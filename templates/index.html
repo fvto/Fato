@@ -1422,6 +1422,137 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* FTT Station Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(8, 14, 26, 0.78);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-dialog {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 620px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 35px rgba(56, 189, 248, 0.18);
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal-dialog {
+            transform: scale(1);
+        }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+        .modal-body {
+            padding: 22px 24px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+        .ftt-station-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+            margin-bottom: 20px;
+        }
+        .ftt-station-item {
+            background: var(--bg-primary);
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .ftt-station-item:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            background: rgba(56, 189, 248, 0.05);
+        }
+        .ftt-station-item.active {
+            border-color: var(--accent-cyan);
+            background: rgba(56, 189, 248, 0.12);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+        }
+        .ftt-station-item .station-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ftt-station-item .station-badge {
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+        }
+        .ftt-station-item .check-icon {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+        .ftt-station-item.active .check-icon {
+            color: var(--accent-green);
+        }
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: rgba(0, 0, 0, 0.15);
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -2139,9 +2270,11 @@
                 insp.buttons.forEach(b => {
                     const isSearch = b.btn_type === 'search';
                     const isExport = b.btn_type === 'export';
-                    const btnClass = isSearch ? 'btn-search' : (isExport ? 'btn-export' : 'btn-primary');
+                    const isFttExport = b.btn_type === 'ftt_station_export' || b.id.toLowerCase().includes('btnexcelall');
+                    const btnClass = isSearch ? 'btn-search' : (isExport || isFttExport ? 'btn-export' : 'btn-primary');
+                    const clickAction = isFttExport ? "openFttStationModal()" : `triggerDynamicButtonClick('${b.id}', '${b.label}')`;
                     html += `
-                    <button class="dynamic-btn ${btnClass}" id="btn-dyn-${b.id}" onclick="triggerDynamicButtonClick('${b.id}', '${b.label}')">
+                    <button class="dynamic-btn ${btnClass}" id="btn-dyn-${b.id}" onclick="${clickAction}">
                         <i class="fa-solid fa-${b.icon || 'bolt'}"></i> ${b.label}
                     </button>
                     `;
@@ -2261,6 +2394,11 @@
         }
 
         async function triggerDynamicButtonClick(buttonId, label) {
+            if (buttonId.toLowerCase().includes('btnexcelall')) {
+                openFttStationModal();
+                return;
+            }
+
             const btn = document.getElementById(`btn-dyn-${buttonId}`);
             const origHtml = btn ? btn.innerHTML : '';
             if (btn) {
@@ -3217,6 +3355,220 @@
             }
         }
 
+        // FTT Station Modal Functions
+        const FTT_DEFAULT_STATIONS = [
+            { index: 0, text: 'Chặt', value: 'T01', icon: 'fa-scissors' },
+            { index: 1, text: 'May', value: 'T09', icon: 'fa-shirt' },
+            { index: 2, text: 'Thành hình', value: 'T11', icon: 'fa-shoe-prints' },
+            { index: 3, text: 'HFPA', value: 'T22', icon: 'fa-award' },
+            { index: 4, text: 'Thành hình IPQC', value: 'T23', icon: 'fa-clipboard-check' },
+            { index: 5, text: 'Gia công đế', value: 'T24', icon: 'fa-wrench' }
+        ];
+
+        let selectedFttStations = new Set(['T01', 'T09', 'T11', 'T22', 'T23', 'T24']);
+
+        function openFttStationModal() {
+            const modal = document.getElementById('ftt-station-modal');
+            if (!modal) return;
+
+            const dateFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') || document.getElementById('date-from');
+            const dateTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') || document.getElementById('date-to');
+            const dRange = document.getElementById('ftt-modal-date-range');
+            if (dRange && dateFrom && dateTo) {
+                dRange.innerText = `${dateFrom.value || '2026-10-24'} → ${dateTo.value || '2026-10-24'}`;
+            }
+
+            renderFttStationItems();
+            modal.classList.add('active');
+        }
+
+        function closeFttStationModal() {
+            const modal = document.getElementById('ftt-station-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function onFttModalBackdropClick(e) {
+            if (e.target.id === 'ftt-station-modal') {
+                closeFttStationModal();
+            }
+        }
+
+        function renderFttStationItems() {
+            const grid = document.getElementById('ftt-station-grid');
+            if (!grid) return;
+
+            const stations = (currentInspectionData && currentInspectionData.ftt_stations && currentInspectionData.ftt_stations.length > 0)
+                ? currentInspectionData.ftt_stations
+                : FTT_DEFAULT_STATIONS;
+
+            const allSelected = stations.every(st => selectedFttStations.has(st.value));
+            const allCard = document.getElementById('ftt-station-ALL');
+            if (allCard) {
+                if (allSelected) {
+                    allCard.classList.add('active');
+                    allCard.querySelector('.check-icon').className = 'fa-solid fa-circle-check check-icon';
+                } else {
+                    allCard.classList.remove('active');
+                    allCard.querySelector('.check-icon').className = 'fa-regular fa-circle check-icon';
+                }
+            }
+
+            const countBadge = document.getElementById('ftt-selected-count-badge');
+            if (countBadge) {
+                countBadge.innerText = `Đã chọn: ${selectedFttStations.size}/${stations.length} Trạm`;
+            }
+
+            grid.innerHTML = stations.map(st => {
+                const isSel = selectedFttStations.has(st.value);
+                const icon = st.icon || 'fa-industry';
+                return `
+                <div class="ftt-station-item ${isSel ? 'active' : ''}" id="ftt-st-${st.value}" onclick="toggleFttStation('${st.value}')">
+                    <div class="station-name">
+                        <i class="fa-solid ${icon}" style="color:var(--accent-cyan); font-size:16px;"></i>
+                        <span>${st.text}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="station-badge">${st.value}</span>
+                        <i class="fa-solid ${isSel ? 'fa-circle-check' : 'fa-circle'} check-icon"></i>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function toggleFttStation(val) {
+            if (selectedFttStations.has(val)) {
+                selectedFttStations.delete(val);
+            } else {
+                selectedFttStations.add(val);
+            }
+            renderFttStationItems();
+        }
+
+        function toggleFttAllStations() {
+            const stations = (currentInspectionData && currentInspectionData.ftt_stations && currentInspectionData.ftt_stations.length > 0)
+                ? currentInspectionData.ftt_stations
+                : FTT_DEFAULT_STATIONS;
+
+            const allSelected = stations.every(st => selectedFttStations.has(st.value));
+            if (allSelected) {
+                selectedFttStations.clear();
+            } else {
+                stations.forEach(st => selectedFttStations.add(st.value));
+            }
+            renderFttStationItems();
+        }
+
+        async function executeFttStationExport(reportType) {
+            const stationsArray = Array.from(selectedFttStations);
+            if (stationsArray.length === 0) {
+                showToast("Vui lòng chọn ít nhất 1 Station để xuất dữ liệu!", false);
+                return;
+            }
+
+            const dateFromInput = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') || document.getElementById('date-from');
+            const dateToInput = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') || document.getElementById('date-to');
+            const fileNameInput = document.getElementById('ftt-filename-input');
+
+            const dateFrom = dateFromInput ? dateFromInput.value : '';
+            const dateTo = dateToInput ? dateToInput.value : '';
+            const fileName = fileNameInput ? fileNameInput.value.trim() : '';
+
+            const btnExport = document.getElementById('btn-ftt-export-station');
+            const btnNike = document.getElementById('btn-ftt-export-nike');
+            const btnInternal = document.getElementById('btn-ftt-export-internal');
+
+            const targetBtn = (reportType === 'nike') ? btnNike : ((reportType === 'internal') ? btnInternal : btnExport);
+            const origHtml = targetBtn ? targetBtn.innerHTML : '';
+            if (targetBtn) {
+                targetBtn.disabled = true;
+                targetBtn.innerHTML = '<span class="spinner"></span> Đang xuất...';
+            }
+
+            const typeLabel = (reportType === 'nike') ? 'NIKE' : ((reportType === 'internal') ? 'Internal' : 'Station OK');
+            addLog(`Đang gửi yêu cầu xuất FTT (${typeLabel}) cho ${stationsArray.length} Station...`, 'info');
+
+            try {
+                const res = await fetch('/api/page/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action_type: 'ftt_station_export',
+                        target_id: 'rpnlMain_ContentPlaceHolder1_btnExcelALL',
+                        params: {
+                            stations: stationsArray,
+                            report_type: reportType,
+                            file_name: fileName,
+                            date_from: dateFrom,
+                            date_to: dateTo
+                        }
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success && data.downloaded_file) {
+                    const file = data.downloaded_file;
+                    showToast(`✅ Đã xuất thành công: ${file.name}`);
+                    addLog(`Đã tải xuống file FTT: ${file.name}`, 'success');
+
+                    // Tự động tải file trên trình duyệt
+                    const dlLink = document.createElement('a');
+                    dlLink.href = file.url;
+                    dlLink.download = file.name;
+                    document.body.appendChild(dlLink);
+                    dlLink.click();
+                    document.body.removeChild(dlLink);
+
+                    // Thêm vào thanh Kết quả đã lưu
+                    addSavedFilePill(file.name, file.url);
+                    closeFttStationModal();
+                } else if (data.success) {
+                    showToast("Đã thực thi xuất báo cáo trên SFC!");
+                    addLog("Đã thực thi xuất báo cáo trên SFC", 'success');
+                    closeFttStationModal();
+                } else {
+                    showToast(data.error || "Không thể xuất file FTT", false);
+                    addLog(`Lỗi xuất FTT: ${data.error || 'Thất bại'}`, 'warn');
+                }
+            } catch (err) {
+                console.error("FTT export error:", err);
+                showToast("Lỗi kết nối khi xuất FTT", false);
+            } finally {
+                if (targetBtn) {
+                    targetBtn.disabled = false;
+                    targetBtn.innerHTML = origHtml;
+                }
+            }
+        }
+
+        function addSavedFilePill(name, url) {
+            let container = document.getElementById('saved-command-results');
+            if (!container) {
+                const parent = document.querySelector('.ai-command-container');
+                if (parent) {
+                    const det = document.createElement('details');
+                    det.id = 'saved-command-results';
+                    det.open = true;
+                    det.style.marginTop = '16px';
+                    det.innerHTML = `
+                        <summary style="cursor:pointer; font-weight:600;">Kết quả đã lưu</summary>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;" id="saved-pills-row"></div>
+                    `;
+                    parent.appendChild(det);
+                    container = det;
+                }
+            }
+            const row = document.getElementById('saved-pills-row') || (container ? container.querySelector('div') : null);
+            if (row) {
+                const a = document.createElement('a');
+                a.className = 'intent-pill';
+                a.href = url;
+                a.download = name;
+                a.innerText = `↓ ${name}`;
+                row.prepend(a);
+            }
+        }
+
         // Initial Boot
         window.addEventListener('DOMContentLoaded', () => {
             confirmedNike = localStorage.getItem('sfc-nike-mode') === 'true';
@@ -3236,5 +3588,63 @@
             setInterval(refreshStatus, 4000);
         });
     </script>
+
+    <!-- FTT Select Station Modal -->
+    <div id="ftt-station-modal" class="modal-overlay" onclick="onFttModalBackdropClick(event)">
+        <div class="modal-dialog" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>
+                    <i class="fa-solid fa-layer-group" style="color:var(--accent-cyan);"></i>
+                    Chọn Station Xuất Báo Cáo FTT
+                </h3>
+                <button class="modal-close-btn" onclick="closeFttStationModal()" title="Đóng">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div style="font-size:13px; color:var(--text-secondary);">
+                        <i class="fa-solid fa-calendar-days" style="color:var(--accent-cyan); margin-right:6px;"></i>
+                        Khoảng ngày: <strong id="ftt-modal-date-range" style="color:var(--text-primary);">2026-10-24 → 2026-10-24</strong>
+                    </div>
+                    <span style="font-size:12px; color:var(--accent-cyan); font-weight:600;" id="ftt-selected-count-badge">Đã chọn: 6/6 Trạm</span>
+                </div>
+
+                <!-- ALL toggle button card -->
+                <div class="ftt-station-item active" id="ftt-station-ALL" onclick="toggleFttAllStations()" style="grid-column: span 2; margin-bottom: 6px; border: 1.5px solid var(--accent-cyan);">
+                    <div class="station-name">
+                        <i class="fa-solid fa-asterisk" style="color:var(--accent-cyan);"></i>
+                        <strong>Tất cả Station (ALL - Mặc định)</strong>
+                    </div>
+                    <i class="fa-solid fa-circle-check check-icon" style="color:var(--accent-green);"></i>
+                </div>
+
+                <div class="ftt-station-grid" id="ftt-station-grid">
+                    <!-- Dynamic station items populated by JS: Chặt, May, Thành hình, HFPA, Thành hình IPQC, Gia công đế -->
+                </div>
+
+                <div style="margin-top:16px;">
+                    <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:6px;">
+                        <i class="fa-regular fa-file"></i> Tên file tùy chỉnh (File Name - Tùy chọn):
+                    </label>
+                    <input type="text" id="ftt-filename-input" class="form-control" placeholder="Để trống để dùng tên file mặc định từ hệ thống SFC..." style="width:100%; font-size:13px; padding:10px 14px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="dynamic-btn btn-export" id="btn-ftt-export-station" onclick="executeFttStationExport('station')" style="flex: 1.2; min-width: 170px;">
+                    <i class="fa-solid fa-file-excel"></i> Xuất Excel (OK)
+                </button>
+                <button class="dynamic-btn" id="btn-ftt-export-nike" onclick="executeFttStationExport('nike')" style="flex: 1; min-width: 135px; background: #2563eb; color: #fff;">
+                    <i class="fa-solid fa-download"></i> Báo cáo NIKE
+                </button>
+                <button class="dynamic-btn" id="btn-ftt-export-internal" onclick="executeFttStationExport('internal')" style="flex: 1; min-width: 135px; background: #7c3aed; color: #fff;">
+                    <i class="fa-solid fa-download"></i> Internal
+                </button>
+                <button class="dynamic-btn btn-primary" onclick="closeFttStationModal()" style="min-width: 80px;">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

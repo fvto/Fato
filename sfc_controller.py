@@ -41,7 +41,9 @@ URL_MAPPING = {
     "copq_report": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx",
     "copq_record": "https://sfc.chingluh.com/vhmes/QA/QARecordCOPQ.aspx",
     "bond_test": "https://sfc.chingluh.com/vhmes/QA/BondTest.aspx",
-    "qa_analysis": "https://sfc.chingluh.com/vhmes/QA/QAAnalysis.aspx"
+    "qa_analysis": "https://sfc.chingluh.com/vhmes/QA/QAAnalysis.aspx",
+    "qa": "https://sfc.chingluh.com/vhmes/QA/QA.aspx",
+    "ftt": "https://sfc.chingluh.com/vhmes/QA/QA.aspx"
 }
 
 
@@ -479,11 +481,17 @@ INSPECT_JS = """() => {
                 let label = ctrl.GetText ? ctrl.GetText() : (domEl ? (domEl.innerText || domEl.getAttribute('title') || '') : '');
                 if (!label) {
                     if (name.toLowerCase().includes('search')) label = 'Tìm kiếm dữ liệu';
+                    else if (name.toLowerCase().includes('btnexcelall')) label = 'Xuất Excel theo Station (FTT Report)';
                     else if (name.toLowerCase().includes('export') || name.toLowerCase().includes('excel')) label = 'Xuất file Excel';
                     else if (name.toLowerCase().includes('flowchart') || name.toLowerCase().includes('home')) label = 'Trang chủ FlowChart';
                     else if (name.toLowerCase().includes('update')) label = 'Cập nhật';
                     else if (name.toLowerCase().includes('clear')) label = 'Xóa bộ lọc';
                     else label = name.split('_').pop();
+                }
+                if (name.toLowerCase().includes('btnexcelall')) {
+                    label = 'Xuất Excel theo Station (FTT Report)';
+                } else if (name.toLowerCase() === 'rpnlmain_contentplaceholder1_btnexcel' && pageInfo.pathname.includes('QA.aspx')) {
+                    label = 'Xuất Excel Tổng quan (Grid)';
                 }
                 if (!label || !label.trim()) continue;
 
@@ -493,6 +501,9 @@ INSPECT_JS = """() => {
                 if (lower.includes('search') || lower.includes('tim')) {
                     icon = 'magnifying-glass';
                     btnType = 'search';
+                } else if (name.toLowerCase().includes('btnexcelall')) {
+                    icon = 'folder-tree';
+                    btnType = 'ftt_station_export';
                 } else if (lower.includes('excel') || lower.includes('export') || lower.includes('xuat')) {
                     icon = 'file-excel';
                     btnType = 'export';
@@ -515,12 +526,33 @@ INSPECT_JS = """() => {
         }
     }
 
+    // Trích xuất danh sách Station cho hệ thống FTT
+    const fttStations = [];
+    const isQAPage = pageInfo.pathname.includes('QA.aspx');
+    const chkl = elements['rpnlMain_ContentPlaceHolder1_popupSetArea_chklStation'];
+    if (chkl && typeof chkl.GetItemCount === 'function' && chkl.GetItemCount() > 0) {
+        for (let i = 0; i < chkl.GetItemCount(); i++) {
+            const it = chkl.GetItem(i);
+            if (it) fttStations.push({ index: i, text: it.text, value: it.value });
+        }
+    } else if (isQAPage) {
+        fttStations.push(
+            { index: 0, text: 'Chặt', value: 'T01' },
+            { index: 1, text: 'May', value: 'T09' },
+            { index: 2, text: 'Thành hình', value: 'T11' },
+            { index: 3, text: 'HFPA', value: 'T22' },
+            { index: 4, text: 'Thành hình IPQC', value: 'T23' },
+            { index: 5, text: 'Gia công đế', value: 'T24' }
+        );
+    }
+
     return {
         page: pageInfo,
         date_inputs: dateInputs,
         dropdowns: dropdowns,
         buttons: buttons,
-        checkboxes: checkboxes
+        checkboxes: checkboxes,
+        ftt_stations: fttStations
     };
 }"""
 
@@ -704,6 +736,106 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
                         }
                     }""", {"cid": target_id, "c": chk})
 
+                # 6. Xuất Báo Cáo FTT theo Station (Select Station Dialog)
+                elif action_type == 'ftt_station_export':
+                    stations = params.get('stations', [])
+                    report_type = params.get('report_type', 'station')
+                    file_name = params.get('file_name', '')
+                    date_from = params.get('date_from')
+                    date_to = params.get('date_to')
+
+                    # Đặt ngày nếu có
+                    if date_from or date_to:
+                        page.evaluate("""({f, t}) => {
+                            const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                            if (coll) {
+                                for (let k in coll.elements) {
+                                    const c = coll.elements[k];
+                                    if (!c || !c.name) continue;
+                                    const n = c.name.toLowerCase();
+                                    if (f && (n.includes('datefrom') || (n.includes('date') && n.includes('from')))) {
+                                        if (typeof c.SetText === 'function') c.SetText(f);
+                                    }
+                                    if (t && (n.includes('dateto') || (n.includes('date') && n.includes('to')))) {
+                                        if (typeof c.SetText === 'function') c.SetText(t);
+                                    }
+                                }
+                            }
+                        }""", {"f": date_from, "t": date_to})
+
+                    # Mở popup Select Station nếu chưa mở
+                    page.evaluate("""() => {
+                        const coll = aspxGetControlCollection();
+                        const popup = coll.Get('rpnlMain_ContentPlaceHolder1_popupSetArea');
+                        if (!popup || !popup.IsVisible()) {
+                            const btnALL = coll.Get('rpnlMain_ContentPlaceHolder1_btnExcelALL');
+                            if (btnALL) btnALL.DoClick();
+                            else {
+                                const el = document.getElementById('rpnlMain_ContentPlaceHolder1_btnExcelALL');
+                                if (el) el.click();
+                            }
+                        }
+                    }""")
+                    time.sleep(1.0)
+
+                    # Chọn Stations trong CheckboxList
+                    page.evaluate("""({stations}) => {
+                        const coll = aspxGetControlCollection();
+                        const chkl = coll.Get('rpnlMain_ContentPlaceHolder1_popupSetArea_chklStation');
+                        if (chkl) {
+                            chkl.UnselectAll();
+                            if (!stations || stations === 'ALL' || stations.length === 0 || (Array.isArray(stations) && stations.includes('ALL'))) {
+                                chkl.SelectAll();
+                            } else {
+                                for (let i = 0; i < chkl.GetItemCount(); i++) {
+                                    const it = chkl.GetItem(i);
+                                    if (it && (stations.includes(it.value) || stations.includes(it.text))) {
+                                        chkl.SelectIndices([i]);
+                                    }
+                                }
+                            }
+                        }
+                    }""", {"stations": stations})
+                    time.sleep(0.4)
+
+                    if file_name:
+                        page.evaluate("""({fn}) => {
+                            const coll = aspxGetControlCollection();
+                            const txt = coll.Get('rpnlMain_ContentPlaceHolder1_popupSetArea_ASPxRoundPanel11_txtFileName');
+                            if (txt && typeof txt.SetText === 'function') txt.SetText(fn);
+                        }""", {"fn": file_name})
+
+                    target_btn_id = 'rpnlMain_ContentPlaceHolder1_popupSetArea_btnSave'
+                    if report_type == 'nike':
+                        target_btn_id = 'rpnlMain_ContentPlaceHolder1_popupSetArea_ASPxRoundPanel11_btnExcelNIKE'
+                    elif report_type == 'internal':
+                        target_btn_id = 'rpnlMain_ContentPlaceHolder1_popupSetArea_ASPxRoundPanel11_btnExcelInternal'
+
+                    downloaded_file = None
+                    try:
+                        with page.expect_download(timeout=20000) as dl_info:
+                            page.evaluate("""(bid) => {
+                                const coll = aspxGetControlCollection();
+                                const btn = coll.Get(bid);
+                                if (btn && typeof btn.DoClick === 'function') btn.DoClick();
+                                else {
+                                    const el = document.getElementById(bid);
+                                    if (el) el.click();
+                                }
+                            }""", target_btn_id)
+                        dl = dl_info.value
+                        export_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Report", "HFPAExports")
+                        os.makedirs(export_dir, exist_ok=True)
+                        save_path = os.path.join(export_dir, dl.suggested_filename)
+                        dl.save_as(save_path)
+                        downloaded_file = {
+                            "name": dl.suggested_filename,
+                            "url": f"/api/exports/{dl.suggested_filename}",
+                            "path": save_path
+                        }
+                    except Exception as dl_err:
+                        print("FTT download capture notice:", dl_err)
+
                 try:
                     page.wait_for_load_state("load", timeout=5000)
                 except Exception:
@@ -715,13 +847,16 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
                 browser.close()
                 LAST_STATUS_TIME = 0
 
+                downloaded_file_info = locals().get('downloaded_file')
+                msg = f"Đã xuất thành công: {downloaded_file_info['name']}" if downloaded_file_info else "Đã thực thi thao tác trên SFC thành công."
                 return {
                     "success": True,
                     "action": action_type,
                     "target_id": target_id,
                     "screenshot": img_b64,
                     "inspection": inspection,
-                    "message": "Đã thực thi thao tác trên SFC thành công."
+                    "downloaded_file": downloaded_file_info,
+                    "message": msg
                 }
         except Exception as e:
             return {"success": False, "error": str(e)}
