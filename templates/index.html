@@ -1990,19 +1990,20 @@
                             <i class="fa-solid fa-lightbulb"></i>
                         </div>
                         <div>
-                            <div style="font-weight:700; font-size:13px; color:#f8fafc;">Bạn đang ở màn hình Nhập liệu CoPQ (QARecordCOPQ)</div>
-                            <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Để tải <strong>3 dạng báo cáo COPQ</strong> (1. Report COPQ, 2. COPQ Data, 3. COPQ By Monthly), hãy chuyển sang trang Báo cáo.</div>
+                            <div style="font-weight:700; color:#93c5fd; font-size:14px;">Bạn đang ở trang Nhập liệu COPQ</div>
+                            <div style="font-size:12px; color:var(--text-secondary);">Muốn xem báo cáo và tải file Excel COPQ?</div>
                         </div>
                     </div>
-                    <button class="dynamic-btn btn-export" style="padding: 8px 16px; font-size: 13px; border-radius: 10px; white-space: nowrap; font-weight:700;" onclick="navTo('copq')">
-                        <i class="fa-solid fa-arrow-right-arrow-left"></i> Chuyển sang COPQ Report
+                    <button class="dynamic-btn" style="background:#2563eb; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:600; cursor:pointer;" onclick="navTo('https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx')">
+                        <i class="fa-solid fa-arrow-right"></i> Mở Báo cáo COPQ
                     </button>
                 </div>
                 `;
             }
 
-            // 1. Dedicated COPQ Menu Options (If ASPxMenu with sub-items is detected)
-            const menuDropdown = insp.dropdowns ? insp.dropdowns.find(d => d.type === 'menu_dropdown') : null;
+            // 1. Dedicated COPQ Menu Options (chỉ hiển thị khi đang ở trang COPQ Report thực sự)
+            const isCopqPage = pathname.toLowerCase().includes('copq') || pathname.toLowerCase().includes('tracking');
+            const menuDropdown = insp.dropdowns ? insp.dropdowns.find(d => d.type === 'menu_dropdown' && (d.id.toLowerCase().includes('export') || isCopqPage)) : null;
             if (menuDropdown && menuDropdown.options && menuDropdown.options.length > 0) {
                 const curr = selectedDropdownOptions[menuDropdown.id] || menuDropdown.options[0];
                 html += `
@@ -2031,8 +2032,8 @@
                     <div style="display:flex; gap: 10px; flex-wrap:wrap;">
                         ${menuDropdown.options.map((opt, oIdx) => `
                             <button class="dynamic-btn btn-export" style="flex:1; min-width:140px; font-size:13px; padding:10px 14px; font-weight:600;"
-                                    id="btn-quick-export-${oIdx}"
-                                    onclick="triggerDynamicMenuExportByIndex('${menuDropdown.id}', ${oIdx})">
+                                     id="btn-quick-export-${oIdx}"
+                                     onclick="triggerDynamicMenuExportByIndex('${menuDropdown.id}', ${oIdx})">
                                 <i class="fa-solid fa-download"></i> Xuất: ${opt.text}
                             </button>
                         `).join('')}
@@ -2041,42 +2042,57 @@
                 `;
             }
 
-            // 2. Standard Dropdown & ComboBox (excluding menu_dropdown already rendered)
+            // 2. Standard Dropdown & ComboBox (TẤT CẢ DROPDOWN / LỰA CHỌN ĐỀU CÓ OPTION ALL)
             const standardDropdowns = insp.dropdowns ? insp.dropdowns.filter(d => d.type !== 'menu_dropdown') : [];
             if (standardDropdowns.length > 0) {
                 standardDropdowns.forEach((d) => {
-                    const hasOptions = d.options && d.options.length > 0;
                     const isDept = (d.id ? d.id.toLowerCase() : '').includes('dept') || (d.id ? d.id.toLowerCase() : '').includes('chuyen') || (d.id ? d.id.toLowerCase() : '').includes('line');
-                    const defaultOpt = hasOptions ? (isDept ? (d.options.find(o => o.value === '') || d.options[0]) : d.options[0]) : null;
-                    if (!selectedDropdownOptions[d.id] && defaultOpt) {
-                        selectedDropdownOptions[d.id] = defaultOpt;
+                    if (!d.options) d.options = [];
+
+                    // Luôn luôn đảm bảo CÓ 1 option ALL ở vị trí đầu tiên
+                    const allText = isDept ? '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' : '-- Tất cả (ALL - Mặc định) --';
+                    const hasAll = d.options.some(o => o.value === '' || (o.text && (o.text.toLowerCase() === 'all' || o.text.toLowerCase().includes('tất cả'))));
+                    if (!hasAll) {
+                        d.options.unshift({ value: '', text: allText, is_all: true });
                     }
-                    const currentSelected = selectedDropdownOptions[d.id] || defaultOpt;
+
+                    // Mặc định chọn ALL nếu chưa có lựa chọn
+                    const allOpt = d.options.find(o => o.value === '' || (o.text && (o.text.toLowerCase() === 'all' || o.text.toLowerCase().includes('tất cả')))) || d.options[0];
+                    if (!selectedDropdownOptions[d.id]) {
+                        selectedDropdownOptions[d.id] = allOpt;
+                    }
+                    const currentSelected = selectedDropdownOptions[d.id] || allOpt;
+                    const hasOptions = d.options.length > 0;
 
                     html += `
                     <div class="form-group" style="margin-bottom: 14px;">
                         <label style="display:flex; justify-content:space-between; align-items:center;">
                             <span><i class="fa-solid fa-layer-group" style="color:var(--accent-cyan);"></i> ${d.label || (isDept ? 'Chọn Chuyền / Xưởng sản xuất (Mặc định: ALL)' : 'Tùy chọn danh mục')}:</span>
-                            <span style="font-size:11px; color:var(--accent-cyan); font-weight:600;">${d.options ? d.options.length : 0} lựa chọn</span>
+                            <span style="font-size:11px; color:var(--accent-cyan); font-weight:600;">${d.options.length} lựa chọn</span>
                         </label>
                         <select id="adaptive-select-${d.id}" class="form-control" onchange="onSelectDropdownChanged('${d.id}', this.value, this.options[this.selectedIndex].text)">
-                            ${hasOptions ? d.options.map(opt => {
+                            ${d.options.map(opt => {
                                 const val = (opt.value !== undefined) ? opt.value : (opt.id || '');
                                 const isSel = currentSelected ? (currentSelected.value === val || currentSelected.text === opt.text) : (val === '');
                                 return `<option value="${val}" ${isSel ? 'selected' : ''}>${opt.text}</option>`;
-                            }).join('') : '<option value="" selected>-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --</option>'}
+                            }).join('')}
                         </select>
 
-                        ${hasOptions && d.options.length <= 6 ? `
+                        ${hasOptions && d.options.length <= 8 ? `
                         <div class="option-chips-row">
-                            ${d.options.map((opt, oIdx) => `
-                                <div class="option-chip ${currentSelected && (currentSelected.value === opt.value || currentSelected.id === opt.id) ? 'active' : ''}"
+                            ${d.options.map((opt, oIdx) => {
+                                const isAllOpt = (opt.value === '' || (opt.text && (opt.text.toLowerCase() === 'all' || opt.text.toLowerCase().includes('tất cả'))));
+                                const chipLabel = isAllOpt ? (isDept ? 'Tất cả Chuyền (ALL)' : 'Tất cả (ALL)') : opt.text;
+                                const isChipActive = currentSelected && (currentSelected.value === opt.value || currentSelected.text === opt.text || (isAllOpt && (!currentSelected || currentSelected.value === '')));
+                                return `
+                                <div class="option-chip ${isChipActive ? 'active' : ''}"
                                      id="chip-${d.id}-${oIdx}"
                                      onclick="selectOptionChip('${d.id}', ${oIdx})">
-                                    <i class="fa-solid ${oIdx === 0 ? 'fa-tag' : 'fa-check'}"></i>
-                                    ${opt.text}
+                                    <i class="fa-solid ${isAllOpt ? 'fa-asterisk' : 'fa-tag'}"></i>
+                                    ${chipLabel}
                                 </div>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </div>
                         ` : ''}
                     </div>
@@ -2136,7 +2152,7 @@
             container.innerHTML = html;
         }
 
-        function selectOptionChip(dropdownId, optionIdx) {
+        async function selectOptionChip(dropdownId, optionIdx) {
             if (!currentInspectionData) return;
             const d = currentInspectionData.dropdowns.find(x => x.id === dropdownId);
             if (!d || !d.options || !d.options[optionIdx]) return;
@@ -2144,7 +2160,7 @@
             selectedDropdownOptions[dropdownId] = opt;
 
             const sel = document.getElementById(`adaptive-select-${dropdownId}`);
-            if (sel) sel.value = opt.value || opt.id;
+            if (sel) sel.value = (opt.value !== undefined) ? opt.value : (opt.id || '');
 
             d.options.forEach((_, idx) => {
                 const chip = document.getElementById(`chip-${dropdownId}-${idx}`);
@@ -2154,22 +2170,9 @@
                 }
             });
 
-            const labelExport = document.getElementById('label-menu-export');
-            if (labelExport) {
-                labelExport.innerText = `Xuất: ${opt.text}`;
-            }
+            const isAll = (opt.value === '' || (opt.text && (opt.text.toLowerCase() === 'all' || opt.text.toLowerCase().includes('tất cả'))));
 
-            showToast(`Đã chọn: ${opt.text}`);
-        }
-
-        async function onSelectDropdownChanged(dropdownId, selectedValue, selectedText) {
-            if (!currentInspectionData) return;
-            const d = currentInspectionData.dropdowns.find(x => x.id === dropdownId);
-            if (!d || !d.options) return;
-            const optIdx = d.options.findIndex(o => (o.value || o.id) === selectedValue);
-            if (optIdx >= 0) {
-                selectOptionChip(dropdownId, optIdx);
-            }
+            // Đồng bộ trực tiếp sang SFC
             if (d.type === 'combobox') {
                 try {
                     await fetch('/api/page/execute', {
@@ -2178,16 +2181,32 @@
                         body: JSON.stringify({
                             action_type: 'select_combobox',
                             target_id: dropdownId,
-                            params: { value: selectedValue, text: selectedText || '' }
+                            params: { value: opt.value !== undefined ? opt.value : '', text: opt.text || '' }
                         })
                     });
-                    showToast(selectedValue ? `Đã chọn: ${selectedText || selectedValue}` : 'Đã chọn: Tất cả Chuyền / Xưởng (ALL - Mặc định)');
                 } catch(e) {}
+            }
+
+            const labelExport = document.getElementById('label-menu-export');
+            if (labelExport) {
+                labelExport.innerText = `Xuất: ${opt.text}`;
+            }
+
+            showToast(isAll ? 'Đã chọn: Tất cả (ALL - Mặc định)' : `Đã chọn: ${opt.text}`);
+        }
+
+        async function onSelectDropdownChanged(dropdownId, selectedValue, selectedText) {
+            if (!currentInspectionData) return;
+            const d = currentInspectionData.dropdowns.find(x => x.id === dropdownId);
+            if (!d || !d.options) return;
+            const optIdx = d.options.findIndex(o => ((o.value !== undefined ? o.value : o.id) === selectedValue) || o.text === selectedText);
+            if (optIdx >= 0) {
+                await selectOptionChip(dropdownId, optIdx);
             }
         }
 
         async function triggerDynamicMenuExportByIndex(menuId, optionIdx) {
-            selectOptionChip(menuId, optionIdx);
+            await selectOptionChip(menuId, optionIdx);
             await triggerDynamicMenuExport(menuId);
         }
 
@@ -2251,12 +2270,22 @@
 
             addLog(`Đang bấm nút: "${label || buttonId}"...`, 'info');
             try {
+                const currentSelections = {};
+                for (let k in selectedDropdownOptions) {
+                    const opt = selectedDropdownOptions[k];
+                    currentSelections[k] = {
+                        value: opt ? (opt.value !== undefined ? opt.value : '') : '',
+                        text: opt ? (opt.text || '') : ''
+                    };
+                }
+
                 const res = await fetch('/api/page/execute', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action_type: 'click_button',
-                        target_id: buttonId
+                        target_id: buttonId,
+                        params: { selections: currentSelections }
                     })
                 });
                 const data = await res.json();

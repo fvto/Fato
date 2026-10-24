@@ -10,43 +10,33 @@
     "borderColor": "rgba(56, 189, 248, 0.35)"
   },
   {
-    "id": "copq",
+    "id": "nav_1792824533904",
     "title": "COPQ Report",
-    "sub": "3 Dạng Xuất",
-    "dest": "copq",
-    "icon": "fa-solid fa-file-excel",
-    "color": "#34d399",
-    "bg": "rgba(16, 185, 129, 0.08)",
-    "borderColor": "rgba(16, 185, 129, 0.45)"
+    "sub": "3 Tùy chọn Xuất: 1.Report COPQ, 2.COPQ Data, 3.Monthly",
+    "dest": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx",
+    "icon": "fa-solid fa-clipboard-list",
+    "color": "#38bdf8",
+    "bg": "rgba(56, 189, 248, 0.08)",
+    "borderColor": "rgba(56, 189, 248, 0.4)"
   },
   {
-    "id": "mqaa",
-    "title": "MQAA Check",
-    "sub": "Kiểm toán 21 Mẫu",
-    "dest": "mqaa",
-    "icon": "fa-solid fa-shoe-prints",
-    "color": "#fbbf24",
-    "bg": "rgba(251, 191, 36, 0.08)",
-    "borderColor": "rgba(251, 191, 36, 0.35)"
+    "id": "nav_1792824558648",
+    "title": "Kiểm tra lại",
+    "sub": "Re-Inspection",
+    "dest": "https://sfc.chingluh.com/vhmes/QA/QCRECHK.aspx",
+    "icon": "fa-solid fa-clipboard-list",
+    "color": "#38bdf8",
+    "bg": "rgba(56, 189, 248, 0.08)",
+    "borderColor": "rgba(56, 189, 248, 0.4)"
   },
   {
-    "id": "qms",
-    "title": "QMS Quality",
-    "sub": "Cây Quản trị QA",
-    "dest": "qms",
-    "icon": "fa-solid fa-diagram-project",
-    "color": "#a78bfa",
-    "bg": "rgba(167, 139, 250, 0.08)",
-    "borderColor": "rgba(167, 139, 250, 0.35)"
-  },
-  {
-    "id": "home",
-    "title": "SFC Portal",
-    "sub": "Trang chủ FlowChart",
-    "dest": "home",
-    "icon": "fa-solid fa-house",
-    "color": "#94a3b8",
-    "bg": "rgba(148, 163, 184, 0.08)",
-    "borderColor": "rgba(148, 163, 184, 0.35)"
+    "id": "nav_1792824578560",
+    "title": "FTT",
+    "sub": "First Time Through",
+    "dest": "https://sfc.chingluh.com/vhmes/QA/QA.aspx",
+    "icon": "fa-solid fa-clipboard-list",
+    "color": "#38bdf8",
+    "bg": "rgba(56, 189, 248, 0.08)",
+    "borderColor": "rgba(56, 189, 248, 0.4)"
   }
 ]

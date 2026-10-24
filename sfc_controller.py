@@ -352,6 +352,7 @@ INSPECT_JS = """() => {
                n.includes('dxpager') || n.includes('dxp-') || n.includes('pcupdatecost') ||
                n.includes('titlename') || (n.includes('grd') && !n.includes('btn') && !n.includes('cbo')) ||
                n.includes('txttmp') || n.includes('lbl_msg') || n.includes('popupmsg') ||
+               n.includes('wucheadermaintop') || n.includes('menurighttop') ||
                n.endsWith('_i') || n.endsWith('_b') || n.endsWith('_t') || n.endsWith('_d');
     };
 
@@ -397,7 +398,7 @@ INSPECT_JS = """() => {
             else if (typeof ctrl.GetItemCount === 'function' && ctrl.GetItemCount() > 0) {
                 const item0 = ctrl.GetItem(0);
                 const subCount = (item0 && typeof item0.GetItemCount === 'function') ? item0.GetItemCount() : 0;
-                if (subCount > 0) {
+                if (subCount > 0 && !name.toLowerCase().includes('header') && !name.toLowerCase().includes('menurighttop')) {
                     const subOptions = [];
                     for (let j = 0; j < subCount; j++) {
                         const sub = item0.GetItem(j);
@@ -422,27 +423,31 @@ INSPECT_JS = """() => {
                         options: subOptions
                     });
                 }
-                else if (name.toLowerCase().includes('cbo') || name.toLowerCase().includes('dept') || name.toLowerCase().includes('combo')) {
+                else if (name.toLowerCase().includes('cbo') || name.toLowerCase().includes('dept') || name.toLowerCase().includes('combo') || name.toLowerCase().includes('type') || name.toLowerCase().includes('kind') || name.toLowerCase().includes('category') || name.toLowerCase().includes('reason')) {
                     const items = [];
                     const isChuyen = name.toLowerCase().includes('dept') || name.toLowerCase().includes('chuyen') || name.toLowerCase().includes('line');
-                    if (isChuyen) {
-                        items.push({ value: '', text: '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' });
-                    }
+                    
+                    // LUÔN LUÔN thêm option ALL làm mặc định cho MỌI dropdown chọn lọc
+                    const allText = isChuyen ? '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' : '-- Tất cả (ALL - Mặc định) --';
+                    items.push({ value: '', text: allText, is_all: true });
+
                     for (let i = 0; i < ctrl.GetItemCount(); i++) {
                         const it = ctrl.GetItem(i);
                         if (it && it.text) {
                             const txt = it.text.trim();
-                            if (isChuyen && (txt === '' || txt.toLowerCase().includes('tất cả') || txt.toLowerCase().includes('all'))) continue;
-                            items.push({ value: it.value || txt, text: txt });
+                            if (txt === '' || txt.toLowerCase() === 'all' || txt.toLowerCase().includes('tất cả')) continue;
+                            items.push({ value: (it.value !== undefined) ? it.value : txt, text: txt });
                         }
                     }
                     if (items.length > 0) {
                         let label = isChuyen ? 'Chọn Chuyền / Xưởng sản xuất (Mặc định: ALL)' : 'Chọn Tiêu chí lọc';
-                        if (name.toLowerCase().includes('category')) label = 'Phân loại (Internal / External)';
-                        else if (name.toLowerCase().includes('type')) label = 'Hạng mục lỗi';
+                        if (name.toLowerCase().includes('category')) label = 'Phân loại (Mặc định: ALL)';
+                        else if (name.toLowerCase().includes('type')) label = 'Hạng mục lỗi (Mặc định: ALL)';
+                        else if (name.toLowerCase().includes('reason')) label = 'Mã nguyên nhân / Lý do (Mặc định: ALL)';
+                        else if (name.toLowerCase().includes('kind')) label = 'Loại kiểm tra (Mặc định: ALL)';
 
-                        const currentTxt = ctrl.GetText ? ctrl.GetText().trim() : '';
-                        const defaultSelected = isChuyen ? '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' : (currentTxt || items[0].text);
+                        // Mặc định luôn là ALL
+                        const defaultSelected = allText;
 
                         dropdowns.push({
                             id: name,
@@ -609,6 +614,33 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
 
                 # 3. Bấm nút hành động (Tìm kiếm, Xuất...)
                 elif action_type == 'click_button':
+                    selections = params.get('selections', {})
+                    page.evaluate("""({selections, bid}) => {
+                        const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                        if (coll && selections) {
+                            for (let cid in selections) {
+                                const cbo = coll.Get(cid);
+                                const sel = selections[cid];
+                                if (cbo && sel) {
+                                    const v = sel.value;
+                                    const t = sel.text || '';
+                                    const isAll = (!v || v === 'ALL' || t.includes('Tất cả') || t.includes('ALL'));
+                                    if (isAll) {
+                                        if (typeof cbo.SetValue === 'function') cbo.SetValue(null);
+                                        if (typeof cbo.SetText === 'function') cbo.SetText('');
+                                        if (typeof cbo.SetSelectedIndex === 'function') cbo.SetSelectedIndex(-1);
+                                        const inp = document.getElementById(cid + '_I');
+                                        if (inp) inp.value = '';
+                                    } else if (typeof cbo.FindItemByText === 'function') {
+                                        const it = cbo.FindItemByText(t) || cbo.FindItemByValue(v);
+                                        if (it) cbo.SetSelectedItem(it);
+                                        else if (typeof cbo.SetText === 'function') cbo.SetText(t || v);
+                                    }
+                                }
+                            }
+                        }
+                    }""", {"selections": selections, "bid": target_id})
+
                     btn_el = page.query_selector(f"#{target_id}")
                     if btn_el:
                         btn_el.click()
@@ -631,10 +663,12 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
                     page.evaluate("""({cid, v, t}) => {
                         const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
                         const cbo = coll ? coll.Get(cid) : null;
+                        const isAll = (!v || v === 'ALL' || (t && (t.includes('Tất cả') || t.includes('ALL'))));
                         if (cbo) {
-                            if (!v || v === 'ALL' || (t && (t.includes('Tất cả') || t.includes('ALL')))) {
+                            if (isAll) {
                                 if (typeof cbo.SetValue === 'function') cbo.SetValue(null);
                                 if (typeof cbo.SetText === 'function') cbo.SetText('');
+                                if (typeof cbo.SetSelectedIndex === 'function') cbo.SetSelectedIndex(-1);
                             } else if (typeof cbo.FindItemByText === 'function') {
                                 const it = cbo.FindItemByText(t) || cbo.FindItemByValue(v);
                                 if (it) cbo.SetSelectedItem(it);
@@ -649,7 +683,10 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
                                 sel.dispatchEvent(new Event('change'));
                             }
                         }
+                        const inp = document.getElementById(cid + '_I');
+                        if (inp && isAll) inp.value = '';
                     }""", {"cid": target_id, "v": val, "t": txt})
+                    time.sleep(1.0)
 
                 # 5. Đổi trạng thái Checkbox
                 elif action_type == 'toggle_checkbox':
