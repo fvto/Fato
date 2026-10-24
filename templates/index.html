@@ -2494,6 +2494,37 @@
             }
         }
 
+        function dynamicExportParams(extra = {}) {
+            const inputs = currentInspectionData ? currentInspectionData.date_inputs || [] : [];
+            const dates = {};
+            for (const input of inputs) {
+                const el = document.getElementById(`adaptive-date-${input.id}`);
+                if (el && el.value) {
+                    if (input.id.toLowerCase().includes('from')) dates.date_from = el.value;
+                    if (input.id.toLowerCase().includes('to')) dates.date_to = el.value;
+                }
+            }
+            return {...dates, ...extra};
+        }
+
+        function showDynamicExportFiles(data) {
+            const files = data.downloaded_files || (data.downloaded_file ? [data.downloaded_file] : []);
+            for (const file of files) {
+                addSavedFilePill(file.name, file.url);
+                addLog(`Đã lưu Excel: ${file.name}`, 'success');
+            }
+            // Multiple automatic downloads can be blocked; retain links for every file.
+            if (files.length === 1 && data.success) {
+                const link = document.createElement('a');
+                link.href = files[0].url;
+                link.download = files[0].name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            return files.length;
+        }
+
         async function triggerDynamicMenuExportByIndex(menuId, optionIdx) {
             await selectOptionChip(menuId, optionIdx);
             await triggerDynamicMenuExport(menuId);
@@ -2521,25 +2552,17 @@
                     body: JSON.stringify({
                         action_type: 'select_menu',
                         target_id: menuId,
-                        params: { sub_id: opt.id, index: opt.index, value: opt.value, text: opt.text }
+                        params: dynamicExportParams({ sub_id: opt.id, index: opt.index, value: opt.value, text: opt.text })
                     })
                 });
                 const data = await res.json();
+                const fileCount = showDynamicExportFiles(data);
                 if (data.success) {
-                    if (data.downloaded_file) {
-                        const file = data.downloaded_file;
-                        showToast(`✅ Exported: ${file.name}`);
-                        addLog(`Downloaded file: ${file.name}`, 'success');
-                        const dlLink = document.createElement('a');
-                        dlLink.href = file.url;
-                        dlLink.download = file.name;
-                        document.body.appendChild(dlLink);
-                        dlLink.click();
-                        document.body.removeChild(dlLink);
-                        addSavedFilePill(file.name, file.url);
+                    if (fileCount) {
+                        showToast(`Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
                     } else {
-                        showToast(`✅ Exported report: ${opt.text}`);
-                        addLog(`Successfully executed report export: ${opt.text}`, 'success');
+                        showToast('SFC chưa trả về file Excel.', false);
+                        addLog('Chưa có file xuất để tải.', 'warn');
                     }
                     if (data.screenshot) {
                         document.getElementById('mirror-img').src = data.screenshot;
@@ -2592,22 +2615,14 @@
                     body: JSON.stringify({
                         action_type: 'click_button',
                         target_id: buttonId,
-                        params: { selections: currentSelections }
+                        params: dynamicExportParams({ selections: currentSelections })
                     })
                 });
                 const data = await res.json();
+                const fileCount = showDynamicExportFiles(data);
                 if (data.success) {
-                    if (data.downloaded_file) {
-                        const file = data.downloaded_file;
-                        showToast(`✅ Exported: ${file.name}`);
-                        addLog(`Downloaded file: ${file.name}`, 'success');
-                        const dlLink = document.createElement('a');
-                        dlLink.href = file.url;
-                        dlLink.download = file.name;
-                        document.body.appendChild(dlLink);
-                        dlLink.click();
-                        document.body.removeChild(dlLink);
-                        addSavedFilePill(file.name, file.url);
+                    if (fileCount) {
+                        showToast(`Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
                     } else {
                         showToast(`✅ Executed action: ${label || buttonId}`);
                         addLog(`Executed button "${label || buttonId}" successfully`, 'success');
@@ -3767,8 +3782,12 @@
             const modal = document.getElementById('ftt-station-modal');
             if (!modal) return;
 
-            const dateFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') || document.getElementById('date-from');
-            const dateTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') || document.getElementById('date-to');
+            const dateFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') ||
+                             document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateFrom') ||
+                             document.getElementById('date-from');
+            const dateTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') ||
+                           document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateTo') ||
+                           document.getElementById('date-to');
             const dRange = document.getElementById('ftt-modal-date-range');
             if (dRange && dateFrom && dateTo) {
                 dRange.innerText = `${dateFrom.value || '2026-10-24'} → ${dateTo.value || '2026-10-24'}`;
@@ -3863,8 +3882,12 @@
                 return;
             }
 
-            const dateFromInput = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') || document.getElementById('date-from');
-            const dateToInput = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') || document.getElementById('date-to');
+            const dateFromInput = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') ||
+                                  document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateFrom') ||
+                                  document.getElementById('date-from');
+            const dateToInput = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') ||
+                                document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateTo') ||
+                                document.getElementById('date-to');
             const fileNameInput = document.getElementById('ftt-filename-input');
 
             const dateFrom = dateFromInput ? dateFromInput.value : '';
@@ -3903,25 +3926,9 @@
                 });
 
                 const data = await res.json();
-                if (data.success && data.downloaded_file) {
-                    const file = data.downloaded_file;
-                    showToast(`✅ Exported successfully: ${file.name}`);
-                    addLog(`Downloaded FTT file: ${file.name}`, 'success');
-
-                    // Auto download in browser
-                    const dlLink = document.createElement('a');
-                    dlLink.href = file.url;
-                    dlLink.download = file.name;
-                    document.body.appendChild(dlLink);
-                    dlLink.click();
-                    document.body.removeChild(dlLink);
-
-                    // Add to Saved Results
-                    addSavedFilePill(file.name, file.url);
-                    closeFttStationModal();
-                } else if (data.success) {
-                    showToast("Executed report export on SFC!");
-                    addLog("Executed report export on SFC", 'success');
+                const fileCount = showDynamicExportFiles(data);
+                if (data.success && fileCount) {
+                    showToast(`Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
                     closeFttStationModal();
                 } else {
                     showToast(data.error || "Failed to export FTT report", false);
