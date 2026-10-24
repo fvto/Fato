@@ -2379,33 +2379,20 @@
                         </span>
                     </div>
 
-                    <!-- Date Dropdown Selector -->
+                    <!-- Date Dropdown Selector (This Month, Last Month, Custom) -->
                     <select id="adaptive-date-preset-select" class="date-dropdown-select" onchange="onDatePresetChanged(this.value)">
-                        <option value="today">📅 Today (${valTo})</option>
-                        <option value="yesterday">📅 Yesterday</option>
-                        <option value="last3days">📅 Last 3 Days</option>
-                        <option value="last7days">📅 Last 7 Days (1 Week)</option>
-                        <option value="last14days">📅 Last 14 Days (2 Weeks)</option>
-                        <option value="this_week">📅 This Week (Monday → Today)</option>
                         <option value="this_month">📅 This Month</option>
                         <option value="last_month">📅 Last Month</option>
-                        <option value="this_year">📅 This Year (2026)</option>
                         <option value="custom">⚙️ Custom Range (Manual Selection)</option>
                     </select>
 
                     <!-- Quick Date Chips -->
                     <div class="option-chips-row" style="margin-bottom:12px;">
-                        <div class="option-chip active" id="chip-date-today" onclick="onDatePresetChanged('today')">
-                            <i class="fa-solid fa-calendar-day"></i> Today
-                        </div>
-                        <div class="option-chip" id="chip-date-yesterday" onclick="onDatePresetChanged('yesterday')">
-                            <i class="fa-solid fa-clock-rotate-left"></i> Yesterday
-                        </div>
-                        <div class="option-chip" id="chip-date-last7days" onclick="onDatePresetChanged('last7days')">
-                            <i class="fa-solid fa-calendar-week"></i> Last 7 Days
-                        </div>
-                        <div class="option-chip" id="chip-date-this_month" onclick="onDatePresetChanged('this_month')">
+                        <div class="option-chip active" id="chip-date-this_month" onclick="onDatePresetChanged('this_month')">
                             <i class="fa-solid fa-calendar"></i> This Month
+                        </div>
+                        <div class="option-chip" id="chip-date-last_month" onclick="onDatePresetChanged('last_month')">
+                            <i class="fa-solid fa-calendar-days"></i> Last Month
                         </div>
                         <div class="option-chip" id="chip-date-custom" onclick="onDatePresetChanged('custom')">
                             <i class="fa-solid fa-pen-to-square"></i> Custom
@@ -2726,7 +2713,7 @@
         }
 
         async function onDatePresetChanged(preset) {
-            ['today', 'yesterday', 'last7days', 'this_month', 'custom'].forEach(p => {
+            ['this_month', 'last_month', 'custom'].forEach(p => {
                 const chip = document.getElementById(`chip-date-${p}`);
                 if (chip) chip.classList.toggle('active', p === preset);
             });
@@ -2744,8 +2731,12 @@
             const range = calculateDateRange(preset);
             if (!range) return;
 
-            let inputFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') || document.getElementById('date-from');
-            let inputTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') || document.getElementById('date-to');
+            let inputFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') ||
+                            document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateFrom') ||
+                            document.getElementById('date-from');
+            let inputTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') ||
+                          document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateTo') ||
+                          document.getElementById('date-to');
 
             if (!inputFrom) {
                 const dateInputs = document.querySelectorAll('input[type="date"][id*="From"], input[type="date"][id*="from"]');
@@ -2777,12 +2768,16 @@
         function onManualDateChanged() {
             const sel = document.getElementById('adaptive-date-preset-select');
             if (sel) sel.value = 'custom';
-            ['today', 'yesterday', 'last7days', 'this_month', 'custom'].forEach(p => {
+            ['this_month', 'last_month', 'custom'].forEach(p => {
                 const chip = document.getElementById(`chip-date-${p}`);
                 if (chip) chip.classList.toggle('active', p === 'custom');
             });
-            const inputFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') || document.getElementById('date-from');
-            const inputTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') || document.getElementById('date-to');
+            const inputFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') ||
+                              document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateFrom') ||
+                              document.getElementById('date-from');
+            const inputTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') ||
+                            document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateTo') ||
+                            document.getElementById('date-to');
             if (inputFrom && inputTo) {
                 updateDateRangeSummary(inputFrom.value, inputTo.value);
             }
@@ -4014,15 +4009,9 @@
                         <span style="font-size:12px; color:var(--text-primary); font-weight:700;" id="ftt-modal-date-range">2026-10-24 → 2026-10-24</span>
                     </div>
                     <select id="ftt-modal-date-preset-select" class="date-dropdown-select" onchange="onDatePresetChanged(this.value)" style="margin-bottom:0;">
-                        <option value="today">📅 Today (2026-10-24)</option>
-                        <option value="yesterday">📅 Yesterday</option>
-                        <option value="last3days">📅 Last 3 Days</option>
-                        <option value="last7days">📅 Last 7 Days (1 Week)</option>
-                        <option value="last14days">📅 Last 14 Days (2 Weeks)</option>
-                        <option value="this_week">📅 This Week (Monday → Today)</option>
                         <option value="this_month">📅 This Month</option>
                         <option value="last_month">📅 Last Month</option>
-                        <option value="this_year">📅 This Year (2026)</option>
+                        <option value="custom">⚙️ Custom Range</option>
                     </select>
                 </div>
 
