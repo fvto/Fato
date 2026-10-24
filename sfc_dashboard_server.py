@@ -54,6 +54,10 @@ def api_factories():
 @app.route("/api/switch_factory", methods=["POST"])
 def api_switch_factory():
     data = request.get_json() or {}
+    factories = data.get("factories")
+    if factories and isinstance(factories, list):
+        res = sfc_controller.set_selected_factories(factories)
+        return jsonify(res)
     factory = data.get("factory", "VH")
     res = sfc_controller.switch_factory(factory)
     return jsonify(res)

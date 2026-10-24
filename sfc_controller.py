@@ -70,13 +70,13 @@ def get_connection_status():
                                 capture_output=True, text=True, encoding='utf-8', timeout=12, check=True,
                                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
         status = json.loads(result.stdout)
-        CONNECTION_STATUS_CACHE = dict(status, form={}, available_plants=SEVEN_FACTORIES)
+        CONNECTION_STATUS_CACHE = dict(status, form={}, available_plants=SEVEN_FACTORIES, selected_plants=SELECTED_FACTORIES)
     except Exception:
-        CONNECTION_STATUS_CACHE = dict(connected=False, message='Chưa kết nối được Chrome SFC. Hãy mở Dashboard và DOM.')
+        CONNECTION_STATUS_CACHE = dict(connected=False, message='Chưa kết nối được Chrome SFC. Hãy mở Dashboard và DOM.', selected_plants=SELECTED_FACTORIES)
     finally:
         CONNECTION_STATUS_TIME = time.monotonic()
         CONNECTION_STATUS_LOCK.release()
-    return dict(CONNECTION_STATUS_CACHE, mqaa_status=MQAA_STATUS)
+    return dict(CONNECTION_STATUS_CACHE, mqaa_status=MQAA_STATUS, selected_plants=SELECTED_FACTORIES)
 
 def ensure_sfc_english(page_or_context):
     try:
@@ -184,6 +184,7 @@ def _get_live_status_impl():
                     "url": current_url,
                     "title": title,
                     "current_plant": current_plant,
+                    "selected_plants": SELECTED_FACTORIES,
                     "available_plants": ["VH", "VH2", "VH3", "VH4", "JV", "JV2", "JVB"],
                     "form": form_data,
                     "screenshot": img_b64,
@@ -195,23 +196,56 @@ def _get_live_status_impl():
         except Exception as e:
             return {"connected": False, "error": str(e)}
 
+SELECTED_FACTORIES = ["VH"]
+
+def set_selected_factories(factory_list):
+    global SELECTED_FACTORIES, LAST_STATUS_TIME
+    valid = [f.upper().strip() for f in factory_list if f.upper().strip() in SEVEN_FACTORIES or f.upper().strip() == 'ALL']
+    if not valid:
+        return {"success": False, "error": "Danh sách nhà máy không hợp lệ"}
+    if 'ALL' in valid or len(valid) == len(SEVEN_FACTORIES):
+        SELECTED_FACTORIES = SEVEN_FACTORIES.copy()
+        plant_label = "ALL"
+    else:
+        SELECTED_FACTORIES = valid
+        plant_label = ", ".join(valid)
+
+    if len(SELECTED_FACTORIES) == 1:
+        try:
+            switch_factory(SELECTED_FACTORIES[0])
+        except Exception:
+            pass
+
+    LAST_STATUS_TIME = 0
+    return {
+        "success": True,
+        "selected_plants": SELECTED_FACTORIES,
+        "is_all": len(SELECTED_FACTORIES) == len(SEVEN_FACTORIES),
+        "current_plant": plant_label,
+        "message": f"Selected {len(SELECTED_FACTORIES)} factories: {plant_label}"
+    }
+
+
 def switch_factory(factory_name):
     """
     Chuyển đổi giữa 7 Nhà máy chính của Tập đoàn Ching Luh:
-    VH, VH2, VH3, VH4, JV, JV2, JVB
+    VH, VH2, VH3, VH4, JV, JV2, JVB hoặc ALL
     """
-    global LAST_STATUS_TIME
+    global LAST_STATUS_TIME, SELECTED_FACTORIES
     idx_map = {"VH": 0, "VH2": 1, "VH3": 2, "VH4": 3, "JV": 4, "JV2": 5, "JVB": 6}
     target = factory_name.upper().strip()
     if target == 'ALL':
+        SELECTED_FACTORIES = SEVEN_FACTORIES.copy()
         return {
             "success": True,
             "current_plant": "ALL",
+            "selected_plants": SELECTED_FACTORIES,
             "message": "Selected: All 7 Factories (ALL - Global Multi-Plant Mode)"
         }
     idx = idx_map.get(target)
     if idx is None:
         return {"success": False, "error": f"Nhà máy '{factory_name}' không hợp lệ. Chỉ gồm: ALL, VH, VH2, VH3, VH4, JV, JV2, JVB"}
+    SELECTED_FACTORIES = [target]
 
     with SFC_LOCK:
         try:
