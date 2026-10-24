@@ -1,0 +1,1210 @@
+{
+  "crawled_at": "2026-10-24 08:56:39",
+  "portal": {
+    "title": "SFC - Ching Luh Group",
+    "url": "https://sfc.chingluh.com/vhmes/FlowChart.aspx",
+    "user_name": "P Hello! Trần Phi Hùng (V146683) phihung.tran@chingluh.com",
+    "portal_factories": [
+      {
+        "value": "VH",
+        "text": "VH"
+      },
+      {
+        "value": "VH2",
+        "text": "VH2"
+      },
+      {
+        "value": "VH3",
+        "text": "VH3"
+      },
+      {
+        "value": "VH4",
+        "text": "VH4"
+      },
+      {
+        "value": "JV",
+        "text": "JV"
+      },
+      {
+        "value": "JV2",
+        "text": "JV2"
+      },
+      {
+        "value": "JV3",
+        "text": "JVB"
+      }
+    ],
+    "kpis": [
+      "Process Shift Information Select Process",
+      "DAILY PRODUCTION ? 68,345 -0.15%",
+      "DAILY PRODUCTION ?",
+      "DAILY PRODUCTION",
+      "?",
+      "68,345 -0.15%",
+      "68,345",
+      "-0.15%",
+      "WORKFORCE ATTENDANCE ? 12,091 +1.31%",
+      "WORKFORCE ATTENDANCE ?",
+      "WORKFORCE ATTENDANCE",
+      "?",
+      "12,091 +1.31%",
+      "12,091",
+      "+1.31%",
+      "CTB BTS ? 18.05% -2.90%",
+      "CTB BTS ?",
+      "CTB BTS",
+      "?",
+      "18.05% -2.90%",
+      "18.05%",
+      "-2.90%",
+      "FTT ? 85.66% -0.05%",
+      "FTT ?",
+      "FTT",
+      "?",
+      "85.66% -0.05%",
+      "85.66%",
+      "-0.05%",
+      "656/1028 Users"
+    ]
+  },
+  "production_modules": [
+    {
+      "title": "Shoes Factory Planning - Manages production planning for shoe factories",
+      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?tree_id=SFC_flow_MPS_SHOES"
+    },
+    {
+      "title": "Bottom Factory Planning - Manages production planning for bottom factories",
+      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?tree_id=SFC_flow_MPS_BOTTOM"
+    },
+    {
+      "title": "Workforce - Manages workforce allocation and attendance",
+      "href": "https://sfc.chingluh.com/vhmes/Product/HRWorkforce.aspx?dept_code=&tree_id=07"
+    },
+    {
+      "title": "Station - Oversees production station operations",
+      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?dept_code=&tree_id=06"
+    },
+    {
+      "title": "Output - Monitors production output metrics",
+      "href": "https://sfc.chingluh.com/vhmes/Product/Home.aspx?dept_code=&tree_id=01"
+    },
+    {
+      "title": "MES91 - Replenishment - Manages material replenishment",
+      "href": "https://sfc.chingluh.com/vhmes/Update/Materials.aspx?dept_code=&tree_id=11"
+    },
+    {
+      "title": "Report - Generates production and inventory reports",
+      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?tree_id=SFC_flow_MPS_REPORT"
+    },
+    {
+      "title": "Production Analysis - Analyzes production performance",
+      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?tree_id=16"
+    },
+    {
+      "title": "Quality Management System - Ensures quality control standards",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?dept_code=&tree_id=10"
+    },
+    {
+      "title": "Demand Information - Manufacturing Demand Information",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS40/MPS40_U.aspx"
+    },
+    {
+      "title": "SCAN QR",
+      "href": "https://sfc.chingluh.com/vhmes/QRCode/QRCode.aspx"
+    }
+  ],
+  "qms_modules": [
+    {
+      "name": "Quality Risk",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q101"
+    },
+    {
+      "name": "PFMEA",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q102"
+    },
+    {
+      "name": "Order Information",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q103"
+    },
+    {
+      "name": "Inspection Basic Data",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAReason.aspx"
+    },
+    {
+      "name": "BDTS Rule",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q202"
+    },
+    {
+      "name": "Notification",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q203"
+    },
+    {
+      "name": "Inspection Strategy",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q301"
+    },
+    {
+      "name": "CTQ & CTP",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q302"
+    },
+    {
+      "name": "QA Manual",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAReasonBasic.aspx?tree_id=Q05"
+    },
+    {
+      "name": "Play Book/Guideline",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q304"
+    },
+    {
+      "name": "AQL",
+      "href": "https://sfc.chingluh.com/vhmes/QA/AQLTracking.aspx"
+    },
+    {
+      "name": "Cost Of Poor Quality (CoPQ)",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QARecordCOPQ.aspx"
+    },
+    {
+      "name": "Bonding Test",
+      "href": "https://sfc.chingluh.com/vhmes/QA/BondTest.aspx"
+    },
+    {
+      "name": "Gore-Tex",
+      "href": "https://sfc.chingluh.com/vhmes/QA/GoreTexTest.aspx"
+    },
+    {
+      "name": "CFM",
+      "href": "https://sfc.chingluh.com/vhmes/QA/LearningCase.aspx"
+    },
+    {
+      "name": "Abnormal Tracking",
+      "href": "https://sfc.chingluh.com/vhmes/Update/Reason.aspx"
+    },
+    {
+      "name": "Destruction Management",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QABCDSTRRecord.aspx"
+    },
+    {
+      "name": "Product Process Calibration",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MesQAPPC.aspx"
+    },
+    {
+      "name": "MQAA Audit",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MQAACheck.aspx"
+    },
+    {
+      "name": "AQL Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q501"
+    },
+    {
+      "name": "Quality Analysis",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAAnalysis.aspx"
+    },
+    {
+      "name": "HFPA",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx"
+    },
+    {
+      "name": "Packing",
+      "href": "https://sfc.chingluh.com/vhmes/QA/PackingCheck.aspx"
+    },
+    {
+      "name": "Bond Test Analysis",
+      "href": "https://sfc.chingluh.com/vhmes/QA/BondTestAnalysis.aspx"
+    },
+    {
+      "name": "Upper Quality Data",
+      "href": "https://sfc.chingluh.com/vhmes/QA/DefectiveReturn.aspx"
+    },
+    {
+      "name": "FGWH",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCFGWH.aspx"
+    },
+    {
+      "name": "Re-Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCRECHK.aspx"
+    },
+    {
+      "name": "IMQC",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q508"
+    },
+    {
+      "name": "Product Process Calibration Report",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCPPC.aspx"
+    },
+    {
+      "name": "MQAA Report",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx"
+    },
+    {
+      "name": "COPQ Report",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx"
+    },
+    {
+      "name": "BDTS Report",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAReportNIKE.aspx"
+    },
+    {
+      "name": "Dashboard",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QADashboard.aspx"
+    },
+    {
+      "name": "FTT",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QA.aspx"
+    },
+    {
+      "name": "Quality Management System",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx"
+    },
+    {
+      "name": "Permission Registration",
+      "href": "https://sfc.chingluh.com/vhmes/Update/PermissionSign.aspx"
+    },
+    {
+      "name": "Logout",
+      "href": "https://sfc.chingluh.com/vhmes/Logout.aspx"
+    },
+    {
+      "name": "Account",
+      "href": "https://sfc.chingluh.com/vhmes/Update/Account.aspx"
+    },
+    {
+      "name": "Permission",
+      "href": "https://sfc.chingluh.com/vhmes/Update/Permission.aspx"
+    },
+    {
+      "name": "Basic Data",
+      "href": "https://sfc.chingluh.com/vhmes/Update/BasicData.aspx"
+    },
+    {
+      "name": "Basic Dept",
+      "href": "https://sfc.chingluh.com/vhmes/Update/BasicDept.aspx"
+    },
+    {
+      "name": "Basic Shift",
+      "href": "https://sfc.chingluh.com/vhmes/Update/BasicShift.aspx"
+    },
+    {
+      "name": "Permission Registration (ITSM)",
+      "href": "https://itservice.chingluh.com/Form/Render/11"
+    },
+    {
+      "name": "Account Registration (ITSM)",
+      "href": "https://itservice.chingluh.com/Form/Render/15"
+    },
+    {
+      "name": "SFC",
+      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx"
+    },
+    {
+      "name": "E-Display for QA",
+      "href": "https://sfc.chingluh.com/vhmes/Reports/EDisplayQA.aspx"
+    },
+    {
+      "name": "E-Display for Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/Update/ReasonBottomTV.aspx"
+    },
+    {
+      "name": "E-Display for Stockfitting",
+      "href": "https://sfc.chingluh.com/vhmes/Reports/EDisplaySF.aspx"
+    },
+    {
+      "name": "Dashboard for Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/Update/DashboardBottom.aspx"
+    },
+    {
+      "name": "QC CTB Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQACheck.aspx"
+    },
+    {
+      "name": "QC HFPA",
+      "href": "https://sfc.chingluh.com/vhmes/MesQACheckPackingOQC.aspx"
+    },
+    {
+      "name": "QC FGWH",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MesQACheckPackingFGWH.aspx"
+    },
+    {
+      "name": "Re-Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MesQACheckPackingRECHK.aspx"
+    },
+    {
+      "name": "OMD",
+      "href": "https://sfc.chingluh.com/vhmes/QA/ArticleInspection.aspx"
+    },
+    {
+      "name": "QC IP Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQAIPCheck.aspx"
+    },
+    {
+      "name": "QC DP Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQADPCheck.aspx"
+    },
+    {
+      "name": "QC OS Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQAOSCheck.aspx"
+    },
+    {
+      "name": "QC PU Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQAPUCheck.aspx"
+    },
+    {
+      "name": "QC CMP Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQACMPCheck.aspx"
+    },
+    {
+      "name": "QC Transfer Upper",
+      "href": "https://sfc.chingluh.com/vhmes/MesQATransferFrom.aspx"
+    },
+    {
+      "name": "QC Transfer Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MesQATransferBottom.aspx"
+    },
+    {
+      "name": "IP Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=IP"
+    },
+    {
+      "name": "DP Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=DP"
+    },
+    {
+      "name": "RB Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=OS"
+    },
+    {
+      "name": "PU Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=PU"
+    },
+    {
+      "name": "CMP Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=CMP"
+    },
+    {
+      "name": "B/C Grade QA",
+      "href": "https://sfc.chingluh.com/vhmes/QA/BCGrade.aspx"
+    },
+    {
+      "name": "Packing UCC",
+      "href": "https://sfc.chingluh.com/vhmes/QA/PackingUCC.aspx"
+    }
+  ],
+  "factories_and_lines": [
+    {
+      "text": "VL - D3",
+      "value": "VL00D3"
+    },
+    {
+      "text": "VL - D4",
+      "value": "VL00D4"
+    },
+    {
+      "text": "VL - D5",
+      "value": "VL00D5"
+    },
+    {
+      "text": "VL - D6",
+      "value": "VL00D6"
+    },
+    {
+      "text": "VL - N2",
+      "value": "VL00N2"
+    },
+    {
+      "text": "VL - N3",
+      "value": "VL00N3"
+    },
+    {
+      "text": "VA - N4 Line 1",
+      "value": "VA1301"
+    },
+    {
+      "text": "VA - N4 Line 2",
+      "value": "VA2302"
+    },
+    {
+      "text": "VA - N5 Line 4",
+      "value": "VA6306"
+    },
+    {
+      "text": "VA - N5 Line 5",
+      "value": "VA7307"
+    },
+    {
+      "text": "VA - N5 Line 6",
+      "value": "VA8308"
+    },
+    {
+      "text": "VA - N5 Line 7",
+      "value": "VAA310"
+    },
+    {
+      "text": "VA - N5 Line 8",
+      "value": "VA9309"
+    },
+    {
+      "text": "VA - N5 Line 9",
+      "value": "VAA311"
+    },
+    {
+      "text": "VA - N6 Line 10",
+      "value": "VAC312"
+    },
+    {
+      "text": "VA - N6 Line 11",
+      "value": "VAG312"
+    },
+    {
+      "text": "VA - N6 Line 12",
+      "value": "VAB311"
+    },
+    {
+      "text": "VA - N6 Line 13",
+      "value": "VAI317"
+    },
+    {
+      "text": "VA - N6 Line 14",
+      "value": "VAD316"
+    },
+    {
+      "text": "VA - N6 Line 15",
+      "value": "VAE317"
+    },
+    {
+      "text": "VB - N15 Line 1",
+      "value": "VBB311"
+    },
+    {
+      "text": "VB - N15 Line 2",
+      "value": "VBE317"
+    },
+    {
+      "text": "VB - N15 Line 3",
+      "value": "VBF318"
+    },
+    {
+      "text": "VB - N15 Line 4",
+      "value": "VB2302"
+    },
+    {
+      "text": "VB - N15 Line 5",
+      "value": "VB9309"
+    },
+    {
+      "text": "VB - N15 Line 6",
+      "value": "VBC312"
+    },
+    {
+      "text": "VB - N14 Line 7",
+      "value": "VB7307"
+    },
+    {
+      "text": "VB - N14 Line 8",
+      "value": "VB8308"
+    },
+    {
+      "text": "VB - N14 Line 9",
+      "value": "VB1301"
+    },
+    {
+      "text": "VB - N14 Line 10",
+      "value": "VBD316"
+    },
+    {
+      "text": "VB - N14 Line 11",
+      "value": "VB6306"
+    },
+    {
+      "text": "VB - N14 Line 12",
+      "value": "VB3303"
+    },
+    {
+      "text": "VC - S9 Line 1",
+      "value": "VC3303"
+    },
+    {
+      "text": "VC - S9 Line 2",
+      "value": "VCF308"
+    },
+    {
+      "text": "VC - S9 Line 3",
+      "value": "VCH310"
+    },
+    {
+      "text": "VC - S9 Line 4",
+      "value": "VCB302"
+    },
+    {
+      "text": "VC - S9 Line 5",
+      "value": "VCD306"
+    },
+    {
+      "text": "VC - S9 Line 6",
+      "value": "VC7307"
+    },
+    {
+      "text": "VC - S10 Line 7",
+      "value": "VC8308"
+    },
+    {
+      "text": "VC - S10 Line 8",
+      "value": "VC2302"
+    },
+    {
+      "text": "VC - S10 Line 10",
+      "value": "VC6306"
+    },
+    {
+      "text": "VC - S10 Line 11",
+      "value": "VCJ312"
+    },
+    {
+      "text": "VC - S10 Line 12",
+      "value": "VCP321"
+    },
+    {
+      "text": "VC - S12 Line 13",
+      "value": "VC1313"
+    },
+    {
+      "text": "VC - S12 Line 14",
+      "value": "VC1314"
+    },
+    {
+      "text": "PR - Table Printing",
+      "value": "PR0000"
+    },
+    {
+      "text": "VE - S2 Line 1",
+      "value": "VE1301"
+    },
+    {
+      "text": "VE - S2 Line 2",
+      "value": "VE2302"
+    },
+    {
+      "text": "VE - S2 Line 3",
+      "value": "VE3303"
+    },
+    {
+      "text": "VE - S2 Line 4",
+      "value": "VEA301"
+    },
+    {
+      "text": "VE - S2 Line 5",
+      "value": "VEB302"
+    },
+    {
+      "text": "VE - S2 Line 6",
+      "value": "VE6306"
+    },
+    {
+      "text": "VE - S3 Line 7",
+      "value": "VE7307"
+    },
+    {
+      "text": "VE - S3 Line 8",
+      "value": "VE8308"
+    },
+    {
+      "text": "VE - S3 Line 9",
+      "value": "VE9309"
+    },
+    {
+      "text": "VE - S3 Line 10",
+      "value": "VEC301"
+    },
+    {
+      "text": "VE - S3 Line 11",
+      "value": "VED301"
+    },
+    {
+      "text": "VE - S3 Line 12",
+      "value": "VEE301"
+    },
+    {
+      "text": "VD - S5 Cell 10",
+      "value": "VD4101"
+    },
+    {
+      "text": "VD - S5 Cell 3",
+      "value": "VD4102"
+    },
+    {
+      "text": "VD - S5 Line 2",
+      "value": "VD4103"
+    },
+    {
+      "text": "VD - S5 Cell 7",
+      "value": "VD4106"
+    },
+    {
+      "text": "VD - S5 Cell 9",
+      "value": "VD4107"
+    },
+    {
+      "text": "VD - S5 Cell 17",
+      "value": "VD4108"
+    },
+    {
+      "text": "VD - S5 Line 1",
+      "value": "VD4109"
+    },
+    {
+      "text": "VD - S5 Cell 8",
+      "value": "VD4110"
+    },
+    {
+      "text": "VD - S5 Cell 11",
+      "value": "VD4111"
+    },
+    {
+      "text": "VD - S5 Cell 12",
+      "value": "VD4112"
+    },
+    {
+      "text": "VD - S5 Cell 16",
+      "value": "VD4121"
+    },
+    {
+      "text": "VD - S5 Cell 6",
+      "value": "VD4122"
+    },
+    {
+      "text": "VD - S5 Cell 18",
+      "value": "VD4141"
+    },
+    {
+      "text": "VD - S5 AUTO UV2",
+      "value": "VD4142"
+    },
+    {
+      "text": "VD - S5 AUTO UV1",
+      "value": "VD4143"
+    },
+    {
+      "text": "VD - Washing 1",
+      "value": "VD4151"
+    },
+    {
+      "text": "VD - S5 UV1",
+      "value": "VD4152"
+    },
+    {
+      "text": "VD - Washing 2",
+      "value": "VD4153"
+    },
+    {
+      "text": "VD - S5 UV2",
+      "value": "VD4156"
+    },
+    {
+      "text": "VD - S5 Line 3",
+      "value": "VD4160"
+    },
+    {
+      "text": "VD - N4 Cell 3",
+      "value": "VD4201"
+    },
+    {
+      "text": "VD - N4 Cell 6",
+      "value": "VD4202"
+    },
+    {
+      "text": "VD - N4 Cell 8",
+      "value": "VD4203"
+    },
+    {
+      "text": "VD - N4 Line 3",
+      "value": "VD4206"
+    },
+    {
+      "text": "VD - N4 Cell 16",
+      "value": "VD4207"
+    },
+    {
+      "text": "VD - N4 Cell 12",
+      "value": "VD4208"
+    },
+    {
+      "text": "VD - N4 Cell 17",
+      "value": "VD4209"
+    },
+    {
+      "text": "VD - N4 Cell 7",
+      "value": "VD4210"
+    },
+    {
+      "text": "VD - N4 Cell 11",
+      "value": "VD4211"
+    },
+    {
+      "text": "VD - N4 Cell 18",
+      "value": "VD4212"
+    },
+    {
+      "text": "VD - N4 Cell 9",
+      "value": "VD4213"
+    },
+    {
+      "text": "VD - N4 Line 1",
+      "value": "VD4217"
+    },
+    {
+      "text": "VD - AUTO UV1",
+      "value": "VD4241"
+    },
+    {
+      "text": "VD - AUTO UV2",
+      "value": "VD4242"
+    },
+    {
+      "text": "VD - N4 Washing 1",
+      "value": "VD4251"
+    },
+    {
+      "text": "VD - N4 UV1",
+      "value": "VD4252"
+    },
+    {
+      "text": "VD - N4 Washing 2",
+      "value": "VD4253"
+    },
+    {
+      "text": "VD - N4 UV2",
+      "value": "VD4256"
+    },
+    {
+      "text": "VD - N4 Line 2",
+      "value": "VD4257"
+    },
+    {
+      "text": "VD - S11 LINE 2",
+      "value": "VD4601"
+    },
+    {
+      "text": "VD - S11 Cell 12",
+      "value": "VD4602"
+    },
+    {
+      "text": "VD - S11 Cell 3",
+      "value": "VD4606"
+    },
+    {
+      "text": "VD - S11 Cell 6",
+      "value": "VD4607"
+    },
+    {
+      "text": "VD - S11 Cell 7",
+      "value": "VD4608"
+    },
+    {
+      "text": "VD - S11 Cell 16",
+      "value": "VD4609"
+    },
+    {
+      "text": "VD - S11 Cell 11",
+      "value": "VD4610"
+    },
+    {
+      "text": "VD - S11 Line 1",
+      "value": "VD4611"
+    },
+    {
+      "text": "VD - S11 Cell 8",
+      "value": "VD4613"
+    },
+    {
+      "text": "VD - S11 Cell 9",
+      "value": "VD4614"
+    },
+    {
+      "text": "VD - S11 Washing 2",
+      "value": "VD4651"
+    },
+    {
+      "text": "VD - S11 UV2",
+      "value": "VD4652"
+    },
+    {
+      "text": "VD - S11 Washing 1",
+      "value": "VD4653"
+    },
+    {
+      "text": "VD - S11 Cell 10",
+      "value": "VD4661"
+    },
+    {
+      "text": "VD - S11 UV1",
+      "value": "VD4663"
+    },
+    {
+      "text": "VP - E5 LineA",
+      "value": "VP0027"
+    },
+    {
+      "text": "VP - E5 LineB",
+      "value": "VP0028"
+    },
+    {
+      "text": "VP - E5 LineC",
+      "value": "VP0029"
+    },
+    {
+      "text": "VP - E5 LineD",
+      "value": "VP0030"
+    },
+    {
+      "text": "VP - E5 LineE",
+      "value": "VP0031"
+    },
+    {
+      "text": "V0 - Sample Room Line 01",
+      "value": "V09300"
+    },
+    {
+      "text": "V0 - Sample Room Line 02",
+      "value": "V09301"
+    },
+    {
+      "text": "VD - PCC Stockfit",
+      "value": "VD9040"
+    },
+    {
+      "text": "VE - Building S2",
+      "value": "VES200"
+    },
+    {
+      "text": "VE - Building S3",
+      "value": "VES300"
+    },
+    {
+      "text": "VS - Sublimation",
+      "value": "VS0000"
+    },
+    {
+      "text": "VT - N14 Line 1",
+      "value": "VT1311"
+    },
+    {
+      "text": "VT - N14 Line 2",
+      "value": "VT1321"
+    },
+    {
+      "text": "VT - N14 Line 3",
+      "value": "VT1331"
+    },
+    {
+      "text": "VT - N14 Line 4",
+      "value": "VT1341"
+    },
+    {
+      "text": "VT - N14 Line 5",
+      "value": "VT1351"
+    },
+    {
+      "text": "VT - N14 Line 6",
+      "value": "VT1361"
+    },
+    {
+      "text": "VT - N14 Line 7",
+      "value": "VT1371"
+    },
+    {
+      "text": "VT - N14 Line 8",
+      "value": "VT1396"
+    },
+    {
+      "text": "VT - N14 Line 13",
+      "value": "VT1381"
+    },
+    {
+      "text": "VT - N14 Line 14",
+      "value": "VT1391"
+    },
+    {
+      "text": "VT - N15 Line 9",
+      "value": "VT1397"
+    },
+    {
+      "text": "VT - N15 Line 10",
+      "value": "VT1393"
+    },
+    {
+      "text": "VT - N15 Line 11",
+      "value": "VT1394"
+    },
+    {
+      "text": "VT - N15 Line 12",
+      "value": "VT1395"
+    },
+    {
+      "text": "VT - VB PCC",
+      "value": "VT2300"
+    }
+  ],
+  "hfpa_metadata": {
+    "title": "HFPA",
+    "url": "https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx?tree_id=Q504",
+    "total_factories": 138,
+    "grid_columns": [
+      "Factory Group Cd_UccId",
+      "SO#",
+      "Country",
+      "Season",
+      "Audit Date (dd-mmm-yyyy)",
+      "Internal AUDIT ID (YYMMDDNO+Plant+Line)",
+      "Plant",
+      "Line",
+      "Auditor",
+      "PO Nbr (header+line item nbr)",
+      "Model",
+      "Model 2",
+      "Style Nbr",
+      "Colorway Cd",
+      "Time table",
+      "Produced Q'ty",
+      "Audit Sample Size",
+      "Defective Q'ty(pair)",
+      "Defective Rate",
+      "Pass/Fail",
+      "Defect Q'ty (Total Defect Q'ty)",
+      "Bottom Cosmetic",
+      "Bottom long/short",
+      "Cleanness",
+      "Collar shape",
+      "Components inconsistent",
+      "Damaged lace/wrong lacing",
+      "Double stitching",
+      "Eyestay off center",
+      "Heel/Tip height inconsistent",
+      "Lace cleanness",
+      "Midsole/Outsole to upper bond gap",
+      "Over buffing",
+      "Over cement",
+      "Punching",
+      "Rocking",
+      "Sockliner position",
+      "Sole attachment",
+      "Thread end",
+      "Toe cap shape",
+      "Toe off center",
+      "Trimming",
+      "Wrinkle bottom",
+      "Wrinkle collar lining",
+      "Wrinkle upper"
+    ]
+  },
+  "mqaa_metadata": {},
+  "available_endpoints": {},
+  "mqaa_report_metadata": {
+    "title": "Manufacturing Quality Assurance Audit Report",
+    "url": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx",
+    "controls": [
+      {
+        "id": "__EVENTTARGET",
+        "tag": "INPUT",
+        "val": ""
+      },
+      {
+        "id": "__EVENTARGUMENT",
+        "tag": "INPUT",
+        "val": ""
+      },
+      {
+        "id": "__VIEWSTATE",
+        "tag": "INPUT",
+        "val": "/wEPDwUKMTczOTU0MDYxMg9kFgICAw9kFggCAQ9k"
+      },
+      {
+        "id": "__VIEWSTATEGENERATOR",
+        "tag": "INPUT",
+        "val": "205E5238"
+      },
+      {
+        "id": "__PREVIOUSPAGE",
+        "tag": "INPUT",
+        "val": "5w6lNaYaXtlSSQk2pawIFJk6K2S8tn7yyRM3_hm2"
+      },
+      {
+        "id": "__EVENTVALIDATION",
+        "tag": "INPUT",
+        "val": "/wEdAAOXdblvcicY1t++Zq4VypM4QLv0A6sjbUcS"
+      },
+      {
+        "id": "ASPxRoundPanel9_btnFlowChart",
+        "tag": "DIV",
+        "val": ""
+      },
+      {
+        "id": "ASPxRoundPanel9_btnFlowChart_CD",
+        "tag": "DIV",
+        "val": ""
+      },
+      {
+        "id": "ASPxRoundPanel9_btnFlowChartImg",
+        "tag": "IMG",
+        "val": ""
+      },
+      {
+        "id": "dtDateFrom_I",
+        "tag": "INPUT",
+        "val": "2026-10-24"
+      },
+      {
+        "id": "dtDateFrom_DDDWS",
+        "tag": "INPUT",
+        "val": "0:0:-1:-10000:-10000:0:0:0:1:0:0:0"
+      },
+      {
+        "id": "dtDateTo_I",
+        "tag": "INPUT",
+        "val": "2026-10-24"
+      },
+      {
+        "id": "dtDateTo_DDDWS",
+        "tag": "INPUT",
+        "val": "0:0:-1:-10000:-10000:0:0:0:1:0:0:0"
+      },
+      {
+        "id": "cboType_LP",
+        "tag": "TABLE",
+        "val": "Loading…"
+      },
+      {
+        "id": "cboType_TL",
+        "tag": "SPAN",
+        "val": "Loading…"
+      },
+      {
+        "id": "cboType_LD",
+        "tag": "DIV",
+        "val": ""
+      },
+      {
+        "id": "cboType_ET",
+        "tag": "TABLE",
+        "val": "Type:"
+      },
+      {
+        "id": "cboType_CapC",
+        "tag": "TD",
+        "val": "Type:"
+      },
+      {
+        "id": "cboType_CC",
+        "tag": "TD",
+        "val": ""
+      },
+      {
+        "id": "cboType",
+        "tag": "TABLE",
+        "val": ""
+      }
+    ]
+  },
+  "aql_metadata": {
+    "title": "AQL",
+    "url": "https://sfc.chingluh.com/vhmes/QA/AQLTracking.aspx",
+    "controls": [
+      {
+        "id": "__EVENTTARGET",
+        "tag": "INPUT",
+        "val": ""
+      },
+      {
+        "id": "__EVENTARGUMENT",
+        "tag": "INPUT",
+        "val": ""
+      },
+      {
+        "id": "__VIEWSTATE",
+        "tag": "INPUT",
+        "val": "/wEPDwULLTExMTA2NTQ2OTYPZBYCZg9kFgICAw9k"
+      },
+      {
+        "id": "__VIEWSTATEGENERATOR",
+        "tag": "INPUT",
+        "val": "C7140C17"
+      },
+      {
+        "id": "__PREVIOUSPAGE",
+        "tag": "INPUT",
+        "val": "TPvFllVSKWlxVbOPCsFqV5dWLJx3Szi-WyXSL2xb"
+      },
+      {
+        "id": "__EVENTVALIDATION",
+        "tag": "INPUT",
+        "val": "/wEdABogick7NzumTjOM5RKaqo9vtnXU4VzqP2+g"
+      },
+      {
+        "id": "rpnlMain_ASPxRoundPanel9_btnFlowChart",
+        "tag": "DIV",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ASPxRoundPanel9_btnFlowChart_CD",
+        "tag": "DIV",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ASPxRoundPanel9_btnFlowChartImg",
+        "tag": "IMG",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_ET",
+        "tag": "TABLE",
+        "val": "Line:"
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_CapC",
+        "tag": "TD",
+        "val": "Line:"
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_CC",
+        "tag": "TD",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine",
+        "tag": "TABLE",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_VI",
+        "tag": "INPUT",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_I",
+        "tag": "INPUT",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_B-100",
+        "tag": "TD",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_B-100Img",
+        "tag": "IMG",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_B-1",
+        "tag": "TD",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_B-1Img",
+        "tag": "IMG",
+        "val": ""
+      },
+      {
+        "id": "rpnlMain_ContentPlaceHolder1_cboLine_DDDWS",
+        "tag": "INPUT",
+        "val": "0:0:-1:-10000:-10000:0:0:0:1:0:0:0"
+      }
+    ]
+  }
+}

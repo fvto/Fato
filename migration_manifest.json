@@ -1,0 +1,1706 @@
+{
+  "source_root": "C:\\Users\\User\\Documents\\MQAA-Record",
+  "destination_root": "C:\\Users\\User\\Documents\\Chingluh Dashboard",
+  "moved_at": "2026-10-24T11:36:03.7047049+07:00",
+  "moves": [
+    {
+      "source": "MO_BANG_DIEU_KHIEN.bat",
+      "destination": "MO_BANG_DIEU_KHIEN.bat"
+    },
+    {
+      "source": "MO_SERVER.bat",
+      "destination": "MO_SERVER.bat"
+    },
+    {
+      "source": "mqaa_launcher.py",
+      "destination": "dashboard_launcher.py"
+    },
+    {
+      "source": "dashboard_paths.py",
+      "destination": "dashboard_paths.py"
+    },
+    {
+      "source": "dashboard_config.json",
+      "destination": "dashboard_config.json"
+    },
+    {
+      "source": "sfc_dashboard_server.py",
+      "destination": "sfc_dashboard_server.py"
+    },
+    {
+      "source": "sfc_controller.py",
+      "destination": "sfc_controller.py"
+    },
+    {
+      "source": "sfc_command_jobs.py",
+      "destination": "sfc_command_jobs.py"
+    },
+    {
+      "source": "sfc_commands.py",
+      "destination": "sfc_commands.py"
+    },
+    {
+      "source": "sfc_excel.py",
+      "destination": "sfc_excel.py"
+    },
+    {
+      "source": "sfc_hfpa.py",
+      "destination": "sfc_hfpa.py"
+    },
+    {
+      "source": "sfc_http.py",
+      "destination": "sfc_http.py"
+    },
+    {
+      "source": "sfc_session_cookies.js",
+      "destination": "sfc_session_cookies.js"
+    },
+    {
+      "source": "sfc_memory_crawler.py",
+      "destination": "sfc_memory_crawler.py"
+    },
+    {
+      "source": "sfc_memory_knowledge_base.json",
+      "destination": "sfc_memory_knowledge_base.json"
+    },
+    {
+      "source": "templates",
+      "destination": "templates"
+    },
+    {
+      "source": "tests",
+      "destination": "tests"
+    },
+    {
+      "source": "Report\\HFPAExports",
+      "destination": "Report\\HFPAExports"
+    },
+    {
+      "source": "scratch\\backup_nike_20261024_093431",
+      "destination": "scratch\\backup_nike_20261024_093431"
+    },
+    {
+      "source": "scratch\\backup_sfc_command_20261024_094337",
+      "destination": "scratch\\backup_sfc_command_20261024_094337"
+    },
+    {
+      "source": "scratch\\crawl_sfc_links.py",
+      "destination": "scratch\\crawl_sfc_links.py"
+    },
+    {
+      "source": "scratch\\dashboard_live_integration.json",
+      "destination": "scratch\\dashboard_live_integration.json"
+    },
+    {
+      "source": "scratch\\dashboard_nike_preview.png",
+      "destination": "scratch\\dashboard_nike_preview.png"
+    },
+    {
+      "source": "scratch\\dashboard_plants_preview.png",
+      "destination": "scratch\\dashboard_plants_preview.png"
+    },
+    {
+      "source": "scratch\\dashboard_preview.png",
+      "destination": "scratch\\dashboard_preview.png"
+    },
+    {
+      "source": "scratch\\dashboard_server.log",
+      "destination": "scratch\\dashboard_server.log"
+    },
+    {
+      "source": "scratch\\dashboard_syntax_check.js",
+      "destination": "scratch\\dashboard_syntax_check.js"
+    },
+    {
+      "source": "scratch\\dashboard_updated_preview.png",
+      "destination": "scratch\\dashboard_updated_preview.png"
+    },
+    {
+      "source": "scratch\\diagnose_sfc_connection.js",
+      "destination": "scratch\\diagnose_sfc_connection.js"
+    },
+    {
+      "source": "scratch\\diagnose_sfc_http.js",
+      "destination": "scratch\\diagnose_sfc_http.js"
+    },
+    {
+      "source": "scratch\\flowchart_preview.png",
+      "destination": "scratch\\flowchart_preview.png"
+    },
+    {
+      "source": "scratch\\inspect_date_raw.py",
+      "destination": "scratch\\inspect_date_raw.py"
+    },
+    {
+      "source": "scratch\\inspect_date_serialization.py",
+      "destination": "scratch\\inspect_date_serialization.py"
+    },
+    {
+      "source": "scratch\\inspect_factory_links.py",
+      "destination": "scratch\\inspect_factory_links.py"
+    },
+    {
+      "source": "scratch\\inspect_factory_menu.py",
+      "destination": "scratch\\inspect_factory_menu.py"
+    },
+    {
+      "source": "scratch\\inspect_factory_switcher.py",
+      "destination": "scratch\\inspect_factory_switcher.py"
+    },
+    {
+      "source": "scratch\\inspect_flowchart.py",
+      "destination": "scratch\\inspect_flowchart.py"
+    },
+    {
+      "source": "scratch\\inspect_itemclick.py",
+      "destination": "scratch\\inspect_itemclick.py"
+    },
+    {
+      "source": "scratch\\inspect_menu_postback.py",
+      "destination": "scratch\\inspect_menu_postback.py"
+    },
+    {
+      "source": "scratch\\inspect_menu_script.py",
+      "destination": "scratch\\inspect_menu_script.py"
+    },
+    {
+      "source": "scratch\\inspect_nav.py",
+      "destination": "scratch\\inspect_nav.py"
+    },
+    {
+      "source": "scratch\\inspect_qmsmain.py",
+      "destination": "scratch\\inspect_qmsmain.py"
+    },
+    {
+      "source": "scratch\\inspect_sfc_factory.py",
+      "destination": "scratch\\inspect_sfc_factory.py"
+    },
+    {
+      "source": "scratch\\inspect_sfc_http_form.py",
+      "destination": "scratch\\inspect_sfc_http_form.py"
+    },
+    {
+      "source": "scratch\\inspect_sfc_http_menu.py",
+      "destination": "scratch\\inspect_sfc_http_menu.py"
+    },
+    {
+      "source": "scratch\\migrate_dashboard_project.ps1",
+      "destination": "scratch\\migrate_dashboard_project.ps1"
+    },
+    {
+      "source": "scratch\\narrow_live_scope_to_vh.py",
+      "destination": "scratch\\narrow_live_scope_to_vh.py"
+    },
+    {
+      "source": "scratch\\qmsmain_preview.png",
+      "destination": "scratch\\qmsmain_preview.png"
+    },
+    {
+      "source": "scratch\\run_live_http_command.py",
+      "destination": "scratch\\run_live_http_command.py"
+    },
+    {
+      "source": "scratch\\run_live_vh_command.py",
+      "destination": "scratch\\run_live_vh_command.py"
+    },
+    {
+      "source": "scratch\\sfc_live_command_test.json",
+      "destination": "scratch\\sfc_live_command_test.json"
+    },
+    {
+      "source": "scratch\\sfc_live_http_command_test.json",
+      "destination": "scratch\\sfc_live_http_command_test.json"
+    },
+    {
+      "source": "scratch\\sfc_live_http_job_id.txt",
+      "destination": "scratch\\sfc_live_http_job_id.txt"
+    },
+    {
+      "source": "scratch\\sfc_prompt_test.txt",
+      "destination": "scratch\\sfc_prompt_test.txt"
+    },
+    {
+      "source": "scratch\\sfc_real_download_test.json",
+      "destination": "scratch\\sfc_real_download_test.json"
+    },
+    {
+      "source": "scratch\\sfc_test_preview.png",
+      "destination": "scratch\\sfc_test_preview.png"
+    },
+    {
+      "source": "scratch\\sfc_vh_prompt_test.txt",
+      "destination": "scratch\\sfc_vh_prompt_test.txt"
+    },
+    {
+      "source": "scratch\\start_chrome_clean.py",
+      "destination": "scratch\\start_chrome_clean.py"
+    },
+    {
+      "source": "scratch\\test_cbo_detail.py",
+      "destination": "scratch\\test_cbo_detail.py"
+    },
+    {
+      "source": "scratch\\test_dashboard_live.js",
+      "destination": "scratch\\test_dashboard_live.js"
+    },
+    {
+      "source": "scratch\\test_factory_click.py",
+      "destination": "scratch\\test_factory_click.py"
+    },
+    {
+      "source": "scratch\\test_fast_switch.py",
+      "destination": "scratch\\test_fast_switch.py"
+    },
+    {
+      "source": "scratch\\test_http_direct_export.py",
+      "destination": "scratch\\test_http_direct_export.py"
+    },
+    {
+      "source": "scratch\\test_http_empty_post.py",
+      "destination": "scratch\\test_http_empty_post.py"
+    },
+    {
+      "source": "scratch\\test_http_export_correct.py",
+      "destination": "scratch\\test_http_export_correct.py"
+    },
+    {
+      "source": "scratch\\test_http_export.py",
+      "destination": "scratch\\test_http_export.py"
+    },
+    {
+      "source": "scratch\\test_http_factory_switch_correct.py",
+      "destination": "scratch\\test_http_factory_switch_correct.py"
+    },
+    {
+      "source": "scratch\\test_http_factory_switch.py",
+      "destination": "scratch\\test_http_factory_switch.py"
+    },
+    {
+      "source": "scratch\\test_http_jv_export.py",
+      "destination": "scratch\\test_http_jv_export.py"
+    },
+    {
+      "source": "scratch\\test_http_single_jan.py",
+      "destination": "scratch\\test_http_single_jan.py"
+    },
+    {
+      "source": "scratch\\test_http_single_jan2.py",
+      "destination": "scratch\\test_http_single_jan2.py"
+    },
+    {
+      "source": "scratch\\test_http_today_excel.py",
+      "destination": "scratch\\test_http_today_excel.py"
+    },
+    {
+      "source": "scratch\\test_http_today_nike.py",
+      "destination": "scratch\\test_http_today_nike.py"
+    },
+    {
+      "source": "scratch\\test_http_today.py",
+      "destination": "scratch\\test_http_today.py"
+    },
+    {
+      "source": "scratch\\test_http_week.py",
+      "destination": "scratch\\test_http_week.py"
+    },
+    {
+      "source": "scratch\\test_nlp_parser.py",
+      "destination": "scratch\\test_nlp_parser.py"
+    },
+    {
+      "source": "scratch\\test_sfc_action.py",
+      "destination": "scratch\\test_sfc_action.py"
+    },
+    {
+      "source": "scratch\\test_sfc_http_chunks.py",
+      "destination": "scratch\\test_sfc_http_chunks.py"
+    },
+    {
+      "source": "scratch\\test_sfc_http_plants.py",
+      "destination": "scratch\\test_sfc_http_plants.py"
+    },
+    {
+      "source": "scratch\\test_sse_concept.py",
+      "destination": "scratch\\test_sse_concept.py"
+    },
+    {
+      "source": "scratch\\test_stream_endpoint.py",
+      "destination": "scratch\\test_stream_endpoint.py"
+    },
+    {
+      "source": "scratch\\test_switch_all_factories.py",
+      "destination": "scratch\\test_switch_all_factories.py"
+    },
+    {
+      "source": "scratch\\test_urls.py",
+      "destination": "scratch\\test_urls.py"
+    },
+    {
+      "source": "scratch\\today_export_response.bin",
+      "destination": "scratch\\today_export_response.bin"
+    },
+    {
+      "source": "scratch\\verify_sfc_export_sources.py",
+      "destination": "scratch\\verify_sfc_export_sources.py"
+    },
+    {
+      "source": "scratch\\verify_vh_final.py",
+      "destination": "scratch\\verify_vh_final.py"
+    }
+  ],
+  "excel_files": [
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-01-01_2026-01-31.xlsx",
+      "sha256": "072D012B4BC9C81DD7AF7B8C464897BBB71144F852F7B2529C56F186DED784C0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-01-01_2026-10-31_Combined.xlsx",
+      "sha256": "A36C6B9D4231A14FC23104E678123F3FF012D283EE8A2E099619B1AABB36C74A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-02-01_2026-02-28.xlsx",
+      "sha256": "9FE0673DC4682046BC0B33654EAC3C7E5A1C951BB751F4A3D629D270B49AD966"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-03-01_2026-03-31.xlsx",
+      "sha256": "D1225FC8182D6715F081CE9D086C84EADB98ACE30EFE483ACBDA76ED8886D816"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-04-01_2026-04-30.xlsx",
+      "sha256": "6334B56684F6280D0E568EC8D490D6C3093890C7147BCD94CBFED63C844991A2"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-05-01_2026-05-31.xlsx",
+      "sha256": "879D18BDA2BC8FFC32EAD703E63E498B492AEDAA6E9AA206268A4D503D2A888E"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-06-01_2026-06-30.xlsx",
+      "sha256": "1582F205DB529820FE89C0577963D8ECBBCC0A748CB3C937E509E9C9A5C036D3"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-07-01_2026-07-31.xlsx",
+      "sha256": "5766960AF13083A93F5038BB110F6F7782887C848D77F7EB39633252B9B377BF"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-08-01_2026-08-31.xlsx",
+      "sha256": "E49CAA02FE8C0153851C1046FBD1272B13A26200E2175BE1C902C683104B6C34"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-09-01_2026-09-30.xlsx",
+      "sha256": "92D3D0170626DD8D05434BA63FCCD346055022FD2A37E17BA204B426583898E5"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-10-01_2026-10-31.xlsx",
+      "sha256": "4D2ADB0DAB0CFFACD55FAAB6A0DBA7391DFFC3281F389C1F8DEC04DD739C4979"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-01.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-02.xls",
+      "sha256": "B7E2D84103DFFBFB186EF40C3D14372764F6A8810448FE070E7F3BDFB748329F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-03.xls",
+      "sha256": "64708BB51E845D7148924D4B9EE2B16A3ACF4C442EF8251730DA298863998827"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-04.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-05.xls",
+      "sha256": "90D41455E37FF79C1233C9CBD6A5FB04C743BE708B7CB54784574F3BDD465619"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-06.xls",
+      "sha256": "6FD902328050E21E6572744329827C100B66B3B5E04F416D4BE83F2B5DC9CC36"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-07.xls",
+      "sha256": "B316C2D19FA71F12FFE6CB8EB9200056EDBBFBF07ACD135085E89529419A42C5"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-08.xls",
+      "sha256": "3D5332E347E8C0056FFD27163ED0D1DF919493D80CB863BF75DA249D30291A89"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-09.xls",
+      "sha256": "3B1A21D22A978CB229BA33C6B0D82C139AEC0A66F21C4B209F7040D69955E1AC"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-10.xls",
+      "sha256": "CAF0DAD7A6C5C121108544ED9D517856BB098DB6F23AF70A200E74EAEAA4CB98"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-11.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-12.xls",
+      "sha256": "2ED5ABEAB1DA68C5921A126FAAB3380BE56B79C75F21FEA83CD6CBB4B734A451"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-13.xls",
+      "sha256": "CFC54E3A40A9AF46191B469E60AEC74CA3F50514683577E6671BCAA3941C0299"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-14.xls",
+      "sha256": "6E2D96AEC210BFF588AFBC9EE9EB63D42B427380EC25E463EA54B4CF95372CB9"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-15.xls",
+      "sha256": "3E485859D046DADF1B5F4A648B514BEF0500649B73B9B34D141D1D648968AEDB"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-16.xls",
+      "sha256": "27375E72AE3BFB54EE275A8DDB364A7302363F69B08C5CE4397882125636F0A0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-17.xls",
+      "sha256": "E57F31E01E5286EAF79D40C021A2FA6B6F71D95C6D53D0946D853D7DBB0FD2C4"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-18.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-19.xls",
+      "sha256": "274287CB2259E9E6CC50FC49DEA28772A03F343AE65B3BC9174C741324B9563C"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-20.xls",
+      "sha256": "6D2041E5019DFB167685CE9F31021499C2D5EBF43086814D045A513687096FBD"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-21.xls",
+      "sha256": "2095B1143085A5F161697DB865A7AC78F6B0DCCBFC56D568C7E86493652FD0B4"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-22.xls",
+      "sha256": "DEB07E33CBB54A6A6906FC0F4D8E0F2FF83B797A830EBA09A8DF7F5CEBC3D908"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-23.xls",
+      "sha256": "BBEDF32E2A6A1D7FDD6E57973D309F7CF76840CC1A05B0CE5E367C4C483858D0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-24.xls",
+      "sha256": "6926F9FEFB102AA498E6C76F614A07B39D7847BE8316348762565096897F78B8"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-25.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-26.xls",
+      "sha256": "6E668B49235966D17685FEF7CD4FA300854F9B5E3E43C6922EAFC0322601FF2F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-27.xls",
+      "sha256": "2697F1DF83A15DB4535DE925B6CBC44F082A96C3CA6B26682A127EF8C0BE9F6C"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-28.xls",
+      "sha256": "BC7949B178865B87981F28364E7B312B6847177AB6F5CFD7DC9069EA02094ABE"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-29.xls",
+      "sha256": "803B08DB8DDCCAF962F920D344D623F3A54A9157E6528E7EEB966F1A04B5C3CA"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-30.xls",
+      "sha256": "00F89C20F91D02300808B460752042E3B6FD97AE7197B74840BB13F2846A6F41"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-01-01_2026-01-31\\2026-01-31.xls",
+      "sha256": "E5F7C79ADFDDDCB8D9EB01A300EACFC3193268007C1A73EEA634A068B3CD33AA"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-01.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-02.xls",
+      "sha256": "0A7F8F03A55E9FFD86587915A8C2717C57EDEB2C8EE74A580734D37E9B22E187"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-03.xls",
+      "sha256": "1BB739A036435C55E6875854D7AEDF621BC88DBF266719D09BB03A47B2D3806A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-04.xls",
+      "sha256": "5C509DBB6992E45DE28E5D56E459CF781DE2C827B6FAE1FBAA294D26F9FE0B91"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-05.xls",
+      "sha256": "C7D1AAD29BB106FC8BBF9DFF11CAC4A4A4BEB2942AD8664979BA412AEE9C8018"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-06.xls",
+      "sha256": "0FACB96FA781B5E5B761F78433D451ED910F0F45F67A5482019402612DA28860"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-07.xls",
+      "sha256": "5E9AB580705126869FD7D0473CEB4B91E6EC186E47A1DE1CA3C7B181EFE85D52"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-08.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-09.xls",
+      "sha256": "C894EDE522621D794B891A7A58145A7F7A6AE3CE3EFF230F039A5119D0735C7B"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-10.xls",
+      "sha256": "818E33A877B3035C2BA5F72F4F319C246FE714D3236113A2FD5A5C4E398A8EC0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-11.xls",
+      "sha256": "D87DC10C355CDAF83DCC829DD47EEA20260E7A49778E0918990BA0E2742750EB"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-12.xls",
+      "sha256": "46796DCB815FF21FDF2E16B7B089B1BB57D00F4BAA98E1C9182D65ADB81C8D2D"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-13.xls",
+      "sha256": "14329A9EE3838B87F82A3B01F757C8DBB938642F141B554E850C163D0434BA20"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-14.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-15.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-16.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-17.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-18.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-19.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-20.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-21.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-22.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-23.xls",
+      "sha256": "E8175BA878BBFC4DF55BCD13192AD3D519FCEBD85E0DAAB7C5A904DE1580FE34"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-24.xls",
+      "sha256": "4070A81C4BDF82C0466FEB013473031BA55F9FC72E29400043689C15017A1775"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-25.xls",
+      "sha256": "F73E022B25CA295C925C94D5DE355EF6B5FB1E9661B0F17014694D93E70672E1"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-26.xls",
+      "sha256": "A074EA50BDE8A9F2DA6C1C265138ED4A995C6507D15B788BF3D6F52400C7C809"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-27.xls",
+      "sha256": "ED7C84D95F6BE101647F9122F36B22D61FE9745787709B6085E9C92ACF6A820A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-02-01_2026-02-28\\2026-02-28.xls",
+      "sha256": "3D412D710906652745323D74D552682BB2C17CC0D13F21F5E414997C5BE836F5"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-01.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-02.xls",
+      "sha256": "D676BBCA87B45170ACDFCD8F16403A1A19D97F315961C57EDC8C1071FC13C86E"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-03.xls",
+      "sha256": "277133E1DD928EF0CCD5CF453A07FE7DCE9CC0B06E27A288DC5C1DA9F031AD1B"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-04.xls",
+      "sha256": "81FAAC91E38A0EC4C7209BA56D5BC9D4FE11B781647F31A3441B713E3ED5DBCD"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-05.xls",
+      "sha256": "75BC38DF6F972ABAA709E81C0522802CE6EBA323299E79E4B40A9CC0ABD3D2ED"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-06.xls",
+      "sha256": "3ED1BF12C47CF4E931CAA33895B2B5FEAF326C5D82BF51BA0F008FF401BB3CD3"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-07.xls",
+      "sha256": "B859A9718895D42685515AA529C982D41916B522E8DCA778BD1029E6C9A989F4"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-08.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-09.xls",
+      "sha256": "1AE0809D20A85D8C3CBEBA7CC4AB7AAF9F9F9B7C96ABB88C4DC132DF914F8D2C"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-10.xls",
+      "sha256": "9220D506BEFA38E9711CD173E4D2EA8607E415B9208930FD92A2975BBB505856"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-11.xls",
+      "sha256": "BCF94DEC9BCA0712E400F714AEA9A030C16C75750239CC6B7C4DB1155693C1D7"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-12.xls",
+      "sha256": "5B375475080721EB73B5AE8B6F4412FE6C5090AED66E10C41DF041D10FED019F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-13.xls",
+      "sha256": "ED9BD4A4EB9CE5571E800B2662F20C74910B1D3A1EC630FB0DDB41241ADBD1B8"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-14.xls",
+      "sha256": "661BB59968FB4E176792A4CDA933588F5E456DDFE1B219835439587C71C0F619"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-15.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-16.xls",
+      "sha256": "65FF4C5B0B9670F0A3910A36493D59F7100B1EAFF63F947A43F0FE897B6CCDCB"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-17.xls",
+      "sha256": "2EE6998F598417B41457038B749A19CC4EEE98E342BA537BC8BD7F4237201FBA"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-18.xls",
+      "sha256": "56A63ADAE584E98A6881B4F4AB55AEACAC752C2127C1C1DEEF844F9AA00C1A0D"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-19.xls",
+      "sha256": "523445EEE15143EE9727E974D02030B791492F5034BAE4CA0DA6C0FFFB97D4CE"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-20.xls",
+      "sha256": "30E7370A34845A00C127395C4FC3B0260096F8D1D6106C80F7348BFDE4A7E168"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-21.xls",
+      "sha256": "9D9B7E55CE0BE72EE73286163EF292BD3AE0B38E7A12AD320B3C9B3DE33C03F8"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-22.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-23.xls",
+      "sha256": "8219F9D3BDD167AD0B4F2A186E1E55052FB21F8FF2DA8F4D943CEBB7852DA822"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-24.xls",
+      "sha256": "204D025CCF0CB11585800C985FB19C816B517DC6CE5B3015F9AE748127BDCA64"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-25.xls",
+      "sha256": "537F0B0462366900F2B0A0E1C9D711BBC780E674C7045D852A942A500A5422B3"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-26.xls",
+      "sha256": "B9528BFA77589551C7B0085B182F31CD6173A90C24F98B9582F32B896E07E26A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-27.xls",
+      "sha256": "7EFEA1AEA0DF842D4056694F10D349E8644A0DD0270FF537C23E929FD04C90B4"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-28.xls",
+      "sha256": "B735B5FFB468C1D8DAEB11A9E96D102EE192F6131CBC6DBD471E25A6C4A63679"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-29.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-30.xls",
+      "sha256": "C2CFEB40108705F60E56D3EB222925A29939EB70F79ED328E023ECAECAD7D195"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-03-01_2026-03-31\\2026-03-31.xls",
+      "sha256": "8C187758EE88C727F70031685F15C740E77DECBA06D6F049B9FAEB66101ED254"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-01.xls",
+      "sha256": "C869C0457BD3629BA2672118C8A9F223B66F26C42DA172DD821CBF1F3408637A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-02.xls",
+      "sha256": "87EB47D5E8A787848F94D7FDCE40F6E4339FAB2591A9AF841951DE42BABD405A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-03.xls",
+      "sha256": "05C6F054899E6CC466430FCB6D8B39C2039AADCAED5670B34A4BDBA071673F49"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-04.xls",
+      "sha256": "B9FBF0ED375E5C1134B5C651BDBF41D3A775DACABCFAB8B234ABD3F78F320BE8"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-05.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-06.xls",
+      "sha256": "6D9E0075252716E534B30033CA1F07E07A99C76D6832A5EBA37A2F55ACF1E1E7"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-07.xls",
+      "sha256": "F64180DB1011B61BDA2726B9F1DA56991EFD845D0453FC30CE00538169556F69"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-08.xls",
+      "sha256": "F76B6390492811C5D62ABFB93264D8B9B82BD500A6220D1E1729082A33B4BA03"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-09.xls",
+      "sha256": "CA2BD8204BAB33E7946903E44752163D5C1C15CFFDBC1271B481F8DEA904EC5E"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-10.xls",
+      "sha256": "1D205663CD327B149B6CB7E6C2EF34DD2FFD04A40B40A791814186C2B5EB30CD"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-11.xls",
+      "sha256": "165A6F8229653F259C38FF15EC82F04254F6BA0B54B16316EB9F8EAA7AD2ED5A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-12.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-13.xls",
+      "sha256": "0BE0CEE2B7348B60ECEC2C47D9E475EA87322AB58A0121B95F24AD34739FF64C"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-14.xls",
+      "sha256": "5AFCF8DCF9730441CF3124A05E5F73932474F9BE4E87102CEE37C746284D119C"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-15.xls",
+      "sha256": "A8E85E7D0C03633659FE19B71AAA8C260B59BA951D320AC7F3DACDF4B48855DC"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-16.xls",
+      "sha256": "8D276813CF6E84F39F9DAAEA7B7B1CFA91F51D2651B2072B35998D78F2501F1E"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-17.xls",
+      "sha256": "62E479B888EC4A029FB0B5E553366FAFDF3943380DD4E6AF5650AD888B2DDE49"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-18.xls",
+      "sha256": "E9E281E19180A9DD49318FCB4B562A7295DEE9E26910626795220DACA061AC72"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-19.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-20.xls",
+      "sha256": "7604E450D5A1ED9BD1591EDDB8C3C3D9F79970E53D316BABE9B8D24C47B185DA"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-21.xls",
+      "sha256": "9C7D007CB18536CFF1FC42D2A6BD23ADF49CBEB92DDBA6323580F6BCF9D91554"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-22.xls",
+      "sha256": "7DC990967BD1E0FBDD94B3E4B0BF57E7D23F7618FBDADF5273D34DACD31EA027"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-23.xls",
+      "sha256": "BDEF444EE7BCF2F9C394047E2591D155B5E49A70AABBB069A9E7D2FD062D6A6F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-24.xls",
+      "sha256": "ED920B85D31E981D7FACE497FC1E4129D9D5083D80D23DB264E093DAF745243F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-25.xls",
+      "sha256": "691555A13D1EB6747A1EC807EA4931B8B9037CC2E486F2D68EB0B7DB294CB869"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-26.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-27.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-28.xls",
+      "sha256": "58B0FDCE446E9EBA7A3350A334D0A0FD8BD71F84ACBE902E3777F304C790659F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-29.xls",
+      "sha256": "B723DAA0AA8187A85154741CAD11CA8AC75FEC701EFCDD8BCE950A32001A287F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-04-01_2026-04-30\\2026-04-30.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-01.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-02.xls",
+      "sha256": "FEF0A66AD753A6E49738B3AD6B27605CB4FFADA214116AC5133F89C7004B850F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-03.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-04.xls",
+      "sha256": "28FBBE9D9229CA27DDB4007C6BEF86535B7790080E4235ECC08240122ED99C26"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-05.xls",
+      "sha256": "32C19C01AAD136B4FCD357C04DCE60047A0C7FFAE5E8FB82E7A035D4DCFD453A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-06.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-07.xls",
+      "sha256": "FEF61035DC9FEE0DEB5E056815622674283D23EAB2B5F8F17424D0ABF1688FE9"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-08.xls",
+      "sha256": "3CEB47C42F7515D84BA17F3358587E320F55EEC2D85FAF3710B2765EBE6052D5"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-09.xls",
+      "sha256": "871BFC26E190FA67EDA130F85DDF9A9C1F79DD26A84EF35D01826C1807007DC3"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-10.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-11.xls",
+      "sha256": "2DFCE3AEBFEC84A495FB8B593EAE7A4407C12372BD4239918C6413E3B274EED2"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-12.xls",
+      "sha256": "A9000A62F68FBAF32E17FDAFC8DD067B49C154EE80628A450A4F3CC5A0479C05"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-13.xls",
+      "sha256": "FAF5024E4A513769C17A301E24144E460C6BB1BCDB4C56E1D8F7DEDB994D2F84"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-14.xls",
+      "sha256": "9E2F8C5E7D80A70EEF9ACB7D75B93C68B071DE9B621E6A0A08AA595EF08292D7"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-15.xls",
+      "sha256": "74F2B602956ABBAE9EDB8103F6C248DF94AA5FD1B138C081DBE104528CEC2367"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-16.xls",
+      "sha256": "49FCE94780C0312628DBEE89AF5A051A95BBED195261CF06DDB6CCF1F5328425"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-17.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-18.xls",
+      "sha256": "275355DB7B54A110C932F6BA1209271D9C40363567264D7417C2C2509421EEE0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-19.xls",
+      "sha256": "FF75815933390A7E41441F5296D782441916487EE95E69BC38A9301C3FB219DA"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-20.xls",
+      "sha256": "0410244BEABCD851CB4048C8C7FE8CE13A8F282C584B31F56316C10860F29CF3"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-21.xls",
+      "sha256": "1CED72EF95EAA7242DBAE499DF2197FC54E9D5F656C4C09E3BFCF541ED5A761B"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-22.xls",
+      "sha256": "04F0847BAA89B40D11A6A3D7108B47205131E24757F86F5EB179A3D8FB3110F1"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-23.xls",
+      "sha256": "534F39F558F3CB87A0DAE24F1AB8993C0AFF9C4CF392A0C90BC09F1E5D21EF82"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-24.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-25.xls",
+      "sha256": "7BF531D9C65BA84B0FA8901B03CE52206A35A1FFF5EC8440C79DBECF17D075CA"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-26.xls",
+      "sha256": "047143D1B742D1428416D88EED09DC614708BB64433B8D4B37526DE18A2AE147"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-27.xls",
+      "sha256": "33C0EF998C32B0238D26582960B29F5B2D2925E7539FEC6B588ADDC7B10B529B"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-28.xls",
+      "sha256": "65EA06D1290A335986B6BEF7F297D228D7A308BA4482F70242BC8D58035381B2"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-29.xls",
+      "sha256": "EBA5D9D544F2389CD4E5089F81DEDB24A98C755AF051B50DB23590A86E65EE14"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-30.xls",
+      "sha256": "F13C757BA02EDF6BA3397E06E013B69011FEA8C3F3D2F89AB12CAAD21E7049EB"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-05-01_2026-05-31\\2026-05-31.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-01.xls",
+      "sha256": "729E549F366616AD652987A96302B526BFD052D8FA307D04B571A3390D1DADA8"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-02.xls",
+      "sha256": "A7D2E8C413565B05255DCE6050980F29A203B19524A99CDBA383112CE83456AB"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-03.xls",
+      "sha256": "DFE33B3CFF75172152C9823765B11E2D114756836E72D07B8D022C6049FC45D5"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-04.xls",
+      "sha256": "9D75606CE66F8D15CD84F12469F8AB1327F15A85E20552E30E2C08C5B18AACC4"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-05.xls",
+      "sha256": "DC340B88C0B26048E5BEE1F0A17CEA8AA86DE5DFD8684D5F8C5993525D69C18F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-06.xls",
+      "sha256": "F1708CFD501F1A601A0D7919A86FBBD3D4787F196CB09938C84F2EDF0BF7AC79"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-07.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-08.xls",
+      "sha256": "DB1569BF1F641420780919051EAF8515FB6F7D5C427B08F8F4E023D19EF39D71"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-09.xls",
+      "sha256": "DB532D7D3BCA0B3449CC75607C22A7A64E13BE976FBE7BE403725D12F9B967EF"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-10.xls",
+      "sha256": "14E385589C30CE339B2AF3E311773A138F40C90415E13E597CD1FB97B9671BAC"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-11.xls",
+      "sha256": "DAC8FCCF29EFEAF0BE8768B813BD7BECFE37EBF24A1709BEA7B785239DB1212D"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-12.xls",
+      "sha256": "E6F7B8CD389EA56D539E7658DA5BEB61293B162B1A8A11AFF950309B72F8FA3F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-13.xls",
+      "sha256": "EAFDCE4FD49385D56C227737561CF5FBBD05ED73E7E4487318AD575EFC1331CC"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-14.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-15.xls",
+      "sha256": "561D26F7E98B7372471D5DEF7D5E44E1D9694DE26C33BE7350409F317F43EAA7"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-16.xls",
+      "sha256": "03F098DE8F6F682EEA44D2BAF72734DC491CFB716F66568ACEB2C1C25CD681BF"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-17.xls",
+      "sha256": "88006DED15C5C03B45458F16158F0964B97AEC085A63DD16E03E3389C41ACB69"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-18.xls",
+      "sha256": "B08432CA7EAB788D0602FE026AAF86745D7D50068CB8AC023C58F37FF0E6C455"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-19.xls",
+      "sha256": "6DC6F432B7ECAD254C0A3661A7950618C22FB03F868ABE681CA23707F312CEB5"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-20.xls",
+      "sha256": "3060ACDB1A58B7AE64FED11B2393AF7C99CC7A3BF6D583854B6638E2248B6126"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-21.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-22.xls",
+      "sha256": "68534AD3B596A9A5C1D21A6DBA50F861745F73521897558B656FB4FE06A51B07"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-23.xls",
+      "sha256": "1C07C71B81811D7D03F95EF3747FDD3CA734BCDFE2ED777D4E7E56F0E4CD6263"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-24.xls",
+      "sha256": "2113E2E9583621EED62EA22022FBEF8EDF1C9902EE19BB03BBCA0CE47B4AF0B8"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-25.xls",
+      "sha256": "3FF43EE850ABF47F656F772EBCEE8C580641C117BDF0FC6EB035F263239BC0AD"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-26.xls",
+      "sha256": "9F4E96BBF2E321DAB58FD07317D1485A898E582EE364FA28F68A151D42C9C051"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-27.xls",
+      "sha256": "12EA0E5F56DF1664FF806F5A1CEBE28972631C89CB35C2BCC7601E74B3635369"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-28.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-29.xls",
+      "sha256": "12B601948EE0159BF7DF0ED7AC17A6E20353A27FCE07A876E6C4138893F31782"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-06-01_2026-06-30\\2026-06-30.xls",
+      "sha256": "A4E1B550E8A60BD894CD11DA6347644833578E448FA7262F5D4498D2C162DF7B"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-01.xls",
+      "sha256": "5A5DDBB4DD2075926D874077991AFB56C0BD78DDACE3C5D94D9EB029C597524A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-02.xls",
+      "sha256": "EFD05C945A73B52A8F885A3053DA7BC1B0D1D2AB92F338C5733B96973CE185A0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-03.xls",
+      "sha256": "E049500F6615F8DDD45A5044DB2E9006C251DF171ED6DFFCFCCBE882F4DC3512"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-04.xls",
+      "sha256": "F5BC3C1B165CC9932DEA99DAA00D23B61104846DAF735D3A3FCD93345CE2BDB7"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-05.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-06.xls",
+      "sha256": "C4E7749202E4615DA3B37FDDBD2FE98B9F2EE8ACC0FCE399A4A5BF66937FD5AE"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-07.xls",
+      "sha256": "8A50C65FC618B4B8AA4C1FBB5602EA31F7FCEF103E915B7C8499F378F3DCE9CC"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-08.xls",
+      "sha256": "E842D4A8059CA44996AEBBC2A4556882937A77491C23FA65090B4D8FE850C126"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-09.xls",
+      "sha256": "C91053E8AE4486CFF830A12F582F6D403C61C398603D0584FA6FCC9AFFFC7369"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-10.xls",
+      "sha256": "1BCFCBFA944A9A30EEDB99C00FBB187D92B19F93623171DA7FEB23965A600EC7"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-11.xls",
+      "sha256": "7E44F448D6418DE35D47512FD1E7A4785B7CB827B91F8864A881B8E2F3F8C78D"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-12.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-13.xls",
+      "sha256": "06A7D9099CCA3E34B8B5288954AB426407DD2F21A19E54CF2F2C8939E937CC85"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-14.xls",
+      "sha256": "1BF5913AF6CDA1181D95D0C56CF996C7DA49819CE37731D26933801EC097E9BA"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-15.xls",
+      "sha256": "4CB18B00407C7C99BE0DEEE3BF98C5982A3DF858C73019AA092DD668D2F83BCB"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-16.xls",
+      "sha256": "ED5C409FF8059E8817A4FE66636057CA1A883B460E3A46E035E5788F5291F031"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-17.xls",
+      "sha256": "782B4295FB3B5837015887FA3F4E173966E5D41926FFF046C4B370CCE6CE4AD8"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-18.xls",
+      "sha256": "FAE883DE3774B8C874C27A1F949BFE90254EED9F263DF53D7F62C22D0964BE59"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-19.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-20.xls",
+      "sha256": "D2EAC4C7BCE4EBF45EFFFE5801D5C8ABBFFF159115B103F32E2BBEE278A4A126"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-21.xls",
+      "sha256": "2F92731D5F1EF2DBCA71E82DAE584FA4FC1BAE6C8EAD6D688F4510B1B48119FB"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-22.xls",
+      "sha256": "32A02E8A2CD1D0B80373A3A6429AB2E8685BE3475EDCA7282A1EF33C5BBA921A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-23.xls",
+      "sha256": "DB0E9B730BC22B4F9B5E1BDEAD991DEE07144B31C28827465DBA6F0EFAE18A04"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-24.xls",
+      "sha256": "565B9756B37050CD0428192337B2078CA036A9F09E9421A59F182E03A3847BFD"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-25.xls",
+      "sha256": "3B8CED6D6B5731C7B746EDAC62D3D54150E7DFAFDA2174F4497DE8CD81A8C1D7"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-26.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-27.xls",
+      "sha256": "4CA0D9EFA86265DB47D2EF070AA6AA769A59B5A3EF369CCFF6E4D7BF90F0CB22"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-28.xls",
+      "sha256": "EE340E5A432512E3BAAF0BC5E2F37C221C20B5A38F848BFAD38712B7488515EC"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-29.xls",
+      "sha256": "B29132AE25331844E54C7AAAEB9066F7A5C1F0FBEFE81EEA3E571A780154BB86"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-30.xls",
+      "sha256": "0B267B770090C543E7BCA7E7813C8625732ED986F4DC715860E44F17FC3862A1"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-07-01_2026-07-31\\2026-07-31.xls",
+      "sha256": "A11EDF341681EFEDA962C9EBE8AEA52CD551EB0409BF775E2CFEED7CCA80CF46"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-01.xls",
+      "sha256": "4C278090091F2B0F8C936612CEA5D686F4C5CBBA16A0D4D330019B3F660365B7"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-02.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-03.xls",
+      "sha256": "6A83483282CFD4D77EA611FB4B56368E06E1D8B39FD27230F75D40EA899E2290"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-04.xls",
+      "sha256": "CEB8DB75E2D69539AEC22BF2ABB9C545B9A581F4445E7D1683CDB1EF2BE89E36"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-05.xls",
+      "sha256": "23151ABE0D682E45EF6A5598FCC2D92675A506934D129CDC2EC59D723734EB43"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-06.xls",
+      "sha256": "FE02CE15571FC3E247A3ADEEEB9E2D4C6768CBBA943B407782AFCAB54E43B9D6"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-07.xls",
+      "sha256": "C4130D268CE3843994AA1CF285E03CB1DFCBBF4DF8E3BFBD465FDF1099ABA51F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-08.xls",
+      "sha256": "13A4EC7F71C890F0322458F3AEF68147571BEA4BAA85063EF16BA09AD950EA70"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-09.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-10.xls",
+      "sha256": "0E282E9B7E78D888654A0539539A4834ECD9BB4E7971D59B76F3823509CCE932"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-11.xls",
+      "sha256": "89B27E58853C264D06D8255D2F787F702CE5C3F826437CEE534E73C48EC03436"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-12.xls",
+      "sha256": "ECFDAB7A9210E9B6CC4F63DB0E9EA072381C1777BD446FE78DD3F834F9C4F905"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-13.xls",
+      "sha256": "0EE2C1A281C6C243DA95053F5A0B37AAD3728671FAC69B59ECAD545393E6D244"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-14.xls",
+      "sha256": "537B1E696C14C967F1EBDC09EBB6A9BE919D9A5911DDA01A0AC9FCEC3931B6D5"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-15.xls",
+      "sha256": "740B8F3981D254A723FD77C05F2A25594323D1D3A4AAB8C8B76C7E7FF09204BF"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-16.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-17.xls",
+      "sha256": "63925D3C827120A4F1FFA9A1BAD79414A8FB61617A00BA0657319D81204FB868"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-18.xls",
+      "sha256": "D89E128F7E490BC679D4C1339EBF8B5E63525772370CD3297F91F7F57A7BA691"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-19.xls",
+      "sha256": "2E99FFA2DF542132D173F8C0A2168AF5278410B22B09B961D0A2321EF1C57CD1"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-20.xls",
+      "sha256": "E2B70E3EE06A25268422923FFB73F8A451EA0180AB18D814E2A621E394B8F433"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-21.xls",
+      "sha256": "80FB53C789C6C13241380C72768C18F9AC10204535EA5370F4882FF261A9BF4F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-22.xls",
+      "sha256": "7D3CA96AE2F187F3BC28E5EB753D846E985DC8C93326F701DC2D7D2294523AE2"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-23.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-24.xls",
+      "sha256": "1F0591A7A0AE2C5F26C49DA023945493BACA000A1B41CA43B8FA99D7C5506F3F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-25.xls",
+      "sha256": "9B039AE300A7158B210E02A2B5D7C3F9A2C058255AE03DA775D1CCB880F9788D"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-26.xls",
+      "sha256": "B4509EFEE04B8C40792256542F58CC654F2F740EF98993ED604231207B9E1753"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-27.xls",
+      "sha256": "6785D46AD34DC39B1ADF0A175266FE0C250C6C286C3B099AF2C0AE7111E3816C"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-28.xls",
+      "sha256": "31B208E0820642C82C91E5FFD9CE52DD8FAEA8BF1EA5466E1F7338D950677B28"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-29.xls",
+      "sha256": "CB99A9CD514F903805DD4FB87FA735DE6435A83EC4E6ED6A5C4AB05CFAA6AD4D"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-30.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-08-01_2026-08-31\\2026-08-31.xls",
+      "sha256": "B2370691581587C2E15E21E86A42FD8DD9E063C35040ED276DC4FD20D11FAA56"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-01.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-02.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-03.xls",
+      "sha256": "6FC403E5C269A7AD0D3AB9933DFD9E865E9E70520AF623BFB44BFF14B6FDEBA1"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-04.xls",
+      "sha256": "0D4D31208B2AD1D7B6EE69F9B2F6FD4FFFED2F721C7E0CE919D7CB42F0FB52BB"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-05.xls",
+      "sha256": "6EC4867855E3D97EA8CEDDDB13546DD26468B84841D155085F51416599B5280C"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-06.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-07.xls",
+      "sha256": "1FD22B630573F21B5FF8A1C27A95BEF6BFC1C7DC754769DBBB117413F9321C52"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-08.xls",
+      "sha256": "B6ED5340259573D29F84AA450CAD31478A3D323E2F84C722B185DFEEF2CA268D"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-09.xls",
+      "sha256": "EE11251EFFEF4EE2B113F185D2B726955119F550695EEA878E41238273096592"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-10.xls",
+      "sha256": "7B3C579258EF982B3E81F78922831E53BF1741684D5E7C18145632EE8D69F2DC"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-11.xls",
+      "sha256": "4F83B473F59A9818C0B168F823910F8C5148011A5620EDDF4E5EA67983E898A6"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-12.xls",
+      "sha256": "FE02F6F966027B74DAA8C6D4EA8A19F23083F3601E95C28EBB8EF81EA134FA5E"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-13.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-14.xls",
+      "sha256": "E697D77AAB8B9891DCA8D6F19F8446D8A0F0E721A0D94E591688ACC0B6F2605D"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-15.xls",
+      "sha256": "C9D8CEFC30F5FBD48462DB105925AE73B6C42452C2554298C5FE23D70AFB7BA2"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-16.xls",
+      "sha256": "5722E3E493E22618DB5E194E2BBDE4E0A87E7D00A3401FDD798FFE2E5EC98D50"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-17.xls",
+      "sha256": "FD3987904FE9229BD8C00701F6FEDE738946A6CDDD9162A87B963D93C6C14BC4"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-18.xls",
+      "sha256": "373DE9EE8FD3CEDCDF827FC60F72939E72649A8DB8E7E54FEEE3018E939D0A32"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-19.xls",
+      "sha256": "72DB7903F40A3DC27990270D19DAD8DD07AE1B96621B96D52C80837C4C662E08"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-20.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-21.xls",
+      "sha256": "F4B750EA1E6559A29E4759E8272CF0AAFFF3650B77D69863775DBBCCD64C8FC9"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-22.xls",
+      "sha256": "17B94260B4B1BF5EF76C465842A5D88D5D7504DC31E6A335F1B9E50E29BF7B2B"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-23.xls",
+      "sha256": "5F9FFB1452BF4647E513D5D4504CEFC39101A2554C06A8A8C7B66CEEE59D2460"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-24.xls",
+      "sha256": "04D7E6AB1F44A8FB6CC5F21EA6A132CFD4F830462EC10EEDD2236D4B022D2851"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-25.xls",
+      "sha256": "386C61A892EB3846A2435A186C28BAED2C1A2DA34F2EE7702C03BCB578C136BF"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-26.xls",
+      "sha256": "6F99D38864C4D9AFAB342A41017A70A45CBCA73477576C453A4370B0F0608CAC"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-27.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-28.xls",
+      "sha256": "3161B36D6C0520EAF0F2CF65DE69F3A9EE11A8FECA1890A3747C74DC93F4AF4A"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-29.xls",
+      "sha256": "61984C8991488398D55005961EB65767B20617494D3EDC5307C0B961B652A19F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-09-01_2026-09-30\\2026-09-30.xls",
+      "sha256": "79987223B24CCA363FFC593241C347876C58C89CABA91006CD90DCEFD8BB1EF9"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-01.xls",
+      "sha256": "8E7CE6BE1C33D0A237B3794B7B7CD59FC10C320F0ADDF51D4C0DBC7260AB732E"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-02.xls",
+      "sha256": "EEC1C52116FB8BDDE2A1EFFB034A93309A4E4FB9C51650B766890C8008588FC1"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-03.xls",
+      "sha256": "511B83B60C874A743A02B0A7DDCC5EBE6337074CD6578CA19B642F7F78BD4607"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-04.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-05.xls",
+      "sha256": "E2210BFC14DC6C8C6DA6F39089E5390AE50C22153442A48B6650C4DDB314E3BD"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-06.xls",
+      "sha256": "6AB777EA8B2E108A3EB2E636F27C8E5ABE542F40842495EAF7A864D7B86DA232"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-07.xls",
+      "sha256": "B63F67CD7388ED1CE0CDA622F2B30758F6326246A589D16B66048A0AAD18AB1B"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-08.xls",
+      "sha256": "351E1777D9EF1C53956C5D86BA6DA5E7EF82E0AB95BBFAFF1B9C4873DAEB8F88"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-09.xls",
+      "sha256": "AF462EACBD8CB6E074C68C025AFD4495F1BD926D1353EA59BC65FA96435745F0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-10.xls",
+      "sha256": "9C04BDC2EF72D9CCC2106B99106D5468AB96F033AFC8F3292A03C394027BC294"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-11.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-12.xls",
+      "sha256": "AA899CC9CD48D4C1B44C0EDD0B29388DF59A804278A34D78D38B33A4C3984419"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-13.xls",
+      "sha256": "0CC6895264EAC992E625DCEDA828A60545587156563E4D4CB771E8E35B4DA2C0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-14.xls",
+      "sha256": "4084827A1766CD3AEED3C8D48722E4F41995CC70CC6BDF3714D0CC7EC1E2F3B3"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-15.xls",
+      "sha256": "64EEFF3C80DF37C730C1D6FA72037E668252F937A0565AEDC321687E358651F8"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-16.xls",
+      "sha256": "43AF078BC440AF4BEC95123A14F54F9D0A8FC015E38C0314628CADF88903F72E"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-17.xls",
+      "sha256": "E4178AD5787171AEFCD691F19A05700FDC5D649DA4B3C12A553BEFE7CB109999"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-18.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-19.xls",
+      "sha256": "8E3A3D96506962493D68247BEB32B85C1047E9915C28DB2A38A4D0B47A421010"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-20.xls",
+      "sha256": "9793C2F1035F35FFA4802D90D34E6532EE8A5A1EEBEDFC84967FF7B1404492C9"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-21.xls",
+      "sha256": "E36F025E9971005641CB5744D702F224363A40D18A0767086F5F691F4686C244"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-22.xls",
+      "sha256": "0644073DE41B5E9B8F185BC0086A897AA7CBD598BBCF01B56A8E6EA1CFD59CF0"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-23.xls",
+      "sha256": "43C204CDB59F448641654D714F172ED8D4C381C56014288C1166267D071FD58F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-24.xls",
+      "sha256": "FF8B2AB778866E064A278FE57CE62DAED53799E0E3DC1207BA9D969612576067"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-25.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-26.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-27.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-28.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-29.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-30.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_105912_10c9a3\\_parts\\HFPA_VH_NIKE_2026-10-01_2026-10-31\\2026-10-31.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_112514_bc1151\\HFPA_VH_NIKE_2026-10-24_2026-10-24.xlsx",
+      "sha256": "4BB18BA71FA51B251DBB2AC48B93C089EBDA90457B77970DB7A1D6DA93C22EAF"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_112514_bc1151\\_parts\\HFPA_VH_NIKE_2026-10-24_2026-10-24\\2026-10-24.xls",
+      "sha256": "2C79FD1897D3751210F69C3BD7A794922048D76061700DFDAE8332C00135E7A4"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_112517_1cfe0f\\HFPA_VH_Internal_2026-10-24_2026-10-24.xlsx",
+      "sha256": "03EDF59FB381261089DAD0DC37AA3CC4705AF677F14C621D426EBE58F2434282"
+    },
+    {
+      "path": "Report\\HFPAExports\\20261024_112517_1cfe0f\\_parts\\HFPA_VH_Internal_2026-10-24_2026-10-24\\2026-10-24.xlsx",
+      "sha256": "55F228FC8E2AD4854024731BE06F6EA83427B219AB29160E310B1D72118D4B97"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\HFPA_JV_NIKE_2026-01_correct.xls",
+      "sha256": "D379F480A9B884451909D7C1A288BD136590D6B26AF79C3D74764B7579BF686F"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\HFPA_VH_NIKE_Jan_week_direct.xls",
+      "sha256": "CB74E3217E93BFB15C600F001AAFCA21FF560F2CF9073D5D48B27A76F632480F"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\HFPA_VH_NIKE_Jan1_direct.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\HFPA_VH_NIKE_Jan2_direct.xls",
+      "sha256": "B7E2D84103DFFBFB186EF40C3D14372764F6A8810448FE070E7F3BDFB748329F"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\JV_2026-01-02_2026-01-02.xls",
+      "sha256": "1B8FB07DB83E16B5F138ACA9D15978EDF5F69D2B8291EE6724309B8F6A3CF183"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\today_JV_NIKE.xls",
+      "sha256": "57A7D79ACDAA7CFFCBEC99202246E96262A38A35E85C536AE82C4A5B1273119F"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\today_JV2_NIKE.xls",
+      "sha256": "2B5870FC673E61C737174AA676A647816986EBAFE3C3089481B92C74EE2B1EE2"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\today_VH_NIKE.xls",
+      "sha256": "EFFEC1AAC522F49CB3475DCF49F6B16B4FB0446F10155F28269AA3AA9616AF48"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\today_VH2_NIKE.xls",
+      "sha256": "6DF056A8179188F50E12849BE74771EE46192FB2F7F7CF5F737423CDFA1F0DE4"
+    },
+    {
+      "path": "Report\\HFPAExports\\http_pilot\\VH_2026-01-02_2026-01-04.xls",
+      "sha256": "EC0A5A64660B8EFF56B143F5AEAB911F65A7E2824212096EE6FB3DA146CB8BFB"
+    }
+  ],
+  "legacy_files": [
+    {
+      "path": "auto_scan_all_21_models.py",
+      "sha256": "5C4FBF7DD6889A08714DE69B54140EAD2ACF53A7E59177AF575C3D74F637F3DD"
+    },
+    {
+      "path": "generate_master_comparison.py",
+      "sha256": "5BFD7705055D7D62808948778C931BB35DAA0A89E93DD335EA191E91581ED462"
+    },
+    {
+      "path": "TU_DONG_QUET_MQAA.bat",
+      "sha256": "B1394BCA61C0C945F2C1E9FC8EBFF0111F736A2833C8168A729FF890D6FC78C8"
+    },
+    {
+      "path": "MQAA_Master_DoiChieu_21_Forms_MoiNhat.xlsx",
+      "sha256": "F0FD656C5E5BD53389286273E36FE9F49FB0FB3596E6B73D60F6BC0DEB65EC8B"
+    },
+    {
+      "path": "MQAA_Master_DoiChieu_21_Forms.xlsx",
+      "sha256": "3CCAA9725D6A8DCEB39FFA009D1BB3CC5569A6920236EF5ED28A619408170F9C"
+    }
+  ],
+  "state": "verified",
+  "rebased_metadata_files": [
+    "Report/HFPAExports/20261024_105912_10c9a3/manifest.json",
+    "Report/HFPAExports/20261024_105912_10c9a3/validation.json",
+    "Report/HFPAExports/20261024_112514_bc1151/manifest.json",
+    "Report/HFPAExports/20261024_112517_1cfe0f/manifest.json",
+    "scratch/dashboard_live_integration.json",
+    "scratch/sfc_live_http_command_test.json"
+  ],
+  "python_tests_passed": 27,
+  "javascript_tests_passed": true,
+  "excel_files_verified": 329,
+  "server_root_verified": "C:\\Users\\User\\Documents\\Chingluh Dashboard",
+  "vh_result_download_verified": true,
+  "legacy_mqaa_summary_verified": true
+}

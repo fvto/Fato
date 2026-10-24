@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFC Ching Luh - Copilot & Control Cockpit</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #131c2e;
+            --bg-card: rgba(23, 34, 56, 0.75);
+            --bg-card-hover: rgba(30, 45, 75, 0.9);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-focus: #3b82f6;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --card-radius: 16px;
+            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-card-hover: rgba(255, 255, 255, 1);
+            --border-color: rgba(0, 0, 0, 0.08);
+            --border-focus: #2563eb;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Top Header */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 19px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+
+        .brand-title h1 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-title h1 span.badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+            border-radius: 6px;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* 7 Factory Plants Switcher in Header */
+        .plants-header-selector {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 4px 6px;
+            gap: 4px;
+        }
+
+        .plant-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .plant-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .plant-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .plant-btn.active {
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            color: white;
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .memory-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(139, 92, 246, 0.15);
+            color: #c4b5fd;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-green);
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .theme-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.05);
+            border-color: var(--border-focus);
+        }
+
+        /* Container Layout */
+        .container {
+            max-width: 1540px;
+            margin: 0 auto;
+            padding: 22px 28px;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Prompt Hero Bar */
+        .ai-prompt-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-radius);
+            padding: 18px 22px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-prompt-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6);
+        }
+
+        .prompt-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .prompt-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .prompt-input {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-size: 15px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .prompt-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-prompt-send {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-prompt-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .quick-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chip:hover {
+            color: var(--text-primary);
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .chip.chip-plant {
+            border-color: rgba(6, 182, 212, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        /* Real-time AI Execution Console & Stepper */
+        .ai-exec-console {
+            margin-top: 16px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exec-console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .exec-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .live-pulse-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(239, 68, 68, 0.18);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .live-pulse-badge.done {
+            background: rgba(16, 185, 129, 0.18);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+
+        .pulse-dot-red {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulseRed 1.4s infinite;
+        }
+
+        @keyframes pulseRed {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .exec-prompt-echo {
+            font-size: 13px;
+            font-style: italic;
+            color: #94a3b8;
+            max-width: 500px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-close-console {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-close-console:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Intent Pills Bar */
+        .intent-chips-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .intent-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            color: #60a5fa;
+        }
+
+        .intent-pill.plant {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: rgba(6, 182, 212, 0.35);
+            color: #22d3ee;
+        }
+
+        .intent-pill.line {
+            background: rgba(168, 85, 247, 0.15);
+            border-color: rgba(168, 85, 247, 0.35);
+            color: #c084fc;
+        }
+
+        .intent-pill.date {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.35);
+            color: #fbbf24;
+        }
+
+        .intent-pill.page {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.35);
+            color: #34d399;
+        }
+
+        /* Stepper Timeline */
+        .exec-stepper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .step-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.25s ease;
+        }
+
+        .step-card.waiting {
+            opacity: 0.45;
+        }
+
+        .step-card.running {
+            opacity: 1;
+            background: rgba(59, 130, 246, 0.12);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+
+        .step-card.success {
+            opacity: 1;
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .step-card.skipped {
+            opacity: 0.6;
+            background: rgba(255, 255, 255, 0.02);
+            border-style: dashed;
+        }
+
+        .step-card.error {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .step-card.warn {
+            opacity: 1;
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .step-card.done {
+            opacity: 1;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15));
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .step-card.running .step-icon {
+            background: #2563eb;
+            color: white;
+            animation: pulseIcon 1.2s infinite;
+        }
+
+        @keyframes pulseIcon {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .step-card.success .step-icon {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .step-card.done .step-icon {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .step-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .step-msg {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .step-card.running .step-msg {
+            color: #93c5fd;
+            font-weight: 500;
+        }
+
+        .step-card.success .step-msg {
+            color: #a7f3d0;
+        }
+
+        .step-status-badge {
+            font-size: 13px;
+            flex-shrink: 0;
+            padding: 0 6px;
+        }
+
+        /* Two Column Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1100px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--accent-blue);
+        }
+
+        /* Quick Destination Tiles */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .nav-tile {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+
+        .nav-tile:hover {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .nav-tile i {
+            font-size: 18px;
+            color: var(--accent-cyan);
+        }
+
+        .nav-tile span.title {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .nav-tile span.sub {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Form Controls */
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .action-btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .btn-action {
+            border: none;
+            border-radius: 12px;
+            padding: 13px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-excel {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: white;
+        }
+
+        .btn-excel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+        }
+
+        /* MQAA Section */
+        .mqaa-banner {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .mqaa-info h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #c4b5fd;
+            margin-bottom: 4px;
+        }
+
+        .mqaa-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .mqaa-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-mqaa-run {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-mqaa-run:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-open-file {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+            padding: 11px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-open-file:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* Live Mirror Screen */
+        .mirror-viewport {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mirror-img {
+            width: 100%;
+            height: auto;
+            max-height: 380px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .mirror-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        .mirror-url {
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 75%;
+        }
+
+        .btn-refresh-screen {
+            background: transparent;
+            border: none;
+            color: var(--accent-cyan);
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-refresh-screen:hover {
+            transform: rotate(45deg);
+        }
+
+        /* MQAA Summary Table */
+        .table-wrapper {
+            max-height: 240px;
+            overflow-y: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        table.mqaa-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        table.mqaa-table th {
+            background: var(--bg-primary);
+            padding: 10px 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        table.mqaa-table td {
+            padding: 8px 12px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .status-badge-sm {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-ok {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-warn {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* Activity Log */
+        .log-box {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 14px;
+            max-height: 180px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 8px;
+            line-height: 1.4;
+        }
+
+        .log-time {
+            color: var(--text-muted);
+        }
+
+        .log-text {
+            color: var(--text-secondary);
+        }
+
+        .log-text.success {
+            color: var(--accent-green);
+        }
+
+        .log-text.info {
+            color: var(--accent-cyan);
+        }
+
+        .log-text.warn {
+            color: var(--accent-orange);
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 22px;
+            background: rgba(19, 28, 46, 0.96);
+            color: white;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-left: 5px solid var(--accent-blue);
+            transform: translateY(120px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <div class="brand-logo">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div class="brand-title">
+                <h1>SFC Ching Luh Copilot <span class="badge">PRO</span></h1>
+                <p>Điều khiển 7 Cụm Nhà máy & 138 Chuyền sản xuất</p>
+            </div>
+        </div>
+
+        <!-- 7 Factory Plants Selector (Đổi Nhà máy cấp cao) -->
+        <div class="plants-header-selector">
+            <div class="plant-label">
+                <i class="fa-solid fa-house-chimney"></i> NHÀ MÁY:
+            </div>
+            <button class="plant-btn active" id="plant-btn-VH" onclick="switchPlant('VH')">VH</button>
+            <button class="plant-btn" id="plant-btn-VH2" onclick="switchPlant('VH2')">VH2</button>
+            <button class="plant-btn" id="plant-btn-VH3" onclick="switchPlant('VH3')">VH3</button>
+            <button class="plant-btn" id="plant-btn-VH4" onclick="switchPlant('VH4')">VH4</button>
+            <button class="plant-btn" id="plant-btn-JV" onclick="switchPlant('JV')">JV</button>
+            <button class="plant-btn" id="plant-btn-JV2" onclick="switchPlant('JV2')">JV2</button>
+            <button class="plant-btn" id="plant-btn-JVB" onclick="switchPlant('JVB')">JVB</button>
+        </div>
+
+        <div class="header-actions">
+            <div class="memory-badge" id="memory-stat" title="Bộ nhớ dữ liệu đã cào">
+                <i class="fa-solid fa-brain"></i>
+                <span id="memory-count">7 Nhà máy + 68 QMS + 138 Chuyền</span>
+            </div>
+            <div class="status-badge" id="cdp-status">
+                <div class="pulse-dot"></div>
+                <span id="cdp-text">Chrome 9222: Đã kết nối</span>
+            </div>
+            <button class="theme-btn" id="theme-toggle" title="Đổi giao diện Sáng / Tối">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Natural Language Prompt Hero -->
+        <div class="ai-prompt-box">
+            <div class="prompt-label">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> RA LỆNH TỰ NHIÊN CHO TRỢ LÝ SFC (AI COMMAND PROMPT)
+            </div>
+            <div class="prompt-input-row">
+                <input type="text" id="ai-prompt-input" class="prompt-input" value="{{ last_command_prompt }}" data-last-job="{{ last_command_job_id }}"
+                       placeholder="Ví dụ: 'Đổi sang nhà máy VH3', 'Chọn chuyền VL - D3 ngày hôm nay rồi tìm kiếm', 'Vào mục MQAA'..." />
+                <button class="btn-prompt-send" id="btn-prompt-exec">
+                    <i class="fa-solid fa-paper-plane"></i> Thực thi ngay
+                </button>
+            </div>
+            <div class="quick-chips">
+                <div class="chip chip-plant" onclick="applyPreset('Đổi sang nhà máy VH3')">
+                    <i class="fa-solid fa-building"></i> Đổi sang Nhà máy VH3
+                </div>
+                <div class="chip chip-plant" onclick="applyPreset('Đổi sang nhà máy VH4')">
+                    <i class="fa-solid fa-building"></i> Đổi sang Nhà máy VH4
+                </div>
+                <div class="chip chip-plant" onclick="applyPreset('Đổi sang nhà máy JV')">
+                    <i class="fa-solid fa-building"></i> Đổi sang Nhà máy JV
+                </div>
+                <div class="chip" onclick="applyPreset('Chọn chuyền VL - D3 ngày hôm nay rồi tìm kiếm')">
+                    <i class="fa-solid fa-magnifying-glass"></i> Chuyền VL-D3 Hôm nay & Tìm
+                </div>
+                <div class="chip" onclick="applyPreset('Xuất excel chuyền VL - D4 từ ngày 2026-10-20 đến 2026-10-24')">
+                    <i class="fa-solid fa-file-excel"></i> Xuất Excel Chuyền VL-D4
+                </div>
+                <div class="chip" onclick="applyPreset('Vào HFPA')">
+                    <i class="fa-solid fa-clipboard-check"></i> QA HFPA (Q504)
+                </div>
+                <div class="chip" onclick="applyPreset('Vào mục MQAA')">
+                    <i class="fa-solid fa-list-check"></i> MQAACheck
+                </div>
+                <div class="chip" onclick="applyPreset('Vào QMS')">
+                    <i class="fa-solid fa-diagram-project"></i> Quản lý Chất lượng QMS
+                </div>
+                <div class="chip" onclick="applyPreset('Về Trang chủ SFC')">
+                    <i class="fa-solid fa-house"></i> Trang chủ FlowChart
+                </div>
+            </div>
+
+            {% if saved_command_results %}
+            <details id="saved-command-results" style="margin-top:16px;" open>
+                <summary style="cursor:pointer; font-weight:600;">Kết quả đã lưu</summary>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                {% for result in saved_command_results %}
+                    {% for file in result.files %}
+                    <a class="intent-pill" href="{{ file.url }}" download="{{ file.name }}">↓ {{ file.name }}{% if file.rows is defined %} ({{ "{:,}".format(file.rows) }} dòng){% endif %}</a>
+                    {% endfor %}
+                {% endfor %}
+                </div>
+            </details>
+            {% endif %}
+
+            <!-- Real-time AI Execution Console & Stepper -->
+            <div id="ai-exec-console" class="ai-exec-console" style="display: none;">
+                <div class="exec-console-header">
+                    <div class="exec-header-left">
+                        <span class="live-pulse-badge" id="exec-status-badge">
+                            <span class="pulse-dot-red"></span> ĐANG XỬ LÝ TRỰC TIẾP
+                        </span>
+                        <span class="exec-prompt-echo" id="exec-prompt-echo">"..."</span>
+                    </div>
+                    <button class="btn-close-console" onclick="closeExecConsole()" title="Đóng bảng chi tiết">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Parsed Intent Chips -->
+                <div class="intent-chips-bar" id="intent-chips-bar">
+                    <!-- Dynamic badges: Plant, Page, Line, Date, Action -->
+                </div>
+
+                <!-- 5-Step Stepper Timeline -->
+                <div class="exec-stepper" id="exec-stepper">
+                    <div class="step-card waiting" id="step-card-1">
+                        <div class="step-icon"><i class="fa-solid fa-brain"></i></div>
+                        <div class="step-body">
+                            <div class="step-name">1. Phân tích ngữ nghĩa câu lệnh</div>
+                            <div class="step-msg" id="step-msg-1">Đang chờ...</div>
+                        </div>
+                        <div class="step-status-badge" id="step-status-1"><i class="fa-solid fa-clock" style="color:#64748b;"></i></div>
+                    </div>
+
+                    <div class="step-card waiting" id="step-card-2">
+                        <div class="step-icon"><i class="fa-solid fa-industry"></i></div>
+                        <div class="step-body">
+                            <div class="step-name">2. Chuyển đổi Nhà máy SFC</div>
+                            <div class="step-msg" id="step-msg-2">Đang chờ...</div>
+                        </div>
+                        <div class="step-status-badge" id="step-status-2"><i class="fa-solid fa-clock" style="color:#64748b;"></i></div>
+                    </div>
+
+                    <div class="step-card waiting" id="step-card-3">
+                        <div class="step-icon"><i class="fa-solid fa-compass"></i></div>
+                        <div class="step-body">
+                            <div class="step-name">3. Điều hướng Phân hệ SFC</div>
+                            <div class="step-msg" id="step-msg-3">Đang chờ...</div>
+                        </div>
+                        <div class="step-status-badge" id="step-status-3"><i class="fa-solid fa-clock" style="color:#64748b;"></i></div>
+                    </div>
+
+                    <div class="step-card waiting" id="step-card-4">
+                        <div class="step-icon"><i class="fa-solid fa-sliders"></i></div>
+                        <div class="step-body">
+                            <div class="step-name">4. Thiết lập Chuyền / Ngày & Thao tác</div>
+                            <div class="step-msg" id="step-msg-4">Đang chờ...</div>
+                        </div>
+                        <div class="step-status-badge" id="step-status-4"><i class="fa-solid fa-clock" style="color:#64748b;"></i></div>
+                    </div>
+
+                    <div class="step-card waiting" id="step-card-5">
+                        <div class="step-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="step-body">
+                            <div class="step-name">5. Hoàn tất & Kiểm tra kết quả</div>
+                            <div class="step-msg" id="step-msg-5">Đang chờ...</div>
+                        </div>
+                        <div class="step-status-badge" id="step-status-5"><i class="fa-solid fa-clock" style="color:#64748b;"></i></div>
+                    </div>
+                </div>
+                <div id="command-files" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;"></div>
+            </div>
+        </div>
+
+        <!-- 2 Columns Grid -->
+        <div class="main-layout">
+            
+            <!-- LEFT COLUMN: Control Station -->
+            <div class="panel-column">
+                
+                <!-- Quick Navigation Tiles -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-compass"></i> Điều hướng nhanh Phân hệ SFC
+                        </div>
+                    </div>
+                    <div class="nav-grid">
+                        <div class="nav-tile" onclick="navTo('hfpa')">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <span class="title">QA HFPA</span>
+                            <span class="sub">Mã Q504</span>
+                        </div>
+                        <div class="nav-tile" onclick="navTo('mqaa')">
+                            <i class="fa-solid fa-shoe-prints"></i>
+                            <span class="title">MQAA Check</span>
+                            <span class="sub">Kiểm toán 21 Mẫu</span>
+                        </div>
+                        <div class="nav-tile" onclick="navTo('qms')">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            <span class="title">QMS Quality</span>
+                            <span class="sub">Cây Quản trị QA</span>
+                        </div>
+                        <div class="nav-tile" onclick="navTo('home')">
+                            <i class="fa-solid fa-house"></i>
+                            <span class="title">SFC Portal</span>
+                            <span class="sub">Trang chủ FlowChart</span>
+                        </div>
+                    </div>
+
+                    <!-- Jump directly to any of the 68 crawled QMS modules -->
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><i class="fa-solid fa-list-ul"></i> Mở nhanh Tính năng QMS đã cào bộ nhớ (68 Menu):</label>
+                        <div style="display:flex; gap: 8px;">
+                            <select id="qms-jump-select" class="form-control" style="font-size: 13px;">
+                                <option value="">-- Đang nạp danh mục QMS từ bộ nhớ... --</option>
+                            </select>
+                            <button class="btn-action btn-excel" style="padding: 0 16px; border-radius: 10px;" onclick="jumpToQmsModule()">
+                                <i class="fa-solid fa-arrow-right"></i> Mở
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Filter Panel for HFPA -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-sliders"></i> Bộ lọc & Thao tác Chuyền / Xưởng
+                        </div>
+                        <span style="font-size: 11px; color: var(--text-muted);">Trang HFPA (Q504)</span>
+                    </div>
+
+                    <!-- Factory indicator and line selector -->
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+                            <label><i class="fa-solid fa-code-fork"></i> Chọn Chuyền / Xưởng sản xuất (138 Chuyền):</label>
+                            <span style="font-size: 11px; color: var(--accent-cyan); font-weight: 600;" id="active-plant-text">Nhà máy: VH</span>
+                        </div>
+                        <select id="factory-select" class="form-control">
+                            <option value="">-- Đang tải danh sách chuyền từ SFC... --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nike-toggle" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                            <input type="checkbox" id="nike-toggle" onchange="toggleNike()"
+                                style="width:24px; height:24px; accent-color:#84cc16; cursor:pointer;" />
+                            <strong>NIKE</strong>
+                            <span id="nike-mode-text" style="color:var(--text-muted);">Nội bộ</span>
+                        </label>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:6px;">Chế độ xuất dữ liệu: Tắt — Nội bộ · Bật — External (NIKE)</div>
+                    </div>
+
+                    <!-- Date range -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fa-regular fa-calendar"></i> Từ ngày (Date From):</label>
+                            <input type="date" id="date-from" class="form-control" value="2026-10-24" />
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-regular fa-calendar-check"></i> Đến ngày (Date To):</label>
+                            <input type="date" id="date-to" class="form-control" value="2026-10-24" />
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="action-btn-row">
+                        <button class="btn-action btn-search" id="btn-run-search" onclick="triggerAction('search')">
+                            <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm dữ liệu
+                        </button>
+                        <button class="btn-action btn-excel" id="btn-run-excel" onclick="triggerAction('excel')">
+                            <i class="fa-solid fa-file-excel"></i> Xuất file Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MQAA 21 Forms Master Audit Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-microchip"></i> Trung tâm Kiểm toán 21 Form MQAA
+                        </div>
+                    </div>
+                    <div class="mqaa-banner">
+                        <div class="mqaa-info">
+                            <h3>Tự động Quét & Đối chiếu</h3>
+                            <p id="mqaa-status-text">Sẵn sàng quét 7 Form Bottom & 14 Form Upper</p>
+                        </div>
+                        <div class="mqaa-actions">
+                            <button class="btn-mqaa-run" id="btn-start-mqaa" onclick="startMqaaScan()">
+                                <i class="fa-solid fa-play"></i> Bắt đầu Quét
+                            </button>
+                            <button class="btn-open-file" onclick="openMasterExcel()">
+                                <i class="fa-solid fa-folder-open"></i> Mở Master Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Live Mirror & Summary Table -->
+            <div class="panel-column">
+                
+                <!-- Live SFC Mirror Screen -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-display"></i> Ảnh trang SFC
+                        </div>
+                        <button class="btn-refresh-screen" id="btn-refresh-vp" onclick="refreshStatus(true)" title="Cập nhật ảnh trang SFC hiện tại">
+                            <i class="fa-solid fa-rotate-right"></i> Làm mới
+                        </button>
+                    </div>
+
+                    <div class="mirror-bar">
+                        <span class="mirror-url" id="mirror-url">Đang kết nối vào SFC Ching Luh...</span>
+                        <span id="mirror-title" style="color: var(--accent-cyan); font-weight: 600;">HFPA</span>
+                    </div>
+
+                    <div class="mirror-viewport">
+                        <img id="mirror-img" class="mirror-img" src="" alt="Live SFC Viewport" />
+                    </div>
+                </div>
+
+                <!-- MQAA Scorecard Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-chart-pie"></i> Bảng điểm Đối chiếu 21 Form Chuẩn
+                        </div>
+                        <span id="scorecard-stat" style="font-size: 12px; font-weight: 600; color: var(--accent-green);">13/21 Đạt chuẩn 100%</span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="mqaa-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Phân loại</th>
+                                    <th>Mẫu kiểm toán</th>
+                                    <th>Khớp câu hỏi</th>
+                                    <th>Khớp ghi chú</th>
+                                    <th>Đánh giá</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mqaa-table-body">
+                                <tr>
+                                    <td colspan="6" style="text-align:center; padding: 20px; color: var(--text-muted);">
+                                        Đang tải dữ liệu từ Master Excel...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-terminal"></i> Nhật ký Thao tác (Live Activity)
+                        </div>
+                    </div>
+                    <div class="log-box" id="activity-log">
+                        <div class="log-entry">
+                            <span class="log-time">[Hệ thống]</span>
+                            <span class="log-text success">Sẵn sàng điều khiển 7 Nhà máy và 138 Chuyền sản xuất.</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-text">Thông báo</span>
+    </div>
+
+    <script>
+        let currentActivePlant = 'VH';
+
+        // Theme switch
+        const themeBtn = document.getElementById('theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            const current = document.body.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', target);
+            themeBtn.innerHTML = target === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+            showToast(`Đã chuyển sang chế độ: ${target === 'dark' ? 'Dark Mode' : 'Light Mode'}`);
+        });
+
+        function showToast(msg, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const txt = document.getElementById('toast-text');
+            txt.innerText = msg;
+            toast.style.borderLeftColor = isSuccess ? 'var(--accent-green)' : 'var(--accent-red)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        function addLog(msg, type = 'info') {
+            const box = document.getElementById('activity-log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-text ${type}">${msg}</span>`;
+            box.prepend(entry);
+        }
+
+        function applyPreset(text) {
+            document.getElementById('ai-prompt-input').value = text;
+            executeCommand();
+        }
+
+        // Switch between the 7 Factories
+        async function switchPlant(plantName) {
+            if (!plantName) return;
+            addLog(`Đang chuyển sang Nhà máy: "${plantName}"...`, 'info');
+
+            // Update UI buttons immediately
+            document.querySelectorAll('.plant-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`plant-btn-${plantName}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            try {
+                const res = await fetch('/api/switch_factory', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ factory: plantName })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentActivePlant = data.current_plant || plantName;
+                    document.getElementById('active-plant-text').innerText = `Nhà máy: ${currentActivePlant}`;
+                    showToast(data.message || `Đã chuyển sang Nhà máy: ${currentActivePlant}`);
+                    addLog(data.message || `Đã chuyển sang Nhà máy: ${currentActivePlant}`, 'success');
+                    if (data.screenshot) {
+                        document.getElementById('mirror-img').src = data.screenshot;
+                    }
+                    setTimeout(refreshStatus, 1500);
+                } else {
+                    showToast(data.error || 'Lỗi khi chuyển Nhà máy', false);
+                    addLog(`Lỗi: ${data.error || 'Không đổi được nhà máy'}`, 'warn');
+                }
+            } catch(e) {
+                showToast('Lỗi kết nối máy chủ', false);
+            }
+        }
+
+        let nikeBusy = false;
+        let confirmedNike = false;
+
+        function updateNikeMode(checked) {
+            document.getElementById('nike-toggle').checked = checked;
+            document.getElementById('nike-mode-text').innerText = checked ? 'External (NIKE)' : 'Nội bộ';
+            localStorage.setItem('sfc-nike-mode', checked ? 'true' : 'false');
+        }
+
+        function toggleNike() {
+            const checkbox = document.getElementById('nike-toggle');
+            if (commandBusy || nikeBusy) {
+                updateNikeMode(confirmedNike);
+                showToast('Đang xuất dữ liệu; vui lòng chờ hoàn tất trước khi đổi chế độ.', false);
+                return;
+            }
+            confirmedNike = checkbox.checked;
+            updateNikeMode(confirmedNike);
+            const message = `Đã chọn chế độ xuất: ${confirmedNike ? 'External (NIKE)' : 'Nội bộ'}`;
+            showToast(message);
+            addLog(message, 'success');
+        }
+
+        // Fetch Live Status
+        async function refreshStatus(includeScreenshot = false) {
+            try {
+                const res = await fetch(includeScreenshot ? '/api/status?screen=1' : '/api/status');
+                const data = await res.json();
+                document.getElementById('cdp-text').innerText = data.command_running || data.processing
+                    ? 'SFC: Đang xử lý' : (data.requires_login ? 'SFC: Cần đăng nhập' : (data.connected ? 'SFC: Đã kết nối' : 'SFC: Chưa kết nối'));
+                if (data.command_running || data.processing) return;
+                if (data.connected) {
+                    document.getElementById('mirror-url').innerText = data.url;
+                    document.getElementById('mirror-title').innerText = data.title || 'SFC';
+                    if (data.screenshot) {
+                        document.getElementById('mirror-img').src = data.screenshot;
+                    }
+                    if (data.current_plant) {
+                        currentActivePlant = data.current_plant;
+                        document.getElementById('active-plant-text').innerText = `Nhà máy: ${currentActivePlant}`;
+                        document.querySelectorAll('.plant-btn').forEach(btn => btn.classList.remove('active'));
+                        const btn = document.getElementById(`plant-btn-${currentActivePlant}`);
+                        if (btn) btn.classList.add('active');
+                    }
+                    if (data.form && data.form.selectedDept) {
+                        const sel = document.getElementById('factory-select');
+                        for (let opt of sel.options) {
+                            if (opt.text === data.form.selectedDept) {
+                                opt.selected = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (data.mqaa_status && data.mqaa_status.progress) {
+                        document.getElementById('mqaa-status-text').innerText = data.mqaa_status.progress;
+                    }
+                } else {
+                    document.getElementById('mirror-url').innerText = "Chưa kết nối được Chrome cổng 9222";
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // Load Lines into Dropdown
+        async function loadFactories() {
+            try {
+                const res = await fetch('/api/factories');
+                const data = await res.json();
+                const sel = document.getElementById('factory-select');
+                sel.innerHTML = '<option value="">-- Chọn Chuyền / Xưởng sản xuất --</option>';
+                if (data.factories) {
+                    data.factories.forEach(f => {
+                        const opt = document.createElement('option');
+                        opt.value = f.text;
+                        opt.innerText = f.text;
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // Load Memory & QMS modules
+        async function loadMemory() {
+            try {
+                const res = await fetch('/api/memory');
+                const data = await res.json();
+                const qmsList = data.qms_modules || [];
+                const qmsSel = document.getElementById('qms-jump-select');
+                qmsSel.innerHTML = '<option value="">-- Chọn tính năng QMS muốn mở --</option>';
+                
+                qmsList.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.href;
+                    opt.innerText = m.name;
+                    qmsSel.appendChild(opt);
+                });
+
+                document.getElementById('memory-count').innerText = `7 Nhà máy + ${qmsList.length} QMS + ${data.factories_and_lines ? data.factories_and_lines.length : 138} Chuyền`;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function jumpToQmsModule() {
+            const sel = document.getElementById('qms-jump-select');
+            const targetUrl = sel.value;
+            const targetName = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+            if (!targetUrl) {
+                showToast("Vui lòng chọn tính năng QMS trong danh sách!", false);
+                return;
+            }
+
+            addLog(`Đang chuyển đến: "${targetName}"...`, 'info');
+            try {
+                const res = await fetch('/api/navigate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ destination: targetUrl })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Đã mở: ${targetName}`);
+                    addLog(`Đã chuyển đến: ${targetName}`, 'success');
+                    if (data.screenshot) {
+                        document.getElementById('mirror-img').src = data.screenshot;
+                    }
+                    setTimeout(refreshStatus, 1500);
+                } else {
+                    showToast(data.error || 'Lỗi điều hướng', false);
+                }
+            } catch(e) {
+                showToast('Lỗi kết nối máy chủ', false);
+            }
+        }
+
+        // Load MQAA Summary
+        async function loadMqaaSummary() {
+            try {
+                const res = await fetch('/api/mqaa/summary');
+                const data = await res.json();
+                if (data.has_data && data.rows) {
+                    document.getElementById('scorecard-stat').innerText = `${data.perfect_count}/${data.total_models} Đạt chuẩn 100%`;
+                    const tbody = document.getElementById('mqaa-table-body');
+                    tbody.innerHTML = '';
+                    data.rows.forEach(r => {
+                        const tr = document.createElement('tr');
+                        const isOk = (r.status || '').includes('100%');
+                        tr.innerHTML = `
+                            <td>${r.stt}</td>
+                            <td><span style="font-weight:600; color: ${r.cat === 'Bottom' ? '#38bdf8' : '#c084fc'};">${r.cat}</span></td>
+                            <td><strong>${r.model}</strong></td>
+                            <td style="text-align:center;">${r.match_q}</td>
+                            <td style="text-align:center;">${r.match_rmk}</td>
+                            <td><span class="status-badge-sm ${isOk ? 'status-ok' : 'status-warn'}">${r.status}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        let commandBusy = false;
+        let commandTerminal = false;
+
+        async function consumeCommandStream(res) {
+            if (!res.ok) {
+                const error = await res.json().catch(() => ({}));
+                throw new Error(error.error || `HTTP ${res.status}`);
+            }
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+            const consume = chunk => {
+                const line = chunk.trim();
+                if (line.startsWith('data: ')) handleStreamStep(JSON.parse(line.slice(6)));
+            };
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, {stream:true});
+                const chunks = buffer.split('\n\n');
+                buffer = chunks.pop();
+                chunks.forEach(consume);
+            }
+            buffer += decoder.decode();
+            if (buffer.trim()) consume(buffer);
+            if (!commandTerminal) throw new Error('Luồng tiến độ bị ngắt. Tác vụ vẫn chạy nền; tải lại dashboard để kết nối lại.');
+        }
+
+        // Execute or reconnect to an existing job; reconnect never reruns exports.
+        async function executeCommand(resumeJobId = null) {
+            if (commandBusy || nikeBusy) return;
+            const resume = typeof resumeJobId === 'string' && resumeJobId.length > 0;
+            const input = document.getElementById('ai-prompt-input');
+            const prompt = input.value.trim();
+            if (!prompt) {
+                showToast('Vui lòng nhập lệnh trước khi bấm thực thi', false);
+                return;
+            }
+
+            commandBusy = true;
+            commandTerminal = false;
+            localStorage.setItem('sfc-last-prompt', prompt);
+            if (!resume) localStorage.removeItem('sfc-last-job');
+            document.getElementById('command-files').replaceChildren();
+
+            const btn = document.getElementById('btn-prompt-exec');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Đang chạy...';
+            btn.disabled = true;
+
+            // Show and reset Exec Console
+            const consoleEl = document.getElementById('ai-exec-console');
+            consoleEl.style.display = 'block';
+            document.getElementById('exec-prompt-echo').innerText = `"${prompt}"`;
+            const badge = document.getElementById('exec-status-badge');
+            badge.className = 'live-pulse-badge';
+            badge.innerHTML = '<span class="pulse-dot-red"></span> ĐANG XỬ LÝ TRỰC TIẾP';
+            document.getElementById('intent-chips-bar').innerHTML = '<span class="intent-pill"><i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích câu lệnh...</span>';
+
+            // Reset all 5 steps to waiting
+            for (let s = 1; s <= 5; s++) {
+                const card = document.getElementById(`step-card-${s}`);
+                const msg = document.getElementById(`step-msg-${s}`);
+                const statusBadge = document.getElementById(`step-status-${s}`);
+                if (card) {
+                    card.className = s === 1 ? 'step-card running' : 'step-card waiting';
+                }
+                if (msg) msg.innerText = s === 1 ? '🧠 Đang bóc tách ý định câu lệnh...' : 'Đang chờ...';
+                if (statusBadge) statusBadge.innerHTML = s === 1 ? '<i class="fa-solid fa-spinner fa-spin" style="color:#60a5fa;"></i>' : '<i class="fa-solid fa-clock" style="color:#64748b;"></i>';
+            }
+
+            addLog(`Đang gửi lệnh: "${prompt}"...`, 'info');
+
+            try {
+                const res = resume ? await fetch(`/api/command/jobs/${encodeURIComponent(resumeJobId)}/stream`) : await fetch('/api/command/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                await consumeCommandStream(res);
+
+            } catch (e) {
+                showToast(`Lỗi kết nối máy chủ: ${e.message}`, false);
+                addLog(`Lỗi xử lý: ${e.message}`, 'warn');
+                if (badge) {
+                    badge.className = 'live-pulse-badge';
+                    badge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> GẶP SỰ CỐ';
+                }
+            } finally {
+                commandBusy = false;
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        function handleStreamStep(data) {
+            if (data.job_id) localStorage.setItem('sfc-last-job', data.job_id);
+            const stepNum = data.step;
+            const card = document.getElementById(`step-card-${stepNum}`);
+            const msg = document.getElementById(`step-msg-${stepNum}`);
+            const statusBadge = document.getElementById(`step-status-${stepNum}`);
+
+            if (card) {
+                card.className = `step-card ${data.status}`;
+            }
+            if (msg && data.msg) {
+                msg.innerText = data.msg;
+            }
+
+            // Status icon update
+            if (statusBadge) {
+                if (data.status === 'running') {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color:#60a5fa;"></i>';
+                } else if (data.status === 'success') {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#34d399;"></i>';
+                } else if (data.status === 'skipped') {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-forward-step" style="color:#94a3b8;"></i>';
+                } else if (data.status === 'error') {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#f87171;"></i>';
+                } else if (data.status === 'warn') {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fbbf24;"></i>';
+                } else if (data.status === 'done') {
+                    statusBadge.innerHTML = '<i class="fa-solid fa-trophy" style="color:#34d399;"></i>';
+                }
+            }
+
+            // Step 1: Render Intent Pills
+            if (stepNum === 1 && data.intent) {
+                const intent = data.intent;
+                const bar = document.getElementById('intent-chips-bar');
+                bar.innerHTML = '';
+
+                if (intent.target_plant) {
+                    bar.innerHTML += `<span class="intent-pill plant"><i class="fa-solid fa-house-chimney"></i> Nhà máy: <strong>${(intent.target_plants || [intent.target_plant]).join(', ')}</strong></span>`;
+                }
+                if (intent.target_page) {
+                    bar.innerHTML += `<span class="intent-pill page"><i class="fa-solid fa-compass"></i> Trang: <strong>${intent.target_page.toUpperCase()}</strong></span>`;
+                }
+                if (intent.target_line) {
+                    bar.innerHTML += `<span class="intent-pill line"><i class="fa-solid fa-network-wired"></i> Chuyền: <strong>${intent.target_line}</strong></span>`;
+                }
+                if (intent.date_from) {
+                    const dateStr = intent.date_to && intent.date_to !== intent.date_from ? `${intent.date_from} ➔ ${intent.date_to}` : intent.date_from;
+                    bar.innerHTML += `<span class="intent-pill date"><i class="fa-solid fa-calendar-day"></i> Ngày: <strong>${dateStr}</strong></span>`;
+                }
+                if (intent.action) {
+                    const actLabel = intent.action === 'excel' ? 'Xuất Excel' : 'Tìm kiếm dữ liệu';
+                    bar.innerHTML += `<span class="intent-pill"><i class="fa-solid fa-bolt"></i> Thao tác: <strong>${actLabel}</strong></span>`;
+                }
+                if (typeof intent.nike === 'boolean') {
+                    bar.innerHTML += `<span class="intent-pill">${intent.nike ? 'NIKE (External)' : 'Nội bộ'}</span>`;
+                    confirmedNike = intent.nike;
+                    updateNikeMode(confirmedNike);
+                }
+                if (intent.monthly) bar.innerHTML += '<span class="intent-pill">Chia từng tháng</span>';
+                if (intent.combine) bar.innerHTML += '<span class="intent-pill">Gộp riêng từng nhà máy</span>';
+                if (!bar.innerHTML) {
+                    bar.innerHTML = '<span class="intent-pill"><i class="fa-solid fa-check"></i> Đã nhận diện yêu cầu</span>';
+                }
+            }
+
+            // Step 2: Plant Switch Sync
+            if (data.plant) {
+                currentActivePlant = data.plant;
+                document.getElementById('active-plant-text').innerText = `Nhà máy: ${data.plant}`;
+                document.querySelectorAll('.plant-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.id === `plant-btn-${data.plant}`);
+                });
+            }
+            if (typeof data.nike === 'boolean' && !nikeBusy) {
+                confirmedNike = data.nike;
+                updateNikeMode(confirmedNike);
+            }
+
+            // Realtime Screenshot Mirror Update
+            if (data.screenshot) {
+                const mirrorImg = document.getElementById('mirror-img');
+                if (mirrorImg) {
+                    mirrorImg.src = data.screenshot;
+                }
+            }
+
+            // Append to Activity Log
+            if (data.msg) {
+                const logType = (data.status === 'success' || data.status === 'done') ? 'success' : (data.status === 'warn' ? 'warn' : 'info');
+                addLog(data.msg, logType);
+            }
+
+            if (data.files) {
+                const files = document.getElementById('command-files');
+                for (const file of data.files) {
+                    if (!file.url || !file.url.startsWith('/api/exports/')) continue;
+                    if ([...files.querySelectorAll('a')].some(a => a.getAttribute('href') === file.url)) continue;
+                    const link = document.createElement('a');
+                    link.href = file.url;
+                    link.className = 'intent-pill';
+                    link.textContent = `↓ ${file.name}${typeof file.rows === 'number' ? ` (${file.rows.toLocaleString()} dòng)` : ''}`;
+                    link.setAttribute('download', file.name);
+                    files.appendChild(link);
+                }
+            }
+            if (data.status === 'error') {
+                commandTerminal = true;
+                const badge = document.getElementById('exec-status-badge');
+                badge.className = 'live-pulse-badge';
+                badge.textContent = 'CHƯA HOÀN TẤT';
+                showToast(data.msg || 'Tác vụ thất bại', false);
+            }
+
+            // Step 5: Finished
+            if (stepNum === 5 && data.status === 'done') {
+                commandTerminal = true;
+                const badge = document.getElementById('exec-status-badge');
+                if (badge) {
+                    badge.className = 'live-pulse-badge done';
+                    badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> HOÀN THÀNH TOÀN BỘ';
+                }
+                showToast('🎉 Đã thực hiện xong lệnh của bạn!');
+                setTimeout(refreshStatus, 1500);
+            }
+        }
+
+        function closeExecConsole() {
+            const consoleEl = document.getElementById('ai-exec-console');
+            if (consoleEl) consoleEl.style.display = 'none';
+        }
+
+        document.getElementById('btn-prompt-exec').addEventListener('click', executeCommand);
+        document.getElementById('ai-prompt-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') executeCommand();
+        });
+
+        // Navigate Quick
+        async function navTo(dest) {
+            addLog(`Đang chuyển hướng sang: ${dest.toUpperCase()}...`, 'info');
+            try {
+                const res = await fetch('/api/navigate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ destination: dest })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Đã chuyển đến: ${data.title}`);
+                    addLog(`Đã chuyển đến trang: ${data.title}`, 'success');
+                    if (data.screenshot) {
+                        document.getElementById('mirror-img').src = data.screenshot;
+                    }
+                    setTimeout(refreshStatus, 1000);
+                } else {
+                    showToast(data.error || 'Lỗi điều hướng', false);
+                }
+            } catch(e) {
+                showToast('Lỗi điều hướng', false);
+            }
+        }
+
+        // Trigger Filter Action (Search / Excel)
+        async function triggerAction(action) {
+            if (nikeBusy || commandBusy) return;
+            const nike = document.getElementById('nike-toggle').checked;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+            const factory = document.getElementById('factory-select').value;
+
+            if (action === 'excel' && !factory) {
+                if (!dateFrom || !dateTo || dateTo < dateFrom) {
+                    showToast('Vui lòng chọn khoảng ngày hợp lệ.', false);
+                    return;
+                }
+                document.getElementById('ai-prompt-input').value = `Xuất Excel HFPA ${currentActivePlant} từ ngày ${dateFrom} đến ngày ${dateTo} ${nike ? 'NIKE (external)' : 'nội bộ'}`;
+                await executeCommand();
+                return;
+            }
+
+            const btn = action === 'search' ? document.getElementById('btn-run-search') : document.getElementById('btn-run-excel');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Đang gửi lệnh...';
+            btn.disabled = true;
+
+            addLog(`Đang thực hiện ${action === 'search' ? 'Tìm kiếm' : 'Xuất Excel'} Chuyền [${factory || 'Tất cả'} | ${dateFrom} -> ${dateTo}]...`, 'info');
+
+            try {
+                const res = await fetch('/api/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dateFrom, dateTo, factory, action, nike })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.action_result || 'Thực hiện thành công!');
+                    addLog(data.action_result || 'Đã hoàn tất thao tác', 'success');
+                    if (data.screenshot) {
+                        document.getElementById('mirror-img').src = data.screenshot;
+                    }
+                    setTimeout(refreshStatus, 2000);
+                } else {
+                    showToast(data.error || 'Lỗi thực thi', false);
+                }
+            } catch(e) {
+                showToast('Lỗi kết nối máy chủ', false);
+            } finally {
+                btn.innerHTML = orig;
+                btn.disabled = false;
+            }
+        }
+
+        // MQAA Actions
+        async function startMqaaScan() {
+            addLog("Đang kích hoạt quy trình quét 21 Form MQAA...", 'info');
+            try {
+                const res = await fetch('/api/mqaa/scan', { method: 'POST' });
+                const data = await res.json();
+                showToast(data.message);
+                addLog(data.message, 'success');
+            } catch(e) {
+                showToast("Lỗi khi bắt đầu quét MQAA", false);
+            }
+        }
+
+        async function openMasterExcel() {
+            try {
+                const res = await fetch('/api/mqaa/open_excel', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Đã mở file: ${data.file}`);
+                    addLog(`Đã mở file: ${data.file}`, 'success');
+                } else {
+                    showToast(data.error, false);
+                }
+            } catch(e) {
+                showToast("Lỗi mở file", false);
+            }
+        }
+
+        // Initial Boot
+        window.addEventListener('DOMContentLoaded', () => {
+            confirmedNike = localStorage.getItem('sfc-nike-mode') === 'true';
+            updateNikeMode(confirmedNike);
+            const promptInput = document.getElementById('ai-prompt-input');
+            const serverJob = promptInput.getAttribute('data-last-job');
+            const savedPrompt = serverJob ? promptInput.value : (localStorage.getItem('sfc-last-prompt') || promptInput.value);
+            const savedJob = serverJob || localStorage.getItem('sfc-last-job');
+            if (savedPrompt) document.getElementById('ai-prompt-input').value = savedPrompt;
+            if (savedJob && savedPrompt) executeCommand(savedJob);
+            refreshStatus();
+            loadFactories();
+            loadMemory();
+            loadMqaaSummary();
+            setInterval(refreshStatus, 4000);
+        });
+    </script>
+</body>
+</html>

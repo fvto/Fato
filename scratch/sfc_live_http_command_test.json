@@ -1,0 +1,3137 @@
+[
+  {
+    "step": 1,
+    "status": "running",
+    "msg": "Đang phân tích yêu cầu...",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 0
+  },
+  {
+    "step": 1,
+    "status": "success",
+    "msg": "Đã nhận diện: Nhà máy: VH | Trang: HFPA | Ngày: 2026-01-01 → 2026-10-31 | External (NIKE) | Xuất Excel | Chia từng tháng | Gộp riêng theo nhà máy",
+    "intent": {
+      "target_plants": [
+        "VH"
+      ],
+      "target_plant": "VH",
+      "target_line": null,
+      "target_page": "hfpa",
+      "date_from": "2026-01-01",
+      "date_to": "2026-10-31",
+      "action": "excel",
+      "nike": true,
+      "monthly": true,
+      "combine": true,
+      "summary": [
+        "Nhà máy: VH",
+        "Trang: HFPA",
+        "Ngày: 2026-01-01 → 2026-10-31",
+        "External (NIKE)",
+        "Xuất Excel",
+        "Chia từng tháng",
+        "Gộp riêng theo nhà máy"
+      ]
+    },
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 1
+  },
+  {
+    "step": 2,
+    "status": "running",
+    "msg": "Kế hoạch: 1 nhà máy × 10 kỳ = 10 file",
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 2
+  },
+  {
+    "step": 2,
+    "status": "running",
+    "msg": "Đang kết nối phiên xuất riêng cho VH...",
+    "plant": "VH",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 3
+  },
+  {
+    "step": 2,
+    "status": "success",
+    "msg": "SFC đã xác nhận nhà máy VH",
+    "plant": "VH",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 4
+  },
+  {
+    "step": 3,
+    "status": "success",
+    "msg": "Đã kết nối HFPA · VH · NIKE",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 5
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[1/10] Đang tải VH: 2026-01-01 → 2026-01-31 · NIKE",
+    "completed": 0,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 6
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "Đã kiểm tra lại file tháng đã lưu: HFPA_VH_NIKE_2026-01-01_2026-01-31.xlsx",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 7
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[1/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-01-01_2026-01-31.xlsx",
+    "completed": 1,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 8
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[2/10] Đang tải VH: 2026-02-01 → 2026-02-28 · NIKE",
+    "completed": 1,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 9
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "Đã kiểm tra lại file tháng đã lưu: HFPA_VH_NIKE_2026-02-01_2026-02-28.xlsx",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 10
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[2/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-02-01_2026-02-28.xlsx",
+    "completed": 2,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 11
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[3/10] Đang tải VH: 2026-03-01 → 2026-03-31 · NIKE",
+    "completed": 2,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 12
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "Đã kiểm tra lại file tháng đã lưu: HFPA_VH_NIKE_2026-03-01_2026-03-31.xlsx",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 13
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[3/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-03-01_2026-03-31.xlsx",
+    "completed": 3,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 14
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[4/10] Đang tải VH: 2026-04-01 → 2026-04-30 · NIKE",
+    "completed": 3,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 15
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "Đã kiểm tra lại file tháng đã lưu: HFPA_VH_NIKE_2026-04-01_2026-04-30.xlsx",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 16
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[4/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-04-01_2026-04-30.xlsx",
+    "completed": 4,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 17
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[5/10] Đang tải VH: 2026-05-01 → 2026-05-31 · NIKE",
+    "completed": 4,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 18
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "Đã kiểm tra lại file tháng đã lưu: HFPA_VH_NIKE_2026-05-01_2026-05-31.xlsx",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 19
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[5/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-05-01_2026-05-31.xlsx",
+    "completed": 5,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 20
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH: 2026-06-01 → 2026-06-30 · NIKE",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 21
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-01",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 22
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-02",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 23
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 1/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 24
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-03",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 25
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 2/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 26
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-04",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 27
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 3/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 28
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-05",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 29
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 4/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 30
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-06",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 31
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 5/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 32
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-08",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 33
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 6/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 34
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-07",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 35
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 7/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 36
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-09",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 37
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 8/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 38
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-10",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 39
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 9/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 40
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-11",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 41
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 10/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 42
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-12",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 43
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 11/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 44
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-14",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 45
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 12/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 46
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-13",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 47
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 13/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 48
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-16",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 49
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 14/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 50
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-15",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 51
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 15/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 52
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-18",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 53
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 16/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 54
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-17",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 55
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 17/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 56
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-20",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 57
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 18/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 58
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-19",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 59
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 19/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 60
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-21",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 61
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 20/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 62
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-22",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 63
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 21/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 64
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-23",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 65
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 22/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 66
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-24",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 67
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 23/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 68
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-25",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 69
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 24/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 70
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-26",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 71
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 25/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 72
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-28",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 73
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 26/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 74
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-27",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 75
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 27/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 76
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 77
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 28/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 78
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang tải VH ngày 2026-06-29",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 79
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 29/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 80
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã kiểm tra VH: 30/30 phần ngày của kỳ 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 81
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đang ghép và đối chiếu file tháng VH: 2026-06-01 → 2026-06-30",
+    "completed": 5,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 82
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[6/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-06-01_2026-06-30.xlsx",
+    "completed": 6,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 83
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH: 2026-07-01 → 2026-07-31 · NIKE",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 84
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-01",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 85
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-02",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 86
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 1/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 87
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-03",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 88
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 2/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 89
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-04",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 90
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 3/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 91
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-06",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 92
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 4/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 93
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-05",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 94
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 5/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 95
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-07",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 96
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 6/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 97
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-08",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 98
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 7/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 99
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-09",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 100
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 8/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 101
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-10",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 102
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 9/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 103
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-11",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 104
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 10/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 105
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-13",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 106
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 11/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 107
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-12",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 108
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 12/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 109
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-14",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 110
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 13/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 111
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-15",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 112
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 14/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 113
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-16",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 114
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 15/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 115
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-17",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 116
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 16/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 117
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-18",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 118
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 17/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 119
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-19",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 120
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 18/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 121
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-20",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 122
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 19/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 123
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-21",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 124
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 20/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 125
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-22",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 126
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 21/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 127
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-23",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 128
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 22/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 129
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-25",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 130
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 23/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 131
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-24",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 132
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 24/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 133
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-27",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 134
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 25/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 135
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-26",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 136
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 26/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 137
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-28",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 138
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 27/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 139
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-29",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 140
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 28/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 141
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-30",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 142
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 29/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 143
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang tải VH ngày 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 144
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 30/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 145
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã kiểm tra VH: 31/31 phần ngày của kỳ 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 146
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đang ghép và đối chiếu file tháng VH: 2026-07-01 → 2026-07-31",
+    "completed": 6,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 147
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[7/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-07-01_2026-07-31.xlsx",
+    "completed": 7,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 148
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH: 2026-08-01 → 2026-08-31 · NIKE",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 149
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-01",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 150
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-02",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 151
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 1/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 152
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-04",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 153
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 2/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 154
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-03",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 155
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 3/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 156
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-06",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 157
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 4/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 158
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-05",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 159
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 5/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 160
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-08",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 161
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 6/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 162
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-07",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 163
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 7/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 164
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-10",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 165
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 8/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 166
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-09",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 167
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 9/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 168
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-12",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 169
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 10/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 170
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-11",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 171
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 11/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 172
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-14",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 173
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 12/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 174
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-13",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 175
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 13/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 176
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-16",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 177
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 14/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 178
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-18",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 179
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 15/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 180
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-15",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 181
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 16/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 182
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-20",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 183
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 17/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 184
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-17",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 185
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 18/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 186
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-22",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 187
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 19/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 188
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-19",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 189
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 20/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 190
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-24",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 191
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 21/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 192
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-21",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 193
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 22/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 194
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-26",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 195
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 23/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 196
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-23",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 197
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 24/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 198
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-25",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 199
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 25/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 200
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-28",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 201
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 26/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 202
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-27",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 203
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 27/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 204
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-30",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 205
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 28/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 206
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 29/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 207
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-29",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 208
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 30/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 209
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang tải VH ngày 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 210
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã kiểm tra VH: 31/31 phần ngày của kỳ 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 211
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đang ghép và đối chiếu file tháng VH: 2026-08-01 → 2026-08-31",
+    "completed": 7,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 212
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[8/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-08-01_2026-08-31.xlsx",
+    "completed": 8,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 213
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH: 2026-09-01 → 2026-09-30 · NIKE",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 214
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-01",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 215
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-02",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 216
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 1/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 217
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-03",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 218
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 2/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 219
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-04",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 220
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 3/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 221
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-05",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 222
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 4/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 223
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-06",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 224
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 5/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 225
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-08",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 226
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 6/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 227
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-07",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 228
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 7/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 229
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-10",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 230
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 8/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 231
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-09",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 232
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 9/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 233
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-12",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 234
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 10/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 235
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-14",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 236
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 11/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 237
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-11",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 238
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 12/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 239
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-16",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 240
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 13/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 241
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-13",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 242
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 14/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 243
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-15",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 244
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 15/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 245
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-18",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 246
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 16/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 247
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-17",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 248
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 17/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 249
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-20",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 250
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 18/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 251
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-22",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 252
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 19/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 253
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-19",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 254
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 20/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 255
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-24",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 256
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 21/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 257
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-21",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 258
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 22/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 259
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-26",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 260
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 23/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 261
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-23",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 262
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 24/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 263
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-28",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 264
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 25/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 265
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-25",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 266
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 26/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 267
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 268
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 27/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 269
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-27",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 270
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 28/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 271
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang tải VH ngày 2026-09-29",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 272
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 29/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 273
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã kiểm tra VH: 30/30 phần ngày của kỳ 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 274
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đang ghép và đối chiếu file tháng VH: 2026-09-01 → 2026-09-30",
+    "completed": 8,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 275
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[9/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-09-01_2026-09-30.xlsx",
+    "completed": 9,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 276
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH: 2026-10-01 → 2026-10-31 · NIKE",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 277
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-01",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 278
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-02",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 279
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 1/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 280
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-04",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 281
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 2/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 282
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-03",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 283
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 3/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 284
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-06",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 285
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 4/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 286
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-05",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 287
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 5/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 288
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-08",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 289
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 6/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 290
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-07",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 291
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 7/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 292
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-10",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 293
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 8/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 294
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-12",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 295
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 9/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 296
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-09",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 297
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 10/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 298
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-14",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 299
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 11/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 300
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-11",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 301
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 12/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 302
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-13",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 303
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 13/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 304
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-16",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 305
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 14/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 306
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-15",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 307
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 15/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 308
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-18",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 309
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 16/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 310
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-20",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 311
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 17/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 312
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-17",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 313
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 18/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 314
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-22",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 315
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 19/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 316
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-19",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 317
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 20/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 318
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-21",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 319
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 21/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 320
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-24",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 321
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 22/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 322
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-26",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 323
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 23/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 324
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-28",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 325
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 24/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 326
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-30",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 327
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 25/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 328
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-23",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 329
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 26/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 330
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 27/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 331
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-25",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 332
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 28/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 333
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-27",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 334
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 29/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 335
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-29",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 336
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 30/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 337
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang tải VH ngày 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 338
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã kiểm tra VH: 31/31 phần ngày của kỳ 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 339
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đang ghép và đối chiếu file tháng VH: 2026-10-01 → 2026-10-31",
+    "completed": 9,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 340
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "[10/10] Đã lưu và kiểm tra HFPA_VH_NIKE_2026-10-01_2026-10-31.xlsx",
+    "completed": 10,
+    "total": 10,
+    "nike": true,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 341
+  },
+  {
+    "step": 4,
+    "status": "running",
+    "msg": "Đang gộp 10 file của VH...",
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 342
+  },
+  {
+    "step": 4,
+    "status": "success",
+    "msg": "Đã gộp VH: 224,944 dòng",
+    "files": [
+      {
+        "name": "HFPA_VH_NIKE_2026-01-01_2026-10-31_Combined.xlsx",
+        "path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-01-01_2026-10-31_Combined.xlsx",
+        "url": "/api/exports/20261024_105912_10c9a3/HFPA_VH_NIKE_2026-01-01_2026-10-31_Combined.xlsx",
+        "size": 17306676,
+        "sha256": "a36c6b9d4231a14fc23104e678123f3ff012d283ee8a2e099619b1aabb36c74a",
+        "rows": 224944
+      }
+    ],
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 343
+  },
+  {
+    "step": 5,
+    "status": "done",
+    "msg": "Hoàn tất 10/10 file nguồn và 1 file gộp theo nhà máy.",
+    "files": [
+      {
+        "name": "HFPA_VH_NIKE_2026-01-01_2026-10-31_Combined.xlsx",
+        "path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-01-01_2026-10-31_Combined.xlsx",
+        "url": "/api/exports/20261024_105912_10c9a3/HFPA_VH_NIKE_2026-01-01_2026-10-31_Combined.xlsx",
+        "size": 17306676,
+        "sha256": "a36c6b9d4231a14fc23104e678123f3ff012d283ee8a2e099619b1aabb36c74a",
+        "rows": 224944
+      }
+    ],
+    "completed": 10,
+    "total": 10,
+    "job_id": "b486bdea4d4945d2874f2115721f89ab",
+    "event_index": 344
+  }
+]

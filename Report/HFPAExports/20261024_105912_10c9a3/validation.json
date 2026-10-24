@@ -1,0 +1,33 @@
+{
+  "status": "verified",
+  "plant": "VH",
+  "nike": true,
+  "monthly_files": 10,
+  "combined_files": 1,
+  "rows": 224944,
+  "actual_date_min": "2026-01-02",
+  "actual_date_max": "2026-10-24",
+  "factory_groups": [
+    "CL_VB",
+    "CL_VH"
+  ],
+  "paused_plants": [
+    "JV",
+    "JV2",
+    "VH2"
+  ],
+  "rows_by_month": {
+    "1": 25155,
+    "2": 17296,
+    "3": 25234,
+    "4": 23677,
+    "5": 22746,
+    "6": 22357,
+    "7": 25208,
+    "8": 25293,
+    "9": 20075,
+    "10": 17903
+  },
+  "download_sha256_verified": true,
+  "combined_path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_105912_10c9a3\\HFPA_VH_NIKE_2026-01-01_2026-10-31_Combined.xlsx"
+}

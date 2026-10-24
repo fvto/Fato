@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "nike": true,
+      "job_id": "0deb5523171d4f6cbbfeb36adb90c440",
+      "file": {
+        "date_from": "2026-10-24",
+        "date_to": "2026-10-24",
+        "name": "HFPA_VH_NIKE_2026-10-24_2026-10-24.xlsx",
+        "nike": true,
+        "parts": [
+          {
+            "date_from": "2026-10-24",
+            "date_to": "2026-10-24",
+            "name": "2026-10-24.xls",
+            "nike": true,
+            "path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_112514_bc1151\\_parts\\HFPA_VH_NIKE_2026-10-24_2026-10-24\\2026-10-24.xls",
+            "plant": "VH",
+            "rows": 474,
+            "sha256": "2c79fd1897d3751210f69c3bd7a794922048d76061700dfdae8332c00135e7a4",
+            "size": 303357,
+            "url": "/api/exports/20261024_112514_bc1151/_parts/HFPA_VH_NIKE_2026-10-24_2026-10-24/2026-10-24.xls"
+          }
+        ],
+        "path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_112514_bc1151\\HFPA_VH_NIKE_2026-10-24_2026-10-24.xlsx",
+        "plant": "VH",
+        "rows": 474,
+        "sha256": "4bb18ba71fa51b251dbb2ac48b93c089ebda90457b77970db7a1d6da93c22eaf",
+        "size": 56598,
+        "url": "/api/exports/20261024_112514_bc1151/HFPA_VH_NIKE_2026-10-24_2026-10-24.xlsx"
+      }
+    },
+    {
+      "nike": false,
+      "job_id": "2234ff8e6e1a4849ac45e3da43065098",
+      "file": {
+        "date_from": "2026-10-24",
+        "date_to": "2026-10-24",
+        "name": "HFPA_VH_Internal_2026-10-24_2026-10-24.xlsx",
+        "nike": false,
+        "parts": [
+          {
+            "date_from": "2026-10-24",
+            "date_to": "2026-10-24",
+            "name": "2026-10-24.xlsx",
+            "nike": false,
+            "path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_112517_1cfe0f\\_parts\\HFPA_VH_Internal_2026-10-24_2026-10-24\\2026-10-24.xlsx",
+            "plant": "VH",
+            "rows": 474,
+            "sha256": "55f228fc8e2ad4854024731be06f6ea83427b219ab29160e310b1d72118d4b97",
+            "size": 49939,
+            "url": "/api/exports/20261024_112517_1cfe0f/_parts/HFPA_VH_Internal_2026-10-24_2026-10-24/2026-10-24.xlsx"
+          }
+        ],
+        "path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_112517_1cfe0f\\HFPA_VH_Internal_2026-10-24_2026-10-24.xlsx",
+        "plant": "VH",
+        "rows": 474,
+        "sha256": "03edf59fb381261089dad0dc37aa3cc4705af677f14c621d426ebe58f2434282",
+        "size": 54206,
+        "url": "/api/exports/20261024_112517_1cfe0f/HFPA_VH_Internal_2026-10-24_2026-10-24.xlsx"
+      }
+    }
+  ],
+  "original_vh_result_still_visible": true,
+  "reconnect_did_not_rerun": true,
+  "workbook_mode_and_dates_verified": true,
+  "restored_after_server_restart": true,
+  "status_response_ms": 6,
+  "reconnect_after_restart_did_not_rerun": true
+}

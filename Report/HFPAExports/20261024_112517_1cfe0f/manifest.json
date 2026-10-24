@@ -1,0 +1,55 @@
+{
+  "prompt": "Xuất Excel HFPA VH từ ngày 2026-10-24 đến ngày 2026-10-24 nội bộ",
+  "intent": {
+    "target_plants": [
+      "VH"
+    ],
+    "target_plant": "VH",
+    "target_line": null,
+    "target_page": "hfpa",
+    "date_from": "2026-10-24",
+    "date_to": "2026-10-24",
+    "action": "excel",
+    "nike": false,
+    "monthly": false,
+    "combine": false,
+    "summary": [
+      "Nhà máy: VH",
+      "Trang: HFPA",
+      "Ngày: 2026-10-24 → 2026-10-24",
+      "Nội bộ",
+      "Xuất Excel"
+    ]
+  },
+  "status": "done",
+  "monthly_files": [
+    {
+      "name": "HFPA_VH_Internal_2026-10-24_2026-10-24.xlsx",
+      "path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_112517_1cfe0f\\HFPA_VH_Internal_2026-10-24_2026-10-24.xlsx",
+      "url": "/api/exports/20261024_112517_1cfe0f/HFPA_VH_Internal_2026-10-24_2026-10-24.xlsx",
+      "size": 54206,
+      "sha256": "03edf59fb381261089dad0dc37aa3cc4705af677f14c621d426ebe58f2434282",
+      "rows": 474,
+      "parts": [
+        {
+          "name": "2026-10-24.xlsx",
+          "path": "C:\\Users\\User\\Documents\\Chingluh Dashboard\\Report\\HFPAExports\\20261024_112517_1cfe0f\\_parts\\HFPA_VH_Internal_2026-10-24_2026-10-24\\2026-10-24.xlsx",
+          "url": "/api/exports/20261024_112517_1cfe0f/_parts/HFPA_VH_Internal_2026-10-24_2026-10-24/2026-10-24.xlsx",
+          "size": 49939,
+          "sha256": "55f228fc8e2ad4854024731be06f6ea83427b219ab29160e310b1d72118d4b97",
+          "rows": 474,
+          "date_from": "2026-10-24",
+          "date_to": "2026-10-24",
+          "plant": "VH",
+          "nike": false
+        }
+      ],
+      "plant": "VH",
+      "date_from": "2026-10-24",
+      "date_to": "2026-10-24",
+      "nike": false
+    }
+  ],
+  "combined_files": [],
+  "export_method": "isolated_daily_v1"
+}

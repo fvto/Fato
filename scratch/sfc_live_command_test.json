@@ -1,0 +1,57 @@
+[
+  {
+    "step": 1,
+    "status": "running",
+    "msg": "Đang phân tích yêu cầu...",
+    "job_id": "5e5fa4a197794f12a5f723a89832a5c8",
+    "event_index": 0
+  },
+  {
+    "step": 1,
+    "status": "success",
+    "msg": "Đã nhận diện: Nhà máy: VH, VH2, JV, JV2 | Trang: HFPA | Ngày: 2026-01-01 → 2026-10-31 | External (NIKE) | Xuất Excel | Chia từng tháng | Gộp riêng theo nhà máy",
+    "intent": {
+      "target_plants": [
+        "VH",
+        "VH2",
+        "JV",
+        "JV2"
+      ],
+      "target_plant": "VH",
+      "target_line": null,
+      "target_page": "hfpa",
+      "date_from": "2026-01-01",
+      "date_to": "2026-10-31",
+      "action": "excel",
+      "nike": true,
+      "monthly": true,
+      "combine": true,
+      "summary": [
+        "Nhà máy: VH, VH2, JV, JV2",
+        "Trang: HFPA",
+        "Ngày: 2026-01-01 → 2026-10-31",
+        "External (NIKE)",
+        "Xuất Excel",
+        "Chia từng tháng",
+        "Gộp riêng theo nhà máy"
+      ]
+    },
+    "job_id": "5e5fa4a197794f12a5f723a89832a5c8",
+    "event_index": 1
+  },
+  {
+    "step": 2,
+    "status": "running",
+    "msg": "Kế hoạch: 4 nhà máy × 10 kỳ = 40 file",
+    "total": 40,
+    "job_id": "5e5fa4a197794f12a5f723a89832a5c8",
+    "event_index": 2
+  },
+  {
+    "step": 5,
+    "status": "error",
+    "msg": "Chưa hoàn tất: BrowserType.connect_over_cdp: Timeout 300000ms exceeded.\nCall log:\n  - <ws preparing> retrieving websocket url from http://localhost:9222\n  - <ws connecting> ws://localhost:9222/devtools/browser/99efaae9-ce7f-42e4-bd48-83c85f74bf6b\n  - <ws connected> ws://localhost:9222/devtools/browser/99efaae9-ce7f-42e4-bd48-83c85f74bf6b\n",
+    "job_id": "5e5fa4a197794f12a5f723a89832a5c8",
+    "event_index": 3
+  }
+]
