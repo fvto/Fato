@@ -169,6 +169,53 @@
             box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
         }
 
+        .plant-btn#plant-btn-ALL {
+            border: 1px dashed rgba(6, 182, 212, 0.45);
+            color: var(--accent-cyan);
+            margin-right: 2px;
+        }
+
+        .plant-btn#plant-btn-ALL:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.15);
+            color: white;
+        }
+
+        .plant-btn#plant-btn-ALL.active {
+            border: 1px solid var(--accent-cyan);
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            color: white;
+            box-shadow: 0 2px 12px rgba(6, 182, 212, 0.5);
+        }
+
+        .date-preset-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 14px;
+        }
+
+        .date-dropdown-select {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            outline: none;
+            transition: var(--transition);
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .date-dropdown-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+        }
+
         .header-actions {
             display: flex;
             align-items: center;
@@ -1569,11 +1616,14 @@
             </div>
         </div>
 
-        <!-- 7 Factory Plants Selector (Đổi Nhà máy cấp cao) -->
+        <!-- 7 Factory Plants Selector + ALL Button -->
         <div class="plants-header-selector">
             <div class="plant-label">
-                <i class="fa-solid fa-house-chimney"></i> NHÀ MÁY:
+                <i class="fa-solid fa-house-chimney"></i> FACTORY:
             </div>
+            <button class="plant-btn" id="plant-btn-ALL" onclick="switchPlant('ALL')" title="All 7 Factories">
+                <i class="fa-solid fa-asterisk"></i> ALL
+            </button>
             <button class="plant-btn active" id="plant-btn-VH" onclick="switchPlant('VH')">VH</button>
             <button class="plant-btn" id="plant-btn-VH2" onclick="switchPlant('VH2')">VH2</button>
             <button class="plant-btn" id="plant-btn-VH3" onclick="switchPlant('VH3')">VH3</button>
@@ -2248,20 +2298,76 @@
                 });
             }
 
-            // 4. Date Inputs
+            // 4. Date Inputs with Quick Date Preset Dropdown
             if (insp.date_inputs && insp.date_inputs.length > 0) {
-                html += '<div class="form-row">';
+                const dtFrom = insp.date_inputs.find(d => d.name && d.name.toLowerCase().includes('from')) || insp.date_inputs[0];
+                const dtTo = insp.date_inputs.find(d => d.name && d.name.toLowerCase().includes('to')) || (insp.date_inputs.length > 1 ? insp.date_inputs[1] : insp.date_inputs[0]);
+                const valFrom = dtFrom ? (dtFrom.value || '2026-10-24') : '2026-10-24';
+                const valTo = dtTo ? (dtTo.value || '2026-10-24') : '2026-10-24';
+
+                html += `
+                <div class="date-preset-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <label style="font-size:13px; font-weight:700; color:var(--accent-cyan); display:flex; align-items:center; gap:6px; margin:0;">
+                            <i class="fa-solid fa-calendar-days"></i> Quick Date Range Dropdown:
+                        </label>
+                        <span id="date-range-summary-badge" style="font-size:12px; font-weight:700; color:var(--text-primary); background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); padding:3px 10px; border-radius:8px;">
+                            ${valFrom} → ${valTo}
+                        </span>
+                    </div>
+
+                    <!-- Date Dropdown Selector -->
+                    <select id="adaptive-date-preset-select" class="date-dropdown-select" onchange="onDatePresetChanged(this.value)">
+                        <option value="today">📅 Today (${valTo})</option>
+                        <option value="yesterday">📅 Yesterday</option>
+                        <option value="last3days">📅 Last 3 Days</option>
+                        <option value="last7days">📅 Last 7 Days (1 Week)</option>
+                        <option value="last14days">📅 Last 14 Days (2 Weeks)</option>
+                        <option value="this_week">📅 This Week (Monday → Today)</option>
+                        <option value="this_month">📅 This Month</option>
+                        <option value="last_month">📅 Last Month</option>
+                        <option value="this_year">📅 This Year (2026)</option>
+                        <option value="custom">⚙️ Custom Range (Manual Selection)</option>
+                    </select>
+
+                    <!-- Quick Date Chips -->
+                    <div class="option-chips-row" style="margin-bottom:12px;">
+                        <div class="option-chip active" id="chip-date-today" onclick="onDatePresetChanged('today')">
+                            <i class="fa-solid fa-calendar-day"></i> Today
+                        </div>
+                        <div class="option-chip" id="chip-date-yesterday" onclick="onDatePresetChanged('yesterday')">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Yesterday
+                        </div>
+                        <div class="option-chip" id="chip-date-last7days" onclick="onDatePresetChanged('last7days')">
+                            <i class="fa-solid fa-calendar-week"></i> Last 7 Days
+                        </div>
+                        <div class="option-chip" id="chip-date-this_month" onclick="onDatePresetChanged('this_month')">
+                            <i class="fa-solid fa-calendar"></i> This Month
+                        </div>
+                        <div class="option-chip" id="chip-date-custom" onclick="onDatePresetChanged('custom')">
+                            <i class="fa-solid fa-pen-to-square"></i> Custom
+                        </div>
+                    </div>
+
+                    <!-- Date inputs row -->
+                    <div class="form-row" style="margin:0;">
+                `;
+
                 insp.date_inputs.forEach((dt, idx) => {
                     const isTo = (dt.name ? dt.name.toLowerCase().includes('to') : false) || (dt.id ? dt.id.toLowerCase().includes('to') : false) || idx === 1;
                     html += `
-                    <div class="form-group">
-                        <label><i class="fa-regular ${isTo ? 'fa-calendar-check' : 'fa-calendar'}"></i> ${dt.label}:</label>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:12px;"><i class="fa-regular ${isTo ? 'fa-calendar-check' : 'fa-calendar'}"></i> ${dt.label}:</label>
                         <input type="date" id="adaptive-date-${dt.id}" class="form-control" value="${dt.value || '2026-10-24'}"
-                               onchange="onDateChanged('${dt.id}', this.value)" />
+                               onchange="onDateChanged('${dt.id}', this.value); onManualDateChanged();" />
                     </div>
                     `;
                 });
-                html += '</div>';
+
+                html += `
+                    </div>
+                </div>
+                `;
             }
 
             // 5. Action Buttons (Search, FlowChart, Update...)
@@ -2466,8 +2572,139 @@
                         params: { date_from: dateFrom, date_to: dateTo }
                     })
                 });
-                showToast(`Đã đồng bộ ngày: ${newVal}`);
+                showToast(`Synchronized date: ${newVal}`);
             } catch(e) {}
+        }
+
+        function calculateDateRange(preset) {
+            const now = new Date();
+            const formatDate = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            let fromDate = new Date();
+            let toDate = new Date();
+
+            switch (preset) {
+                case 'today':
+                    fromDate = new Date();
+                    toDate = new Date();
+                    break;
+                case 'yesterday':
+                    fromDate.setDate(now.getDate() - 1);
+                    toDate.setDate(now.getDate() - 1);
+                    break;
+                case 'last3days':
+                    fromDate.setDate(now.getDate() - 2);
+                    toDate = new Date();
+                    break;
+                case 'last7days':
+                    fromDate.setDate(now.getDate() - 6);
+                    toDate = new Date();
+                    break;
+                case 'last14days':
+                    fromDate.setDate(now.getDate() - 13);
+                    toDate = new Date();
+                    break;
+                case 'this_week': {
+                    const dayOfWeek = now.getDay() || 7;
+                    fromDate.setDate(now.getDate() - dayOfWeek + 1);
+                    toDate = new Date();
+                    break;
+                }
+                case 'this_month':
+                    fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    toDate = new Date();
+                    break;
+                case 'last_month':
+                    fromDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    toDate = new Date(now.getFullYear(), now.getMonth(), 0);
+                    break;
+                case 'this_year':
+                    fromDate = new Date(now.getFullYear(), 0, 1);
+                    toDate = new Date();
+                    break;
+                default:
+                    return null;
+            }
+            return {
+                from: formatDate(fromDate),
+                to: formatDate(toDate)
+            };
+        }
+
+        async function onDatePresetChanged(preset) {
+            ['today', 'yesterday', 'last7days', 'this_month', 'custom'].forEach(p => {
+                const chip = document.getElementById(`chip-date-${p}`);
+                if (chip) chip.classList.toggle('active', p === preset);
+            });
+
+            const sel = document.getElementById('adaptive-date-preset-select');
+            if (sel) sel.value = preset;
+
+            const modalSel = document.getElementById('ftt-modal-date-preset-select');
+            if (modalSel) modalSel.value = preset;
+
+            if (preset === 'custom') {
+                return;
+            }
+
+            const range = calculateDateRange(preset);
+            if (!range) return;
+
+            let inputFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') || document.getElementById('date-from');
+            let inputTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') || document.getElementById('date-to');
+
+            if (!inputFrom) {
+                const dateInputs = document.querySelectorAll('input[type="date"][id*="From"], input[type="date"][id*="from"]');
+                if (dateInputs.length > 0) inputFrom = dateInputs[0];
+            }
+            if (!inputTo) {
+                const dateInputs = document.querySelectorAll('input[type="date"][id*="To"], input[type="date"][id*="to"]');
+                if (dateInputs.length > 0) inputTo = dateInputs[0];
+            }
+
+            if (inputFrom) inputFrom.value = range.from;
+            if (inputTo) inputTo.value = range.to;
+
+            updateDateRangeSummary(range.from, range.to);
+
+            try {
+                await fetch('/api/page/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action_type: 'set_dates',
+                        params: { date_from: range.from, date_to: range.to }
+                    })
+                });
+                showToast(`Selected date range: ${range.from} → ${range.to}`);
+            } catch(e) {}
+        }
+
+        function onManualDateChanged() {
+            const sel = document.getElementById('adaptive-date-preset-select');
+            if (sel) sel.value = 'custom';
+            ['today', 'yesterday', 'last7days', 'this_month', 'custom'].forEach(p => {
+                const chip = document.getElementById(`chip-date-${p}`);
+                if (chip) chip.classList.toggle('active', p === 'custom');
+            });
+            const inputFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') || document.getElementById('date-from');
+            const inputTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') || document.getElementById('date-to');
+            if (inputFrom && inputTo) {
+                updateDateRangeSummary(inputFrom.value, inputTo.value);
+            }
+        }
+
+        function updateDateRangeSummary(fromVal, toVal) {
+            const badge = document.getElementById('date-range-summary-badge');
+            if (badge) badge.innerText = `${fromVal} → ${toVal}`;
+
+            const modalRange = document.getElementById('ftt-modal-date-range');
+            if (modalRange) modalRange.innerText = `${fromVal} → ${toVal}`;
         }
 
         async function onToggleAdaptiveCheckbox(chkId, isChecked) {
@@ -3626,11 +3863,28 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <div style="font-size:13px; color:var(--text-secondary);">
-                        <i class="fa-solid fa-calendar-days" style="color:var(--accent-cyan); margin-right:6px;"></i>
-                        Date Range: <strong id="ftt-modal-date-range" style="color:var(--text-primary);">2026-10-24 → 2026-10-24</strong>
+                <!-- Date Dropdown Bar in FTT Modal -->
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:12px; padding:10px 14px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="font-size:12px; font-weight:700; color:var(--accent-cyan); display:flex; align-items:center; gap:6px; margin:0;">
+                            <i class="fa-solid fa-calendar-days"></i> Quick Date Range Dropdown:
+                        </label>
+                        <span style="font-size:12px; color:var(--text-primary); font-weight:700;" id="ftt-modal-date-range">2026-10-24 → 2026-10-24</span>
                     </div>
+                    <select id="ftt-modal-date-preset-select" class="date-dropdown-select" onchange="onDatePresetChanged(this.value)" style="margin-bottom:0;">
+                        <option value="today">📅 Today (2026-10-24)</option>
+                        <option value="yesterday">📅 Yesterday</option>
+                        <option value="last3days">📅 Last 3 Days</option>
+                        <option value="last7days">📅 Last 7 Days (1 Week)</option>
+                        <option value="last14days">📅 Last 14 Days (2 Weeks)</option>
+                        <option value="this_week">📅 This Week (Monday → Today)</option>
+                        <option value="this_month">📅 This Month</option>
+                        <option value="last_month">📅 Last Month</option>
+                        <option value="this_year">📅 This Year (2026)</option>
+                    </select>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:10px;">
                     <span style="font-size:12px; color:var(--accent-cyan); font-weight:600;" id="ftt-selected-count-badge">Selected: 6/6 Stations</span>
                 </div>
 

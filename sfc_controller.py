@@ -203,9 +203,15 @@ def switch_factory(factory_name):
     global LAST_STATUS_TIME
     idx_map = {"VH": 0, "VH2": 1, "VH3": 2, "VH4": 3, "JV": 4, "JV2": 5, "JVB": 6}
     target = factory_name.upper().strip()
+    if target == 'ALL':
+        return {
+            "success": True,
+            "current_plant": "ALL",
+            "message": "Selected: All 7 Factories (ALL - Global Multi-Plant Mode)"
+        }
     idx = idx_map.get(target)
     if idx is None:
-        return {"success": False, "error": f"Nhà máy '{factory_name}' không hợp lệ. Chỉ gồm: VH, VH2, VH3, VH4, JV, JV2, JVB"}
+        return {"success": False, "error": f"Nhà máy '{factory_name}' không hợp lệ. Chỉ gồm: ALL, VH, VH2, VH3, VH4, JV, JV2, JVB"}
 
     with SFC_LOCK:
         try:
