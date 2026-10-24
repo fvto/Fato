@@ -1,161 +1,50 @@
 {
-  "crawled_at": "2026-10-24 08:56:39",
-  "portal": {
-    "title": "SFC - Ching Luh Group",
-    "url": "https://sfc.chingluh.com/vhmes/FlowChart.aspx",
-    "user_name": "P Hello! Trần Phi Hùng (V146683) phihung.tran@chingluh.com",
-    "portal_factories": [
-      {
-        "value": "VH",
-        "text": "VH"
-      },
-      {
-        "value": "VH2",
-        "text": "VH2"
-      },
-      {
-        "value": "VH3",
-        "text": "VH3"
-      },
-      {
-        "value": "VH4",
-        "text": "VH4"
-      },
-      {
-        "value": "JV",
-        "text": "JV"
-      },
-      {
-        "value": "JV2",
-        "text": "JV2"
-      },
-      {
-        "value": "JV3",
-        "text": "JVB"
-      }
-    ],
-    "kpis": [
-      "Process Shift Information Select Process",
-      "DAILY PRODUCTION ? 68,345 -0.15%",
-      "DAILY PRODUCTION ?",
-      "DAILY PRODUCTION",
-      "?",
-      "68,345 -0.15%",
-      "68,345",
-      "-0.15%",
-      "WORKFORCE ATTENDANCE ? 12,091 +1.31%",
-      "WORKFORCE ATTENDANCE ?",
-      "WORKFORCE ATTENDANCE",
-      "?",
-      "12,091 +1.31%",
-      "12,091",
-      "+1.31%",
-      "CTB BTS ? 18.05% -2.90%",
-      "CTB BTS ?",
-      "CTB BTS",
-      "?",
-      "18.05% -2.90%",
-      "18.05%",
-      "-2.90%",
-      "FTT ? 85.66% -0.05%",
-      "FTT ?",
-      "FTT",
-      "?",
-      "85.66% -0.05%",
-      "85.66%",
-      "-0.05%",
-      "656/1028 Users"
-    ]
-  },
-  "production_modules": [
-    {
-      "title": "Shoes Factory Planning - Manages production planning for shoe factories",
-      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?tree_id=SFC_flow_MPS_SHOES"
-    },
-    {
-      "title": "Bottom Factory Planning - Manages production planning for bottom factories",
-      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?tree_id=SFC_flow_MPS_BOTTOM"
-    },
-    {
-      "title": "Workforce - Manages workforce allocation and attendance",
-      "href": "https://sfc.chingluh.com/vhmes/Product/HRWorkforce.aspx?dept_code=&tree_id=07"
-    },
-    {
-      "title": "Station - Oversees production station operations",
-      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?dept_code=&tree_id=06"
-    },
-    {
-      "title": "Output - Monitors production output metrics",
-      "href": "https://sfc.chingluh.com/vhmes/Product/Home.aspx?dept_code=&tree_id=01"
-    },
-    {
-      "title": "MES91 - Replenishment - Manages material replenishment",
-      "href": "https://sfc.chingluh.com/vhmes/Update/Materials.aspx?dept_code=&tree_id=11"
-    },
-    {
-      "title": "Report - Generates production and inventory reports",
-      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?tree_id=SFC_flow_MPS_REPORT"
-    },
-    {
-      "title": "Production Analysis - Analyzes production performance",
-      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx?tree_id=16"
-    },
-    {
-      "title": "Quality Management System - Ensures quality control standards",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?dept_code=&tree_id=10"
-    },
-    {
-      "title": "Demand Information - Manufacturing Demand Information",
-      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS40/MPS40_U.aspx"
-    },
-    {
-      "title": "SCAN QR",
-      "href": "https://sfc.chingluh.com/vhmes/QRCode/QRCode.aspx"
-    }
-  ],
+  "crawled_at": "2026-10-24 13:33:15",
+  "source_url": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx",
+  "description": "Bộ nhớ danh mục chức năng Quản Lý Chất Lượng (QMS) trích xuất trực tiếp từ QMSMain.aspx",
   "qms_modules": [
     {
-      "name": "Quality Risk",
+      "name": "Rủi Ro Chất Lượng (Quality Risk - Q101)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q101"
     },
     {
-      "name": "PFMEA",
+      "name": "PFMEA (Q102)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q102"
     },
     {
-      "name": "Order Information",
+      "name": "Thông tin đặt hàng (Order Info - Q103)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q103"
     },
     {
-      "name": "Inspection Basic Data",
+      "name": "Nhập Nguyên Nhân QA (Inspection Basic Data)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QAReason.aspx"
     },
     {
-      "name": "BDTS Rule",
+      "name": "Quy Tắc BDTS (BDTS Rule - Q202)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q202"
     },
     {
-      "name": "Notification",
+      "name": "Thông Báo QA (Notification - Q203)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q203"
     },
     {
-      "name": "Inspection Strategy",
+      "name": "Chiến Lược Kiểm Tra (Inspection Strategy - Q301)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q301"
     },
     {
-      "name": "CTQ & CTP",
+      "name": "CTQ & CTP (Q302)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q302"
     },
     {
-      "name": "QA Manual",
+      "name": "Hướng Dẫn QA (QA Manual - Q05)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QAReasonBasic.aspx?tree_id=Q05"
     },
     {
-      "name": "Play Book/Guideline",
+      "name": "Sách Hướng Dẫn / Play Book (Q304)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q304"
     },
     {
-      "name": "AQL",
+      "name": "AQL Tracking",
       "href": "https://sfc.chingluh.com/vhmes/QA/AQLTracking.aspx"
     },
     {
@@ -167,71 +56,71 @@
       "href": "https://sfc.chingluh.com/vhmes/QA/BondTest.aspx"
     },
     {
-      "name": "Gore-Tex",
+      "name": "Gore-Tex Test",
       "href": "https://sfc.chingluh.com/vhmes/QA/GoreTexTest.aspx"
     },
     {
-      "name": "CFM",
+      "name": "CFM (Learning Case)",
       "href": "https://sfc.chingluh.com/vhmes/QA/LearningCase.aspx"
     },
     {
-      "name": "Abnormal Tracking",
+      "name": "Theo Dõi Dị Thường (Abnormal Tracking)",
       "href": "https://sfc.chingluh.com/vhmes/Update/Reason.aspx"
     },
     {
-      "name": "Destruction Management",
+      "name": "Quản lí tiêu hủy (Destruction Mgmt)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QABCDSTRRecord.aspx"
     },
     {
-      "name": "Product Process Calibration",
+      "name": "Hiệu chuẩn quy trình sản phẩm (PPC Calibration)",
       "href": "https://sfc.chingluh.com/vhmes/QA/MesQAPPC.aspx"
     },
     {
-      "name": "MQAA Audit",
+      "name": "Đánh giá MQAA (Audit Check)",
       "href": "https://sfc.chingluh.com/vhmes/QA/MQAACheck.aspx"
     },
     {
-      "name": "AQL Inspection",
+      "name": "Kiểm Tra AQL (AQL Inspection - Q501)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q501"
     },
     {
-      "name": "Quality Analysis",
+      "name": "Phân Tích Chất Lượng (Quality Analysis)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QAAnalysis.aspx"
     },
     {
-      "name": "HFPA",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx"
+      "name": "QA HFPA (Mã Q504)",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx?tree_id=Q504"
     },
     {
-      "name": "Packing",
+      "name": "Đóng Gói (Packing Check)",
       "href": "https://sfc.chingluh.com/vhmes/QA/PackingCheck.aspx"
     },
     {
-      "name": "Bond Test Analysis",
+      "name": "Phân tích kết quả lực kéo (Bond Analysis)",
       "href": "https://sfc.chingluh.com/vhmes/QA/BondTestAnalysis.aspx"
     },
     {
-      "name": "Upper Quality Data",
+      "name": "Chất Lượng Mặt Giày (Upper Quality Data)",
       "href": "https://sfc.chingluh.com/vhmes/QA/DefectiveReturn.aspx"
     },
     {
-      "name": "FGWH",
+      "name": "FGWH (QA Finished Goods Warehouse)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QCFGWH.aspx"
     },
     {
-      "name": "Re-Inspection",
+      "name": "Kiểm tra lại (Re-Inspection)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QCRECHK.aspx"
     },
     {
-      "name": "IMQC",
+      "name": "IMQC (Q508)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q508"
     },
     {
-      "name": "Product Process Calibration Report",
+      "name": "Báo cáo Hiệu chuẩn PPC",
       "href": "https://sfc.chingluh.com/vhmes/QA/QCPPC.aspx"
     },
     {
-      "name": "MQAA Report",
+      "name": "Báo cáo MQAA (Report)",
       "href": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx"
     },
     {
@@ -239,151 +128,83 @@
       "href": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx"
     },
     {
-      "name": "BDTS Report",
+      "name": "Báo Cáo BDTS (Report NIKE)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QAReportNIKE.aspx"
     },
     {
-      "name": "Dashboard",
+      "name": "Bảng Điều Khiển QA Dashboard",
       "href": "https://sfc.chingluh.com/vhmes/QA/QADashboard.aspx"
     },
     {
-      "name": "FTT",
+      "name": "FTT (First Time Through)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QA.aspx"
     },
     {
-      "name": "Quality Management System",
+      "name": "Hệ Thống Quản Lý Chất Lượng (QMS Home)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx"
     },
     {
-      "name": "Permission Registration",
-      "href": "https://sfc.chingluh.com/vhmes/Update/PermissionSign.aspx"
-    },
-    {
-      "name": "Logout",
-      "href": "https://sfc.chingluh.com/vhmes/Logout.aspx"
-    },
-    {
-      "name": "Account",
-      "href": "https://sfc.chingluh.com/vhmes/Update/Account.aspx"
-    },
-    {
-      "name": "Permission",
-      "href": "https://sfc.chingluh.com/vhmes/Update/Permission.aspx"
-    },
-    {
-      "name": "Basic Data",
-      "href": "https://sfc.chingluh.com/vhmes/Update/BasicData.aspx"
-    },
-    {
-      "name": "Basic Dept",
-      "href": "https://sfc.chingluh.com/vhmes/Update/BasicDept.aspx"
-    },
-    {
-      "name": "Basic Shift",
-      "href": "https://sfc.chingluh.com/vhmes/Update/BasicShift.aspx"
-    },
-    {
-      "name": "Permission Registration (ITSM)",
-      "href": "https://itservice.chingluh.com/Form/Render/11"
-    },
-    {
-      "name": "Account Registration (ITSM)",
-      "href": "https://itservice.chingluh.com/Form/Render/15"
-    },
-    {
-      "name": "SFC",
-      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx"
-    },
-    {
-      "name": "E-Display for QA",
+      "name": "Màn hình điện tử QA (E-Display)",
       "href": "https://sfc.chingluh.com/vhmes/Reports/EDisplayQA.aspx"
     },
     {
-      "name": "E-Display for Bottom",
-      "href": "https://sfc.chingluh.com/vhmes/Update/ReasonBottomTV.aspx"
-    },
-    {
-      "name": "E-Display for Stockfitting",
+      "name": "Màn hình điện tử GCĐ (Stockfitting)",
       "href": "https://sfc.chingluh.com/vhmes/Reports/EDisplaySF.aspx"
     },
     {
-      "name": "Dashboard for Bottom",
-      "href": "https://sfc.chingluh.com/vhmes/Update/DashboardBottom.aspx"
-    },
-    {
-      "name": "QC CTB Inspection",
+      "name": "Chất lượng QC CTB",
       "href": "https://sfc.chingluh.com/vhmes/MesQACheck.aspx"
     },
     {
-      "name": "QC HFPA",
+      "name": "Chất lượng QC HFPA (Packing OQC)",
       "href": "https://sfc.chingluh.com/vhmes/MesQACheckPackingOQC.aspx"
     },
     {
-      "name": "QC FGWH",
+      "name": "Chất lượng QC FGWH",
       "href": "https://sfc.chingluh.com/vhmes/QA/MesQACheckPackingFGWH.aspx"
     },
     {
-      "name": "Re-Inspection",
+      "name": "Kiểm tra lại HFPA (RECHK)",
       "href": "https://sfc.chingluh.com/vhmes/QA/MesQACheckPackingRECHK.aspx"
     },
     {
-      "name": "OMD",
+      "name": "OMD (Article Inspection)",
       "href": "https://sfc.chingluh.com/vhmes/QA/ArticleInspection.aspx"
     },
     {
-      "name": "QC IP Inspection",
+      "name": "Chất lượng QC IP",
       "href": "https://sfc.chingluh.com/vhmes/MesQAIPCheck.aspx"
     },
     {
-      "name": "QC DP Inspection",
+      "name": "Chất lượng QC DP",
       "href": "https://sfc.chingluh.com/vhmes/MesQADPCheck.aspx"
     },
     {
-      "name": "QC OS Inspection",
+      "name": "Chất lượng QC RB/OS",
       "href": "https://sfc.chingluh.com/vhmes/MesQAOSCheck.aspx"
     },
     {
-      "name": "QC PU Inspection",
+      "name": "Chất lượng QC PU",
       "href": "https://sfc.chingluh.com/vhmes/MesQAPUCheck.aspx"
     },
     {
-      "name": "QC CMP Inspection",
+      "name": "Chất lượng QC CMP",
       "href": "https://sfc.chingluh.com/vhmes/MesQACMPCheck.aspx"
     },
     {
-      "name": "QC Transfer Upper",
+      "name": "Chuyển giao mặt giầy QC",
       "href": "https://sfc.chingluh.com/vhmes/MesQATransferFrom.aspx"
     },
     {
-      "name": "QC Transfer Bottom",
+      "name": "Chuyển giao đế giầy QC",
       "href": "https://sfc.chingluh.com/vhmes/MesQATransferBottom.aspx"
     },
     {
-      "name": "IP Operator Bottom",
-      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=IP"
-    },
-    {
-      "name": "DP Operator Bottom",
-      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=DP"
-    },
-    {
-      "name": "RB Operator Bottom",
-      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=OS"
-    },
-    {
-      "name": "PU Operator Bottom",
-      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=PU"
-    },
-    {
-      "name": "CMP Operator Bottom",
-      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=CMP"
-    },
-    {
-      "name": "B/C Grade QA",
+      "name": "Giầy báo phế B/C Grade QA",
       "href": "https://sfc.chingluh.com/vhmes/QA/BCGrade.aspx"
     },
     {
-      "name": "Packing UCC",
+      "name": "Đóng gói UCC",
       "href": "https://sfc.chingluh.com/vhmes/QA/PackingUCC.aspx"
     }
   ],
@@ -940,271 +761,5 @@
       "text": "VT - VB PCC",
       "value": "VT2300"
     }
-  ],
-  "hfpa_metadata": {
-    "title": "HFPA",
-    "url": "https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx?tree_id=Q504",
-    "total_factories": 138,
-    "grid_columns": [
-      "Factory Group Cd_UccId",
-      "SO#",
-      "Country",
-      "Season",
-      "Audit Date (dd-mmm-yyyy)",
-      "Internal AUDIT ID (YYMMDDNO+Plant+Line)",
-      "Plant",
-      "Line",
-      "Auditor",
-      "PO Nbr (header+line item nbr)",
-      "Model",
-      "Model 2",
-      "Style Nbr",
-      "Colorway Cd",
-      "Time table",
-      "Produced Q'ty",
-      "Audit Sample Size",
-      "Defective Q'ty(pair)",
-      "Defective Rate",
-      "Pass/Fail",
-      "Defect Q'ty (Total Defect Q'ty)",
-      "Bottom Cosmetic",
-      "Bottom long/short",
-      "Cleanness",
-      "Collar shape",
-      "Components inconsistent",
-      "Damaged lace/wrong lacing",
-      "Double stitching",
-      "Eyestay off center",
-      "Heel/Tip height inconsistent",
-      "Lace cleanness",
-      "Midsole/Outsole to upper bond gap",
-      "Over buffing",
-      "Over cement",
-      "Punching",
-      "Rocking",
-      "Sockliner position",
-      "Sole attachment",
-      "Thread end",
-      "Toe cap shape",
-      "Toe off center",
-      "Trimming",
-      "Wrinkle bottom",
-      "Wrinkle collar lining",
-      "Wrinkle upper"
-    ]
-  },
-  "mqaa_metadata": {},
-  "available_endpoints": {},
-  "mqaa_report_metadata": {
-    "title": "Manufacturing Quality Assurance Audit Report",
-    "url": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx",
-    "controls": [
-      {
-        "id": "__EVENTTARGET",
-        "tag": "INPUT",
-        "val": ""
-      },
-      {
-        "id": "__EVENTARGUMENT",
-        "tag": "INPUT",
-        "val": ""
-      },
-      {
-        "id": "__VIEWSTATE",
-        "tag": "INPUT",
-        "val": "/wEPDwUKMTczOTU0MDYxMg9kFgICAw9kFggCAQ9k"
-      },
-      {
-        "id": "__VIEWSTATEGENERATOR",
-        "tag": "INPUT",
-        "val": "205E5238"
-      },
-      {
-        "id": "__PREVIOUSPAGE",
-        "tag": "INPUT",
-        "val": "5w6lNaYaXtlSSQk2pawIFJk6K2S8tn7yyRM3_hm2"
-      },
-      {
-        "id": "__EVENTVALIDATION",
-        "tag": "INPUT",
-        "val": "/wEdAAOXdblvcicY1t++Zq4VypM4QLv0A6sjbUcS"
-      },
-      {
-        "id": "ASPxRoundPanel9_btnFlowChart",
-        "tag": "DIV",
-        "val": ""
-      },
-      {
-        "id": "ASPxRoundPanel9_btnFlowChart_CD",
-        "tag": "DIV",
-        "val": ""
-      },
-      {
-        "id": "ASPxRoundPanel9_btnFlowChartImg",
-        "tag": "IMG",
-        "val": ""
-      },
-      {
-        "id": "dtDateFrom_I",
-        "tag": "INPUT",
-        "val": "2026-10-24"
-      },
-      {
-        "id": "dtDateFrom_DDDWS",
-        "tag": "INPUT",
-        "val": "0:0:-1:-10000:-10000:0:0:0:1:0:0:0"
-      },
-      {
-        "id": "dtDateTo_I",
-        "tag": "INPUT",
-        "val": "2026-10-24"
-      },
-      {
-        "id": "dtDateTo_DDDWS",
-        "tag": "INPUT",
-        "val": "0:0:-1:-10000:-10000:0:0:0:1:0:0:0"
-      },
-      {
-        "id": "cboType_LP",
-        "tag": "TABLE",
-        "val": "Loading…"
-      },
-      {
-        "id": "cboType_TL",
-        "tag": "SPAN",
-        "val": "Loading…"
-      },
-      {
-        "id": "cboType_LD",
-        "tag": "DIV",
-        "val": ""
-      },
-      {
-        "id": "cboType_ET",
-        "tag": "TABLE",
-        "val": "Type:"
-      },
-      {
-        "id": "cboType_CapC",
-        "tag": "TD",
-        "val": "Type:"
-      },
-      {
-        "id": "cboType_CC",
-        "tag": "TD",
-        "val": ""
-      },
-      {
-        "id": "cboType",
-        "tag": "TABLE",
-        "val": ""
-      }
-    ]
-  },
-  "aql_metadata": {
-    "title": "AQL",
-    "url": "https://sfc.chingluh.com/vhmes/QA/AQLTracking.aspx",
-    "controls": [
-      {
-        "id": "__EVENTTARGET",
-        "tag": "INPUT",
-        "val": ""
-      },
-      {
-        "id": "__EVENTARGUMENT",
-        "tag": "INPUT",
-        "val": ""
-      },
-      {
-        "id": "__VIEWSTATE",
-        "tag": "INPUT",
-        "val": "/wEPDwULLTExMTA2NTQ2OTYPZBYCZg9kFgICAw9k"
-      },
-      {
-        "id": "__VIEWSTATEGENERATOR",
-        "tag": "INPUT",
-        "val": "C7140C17"
-      },
-      {
-        "id": "__PREVIOUSPAGE",
-        "tag": "INPUT",
-        "val": "TPvFllVSKWlxVbOPCsFqV5dWLJx3Szi-WyXSL2xb"
-      },
-      {
-        "id": "__EVENTVALIDATION",
-        "tag": "INPUT",
-        "val": "/wEdABogick7NzumTjOM5RKaqo9vtnXU4VzqP2+g"
-      },
-      {
-        "id": "rpnlMain_ASPxRoundPanel9_btnFlowChart",
-        "tag": "DIV",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ASPxRoundPanel9_btnFlowChart_CD",
-        "tag": "DIV",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ASPxRoundPanel9_btnFlowChartImg",
-        "tag": "IMG",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_ET",
-        "tag": "TABLE",
-        "val": "Line:"
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_CapC",
-        "tag": "TD",
-        "val": "Line:"
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_CC",
-        "tag": "TD",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine",
-        "tag": "TABLE",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_VI",
-        "tag": "INPUT",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_I",
-        "tag": "INPUT",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_B-100",
-        "tag": "TD",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_B-100Img",
-        "tag": "IMG",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_B-1",
-        "tag": "TD",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_B-1Img",
-        "tag": "IMG",
-        "val": ""
-      },
-      {
-        "id": "rpnlMain_ContentPlaceHolder1_cboLine_DDDWS",
-        "tag": "INPUT",
-        "val": "0:0:-1:-10000:-10000:0:0:0:1:0:0:0"
-      }
-    ]
-  }
+  ]
 }

@@ -674,22 +674,33 @@
         }
 
         /* Quick Destination Tiles */
-        .nav-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-bottom: 16px;
+        .btn-customize-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent-blue);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-customize-nav:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: var(--accent-blue);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
         }
 
-        @media (max-width: 992px) {
-            .nav-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        @media (max-width: 640px) {
-            .nav-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
         .nav-tile {
@@ -726,6 +737,195 @@
         .nav-tile span.sub {
             font-size: 10px;
             color: var(--text-muted);
+        }
+
+        /* Nav Customizer Modal Styles */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 15, 29, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .modal-backdrop.open {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-dialog {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            width: 100%;
+            max-width: 620px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+        .modal-close-btn:hover {
+            color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.12);
+        }
+        .modal-body {
+            padding: 18px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.15);
+        }
+        .nav-sort-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .nav-sort-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        .nav-sort-item:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .nav-sort-arrows {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .btn-arrow {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 9px;
+            padding: 2px 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-arrow:hover:not(:disabled) {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+        .btn-arrow:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+        .nav-sort-preview {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .nav-sort-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .nav-sort-title {
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .nav-sort-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .nav-sort-url {
+            color: var(--accent-cyan);
+            font-family: monospace;
+            font-size: 10px;
+        }
+        .btn-remove-nav {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 5px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-remove-nav:hover {
+            color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .nav-add-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(59, 130, 246, 0.35);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         /* Form Controls */
@@ -1403,12 +1603,15 @@
                 
                 <!-- Quick Navigation Tiles -->
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="card-title">
                             <i class="fa-solid fa-compass"></i> Điều hướng nhanh Phân hệ SFC
                         </div>
+                        <button id="btn-customize-nav" class="btn-customize-nav" onclick="openNavCustomizerModal()" title="Tùy chỉnh danh sách nút điều hướng nhanh">
+                            <i class="fa-solid fa-sliders"></i> Tùy chỉnh
+                        </button>
                     </div>
-                    <div class="nav-grid">
+                    <div class="nav-grid" id="nav-tiles-grid">
                         <div class="nav-tile" onclick="navTo('hfpa')" title="Mở trang QA HFPA (Q504)">
                             <i class="fa-solid fa-clipboard-list"></i>
                             <span class="title">QA HFPA</span>
@@ -1436,9 +1639,9 @@
                         </div>
                     </div>
 
-                    <!-- Jump directly to any of the 68 crawled QMS modules -->
+                    <!-- Jump directly to QMS modules from QMSMain.aspx -->
                     <div class="form-group" style="margin-top: 10px;">
-                        <label><i class="fa-solid fa-list-ul"></i> Mở nhanh Tính năng QMS đã cào bộ nhớ (68 Menu):</label>
+                        <label><i class="fa-solid fa-list-ul"></i> Mở nhanh Tính năng QMS (QMSMain.aspx - <span id="qms-count-badge">51 Menu</span>):</label>
                         <div style="display:flex; gap: 8px;">
                             <select id="qms-jump-select" class="form-control" style="font-size: 13px;">
                                 <option value="">-- Đang nạp danh mục QMS từ bộ nhớ... --</option>
@@ -1590,6 +1793,108 @@
 
         </div>
 
+    <!-- Nav Customizer Modal -->
+    <div id="nav-modal-backdrop" class="modal-backdrop" onclick="handleBackdropClick(event)">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-sliders" style="color:var(--accent-blue);"></i> Tùy chỉnh Điều hướng nhanh Phân hệ SFC</h3>
+                <button class="modal-close-btn" onclick="closeNavCustomizerModal()" title="Đóng">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                    Bạn có thể thay đổi thứ tự (▲/▼), xóa bỏ nút không dùng, hoặc thêm các phân hệ chất lượng QMS thường dùng vào thanh điều hướng nhanh.
+                </div>
+
+                <!-- List of current tiles -->
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; display: block;">
+                        <i class="fa-solid fa-layer-group"></i> Nút điều hướng đang hiển thị (<span id="modal-nav-count">5</span> nút):
+                    </label>
+                    <div class="nav-sort-list" id="nav-sort-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Add new tile section -->
+                <div class="nav-add-box">
+                    <label style="font-size: 12px; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-plus-circle"></i> Thêm nút điều hướng mới
+                    </label>
+
+                    <!-- Quick pick from QMS Memory -->
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <span style="font-size: 11px; color: var(--text-muted);">Cách 1: Chọn nhanh từ 51 Menu QMS (QMSMain.aspx):</span>
+                        <select id="modal-qms-quickpick" class="form-control" style="font-size: 12px; margin-top: 4px;" onchange="onModalQmsSelect(this)">
+                            <option value="">-- Chọn tính năng để tự điền mẫu --</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom input fields -->
+                    <span style="font-size: 11px; color: var(--text-muted);">Cách 2: Hoặc tùy chỉnh thủ công:</span>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted);">Tên nút hiển thị *</label>
+                            <input id="new-nav-title" class="form-control" placeholder="VD: COPQ Report, QA HFPA..." style="font-size: 12px;" />
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted);">Phụ đề ngắn</label>
+                            <input id="new-nav-sub" class="form-control" placeholder="VD: 3 Dạng Xuất, Mã Q504..." style="font-size: 12px;" />
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 110px 110px; gap: 8px; margin-top: 8px;">
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted);">Đường dẫn / Mã trang *</label>
+                            <input id="new-nav-dest" class="form-control" placeholder="VD: hfpa, copq hoặc link SFC..." style="font-size: 12px;" />
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted);">Biểu tượng (Icon)</label>
+                            <select id="new-nav-icon" class="form-control" style="font-size: 12px;">
+                                <option value="fa-solid fa-clipboard-list">📋 Báo cáo</option>
+                                <option value="fa-solid fa-file-excel">📊 Excel</option>
+                                <option value="fa-solid fa-shoe-prints">👟 MQAA</option>
+                                <option value="fa-solid fa-diagram-project">🌳 QMS Tree</option>
+                                <option value="fa-solid fa-house">🏠 Trang chủ</option>
+                                <option value="fa-solid fa-shield-halved">🛡️ Kiểm tra</option>
+                                <option value="fa-solid fa-chart-pie">📈 Phân tích</option>
+                                <option value="fa-solid fa-magnifying-glass">🔍 Tra cứu</option>
+                                <option value="fa-solid fa-box-open">📦 Đóng gói</option>
+                                <option value="fa-solid fa-triangle-exclamation">⚠️ Rủi ro</option>
+                                <option value="fa-solid fa-gear">⚙️ Cấu hình</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted);">Tông màu</label>
+                            <select id="new-nav-color" class="form-control" style="font-size: 12px;">
+                                <option value="#38bdf8">Cyan (Xanh dương)</option>
+                                <option value="#34d399">Green (Xanh lục)</option>
+                                <option value="#fbbf24">Amber (Vàng hổ phách)</option>
+                                <option value="#a78bfa">Purple (Tím pastel)</option>
+                                <option value="#f87171">Rose (Đỏ cam)</option>
+                                <option value="#94a3b8">Slate (Xám bạc)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content: flex-end; margin-top: 10px;">
+                        <button class="btn-action btn-search" onclick="addNewNavTile()" style="font-size: 12px; padding: 6px 14px;">
+                            <i class="fa-solid fa-plus"></i> Thêm vào danh sách
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-action" style="background: rgba(255,255,255,0.06); border-color: var(--border-color); color: var(--text-secondary); font-size: 12px;" onclick="resetNavDefault()">
+                    <i class="fa-solid fa-rotate-left"></i> Khôi phục mặc định
+                </button>
+                <div style="display:flex; gap: 8px;">
+                    <button class="btn-action" style="background: rgba(255,255,255,0.04); border-color: var(--border-color); color: var(--text-muted); font-size: 12px;" onclick="closeNavCustomizerModal()">
+                        Hủy
+                    </button>
+                    <button class="btn-action btn-excel" onclick="saveNavConfig()" style="font-size: 12px;">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu & Áp dụng
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Toast Notification -->
@@ -2170,27 +2475,40 @@
             }
         }
 
-        // Load Memory & QMS modules
+        // Load Memory & QMS modules (Trích xuất từ QMSMain.aspx)
         async function loadMemory() {
             try {
                 const res = await fetch('/api/memory');
                 const data = await res.json();
                 const qmsList = data.qms_modules || [];
+                window.cachedQmsModules = qmsList;
                 const qmsSel = document.getElementById('qms-jump-select');
-                qmsSel.innerHTML = '<option value="">-- Chọn tính năng QMS muốn mở --</option>';
-                
-                qmsList.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.href;
-                    opt.innerText = m.name;
-                    qmsSel.appendChild(opt);
-                });
+                if (qmsSel) {
+                    qmsSel.innerHTML = '<option value="">-- Chọn tính năng QMS muốn mở --</option>';
+                    qmsList.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.href;
+                        opt.innerText = m.name;
+                        qmsSel.appendChild(opt);
+                    });
+                }
 
-                document.getElementById('memory-count').innerText = `7 Nhà máy + ${qmsList.length} QMS + ${data.factories_and_lines ? data.factories_and_lines.length : 138} Chuyền`;
+                const badgeEl = document.getElementById('qms-count-badge');
+                if (badgeEl) badgeEl.innerText = `${qmsList.length} Menu`;
+
+                const memCountEl = document.getElementById('memory-count');
+                if (memCountEl) {
+                    memCountEl.innerText = `7 Nhà máy + ${qmsList.length} QMS (QMSMain.aspx) + ${data.factories_and_lines ? data.factories_and_lines.length : 138} Chuyền`;
+                }
+
+                if (typeof populateModalQmsDropdown === 'function') {
+                    populateModalQmsDropdown();
+                }
             } catch(e) {
-                console.error(e);
+                console.error("Lỗi nạp bộ nhớ QMS:", e);
             }
         }
+
 
         async function jumpToQmsModule() {
             const sel = document.getElementById('qms-jump-select');
@@ -2485,6 +2803,289 @@
             if (e.key === 'Enter') executeCommand();
         });
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Custom Quick Navigation Management
+        const DEFAULT_NAV_TILES = [
+            {
+                "id": "hfpa",
+                "title": "QA HFPA",
+                "sub": "Mã Q504",
+                "dest": "hfpa",
+                "icon": "fa-solid fa-clipboard-list",
+                "color": "#38bdf8",
+                "bg": "rgba(56, 189, 248, 0.08)",
+                "borderColor": "rgba(56, 189, 248, 0.35)"
+            },
+            {
+                "id": "copq",
+                "title": "COPQ Report",
+                "sub": "3 Dạng Xuất",
+                "dest": "copq",
+                "icon": "fa-solid fa-file-excel",
+                "color": "#34d399",
+                "bg": "rgba(16, 185, 129, 0.08)",
+                "borderColor": "rgba(16, 185, 129, 0.45)"
+            },
+            {
+                "id": "mqaa",
+                "title": "MQAA Check",
+                "sub": "Kiểm toán 21 Mẫu",
+                "dest": "mqaa",
+                "icon": "fa-solid fa-shoe-prints",
+                "color": "#fbbf24",
+                "bg": "rgba(251, 191, 36, 0.08)",
+                "borderColor": "rgba(251, 191, 36, 0.35)"
+            },
+            {
+                "id": "qms",
+                "title": "QMS Quality",
+                "sub": "Cây Quản trị QA",
+                "dest": "qms",
+                "icon": "fa-solid fa-diagram-project",
+                "color": "#a78bfa",
+                "bg": "rgba(167, 139, 250, 0.08)",
+                "borderColor": "rgba(167, 139, 250, 0.35)"
+            },
+            {
+                "id": "home",
+                "title": "SFC Portal",
+                "sub": "Trang chủ FlowChart",
+                "dest": "home",
+                "icon": "fa-solid fa-house",
+                "color": "#94a3b8",
+                "bg": "rgba(148, 163, 184, 0.08)",
+                "borderColor": "rgba(148, 163, 184, 0.35)"
+            }
+        ];
+
+        let currentNavTiles = [...DEFAULT_NAV_TILES];
+        let editingNavTiles = [];
+
+        async function loadNavConfig() {
+            try {
+                const local = localStorage.getItem('sfc-custom-nav-tiles');
+                if (local) {
+                    try {
+                        const parsed = JSON.parse(local);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            currentNavTiles = parsed;
+                            renderNavGrid(currentNavTiles);
+                        }
+                    } catch(e) {}
+                }
+                const res = await fetch('/api/nav/config');
+                const data = await res.json();
+                if (data.success && Array.isArray(data.tiles) && data.tiles.length > 0) {
+                    currentNavTiles = data.tiles;
+                    localStorage.setItem('sfc-custom-nav-tiles', JSON.stringify(currentNavTiles));
+                    renderNavGrid(currentNavTiles);
+                }
+            } catch(e) {
+                console.error("Lỗi nạp cấu hình nav:", e);
+            }
+        }
+
+        function renderNavGrid(tiles) {
+            const grid = document.getElementById('nav-tiles-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            tiles.forEach(t => {
+                const tile = document.createElement('div');
+                tile.className = 'nav-tile';
+                if (t.borderColor) tile.style.borderColor = t.borderColor;
+                if (t.bg) tile.style.background = t.bg;
+                tile.title = `Mở ${t.title}${t.sub ? ' (' + t.sub + ')' : ''}`;
+                tile.onclick = () => navTo(t.dest);
+                tile.innerHTML = `
+                    <i class="${t.icon || 'fa-solid fa-compass'}" style="color: ${t.color || 'var(--accent-cyan)'};"></i>
+                    <span class="title" style="${t.color ? 'color:' + t.color : ''}">${escapeHtml(t.title)}</span>
+                    <span class="sub">${escapeHtml(t.sub || '')}</span>
+                `;
+                grid.appendChild(tile);
+            });
+        }
+
+        function openNavCustomizerModal() {
+            editingNavTiles = JSON.parse(JSON.stringify(currentNavTiles));
+            renderNavSortList();
+            populateModalQmsDropdown();
+            const modal = document.getElementById('nav-modal-backdrop');
+            if (modal) {
+                modal.classList.add('open');
+            }
+        }
+
+        function closeNavCustomizerModal() {
+            const modal = document.getElementById('nav-modal-backdrop');
+            if (modal) {
+                modal.classList.remove('open');
+            }
+        }
+
+        function handleBackdropClick(e) {
+            if (e.target && e.target.id === 'nav-modal-backdrop') {
+                closeNavCustomizerModal();
+            }
+        }
+
+        function renderNavSortList() {
+            const listEl = document.getElementById('nav-sort-list');
+            const countEl = document.getElementById('modal-nav-count');
+            if (!listEl) return;
+            if (countEl) countEl.innerText = editingNavTiles.length;
+            listEl.innerHTML = '';
+
+            if (editingNavTiles.length === 0) {
+                listEl.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 13px;">Chưa có nút điều hướng nào. Vui lòng bấm "Khôi phục mặc định" hoặc thêm nút mới!</div>';
+                return;
+            }
+
+            editingNavTiles.forEach((t, idx) => {
+                const item = document.createElement('div');
+                item.className = 'nav-sort-item';
+                item.innerHTML = `
+                    <div class="nav-sort-arrows">
+                        <button class="btn-arrow" ${idx === 0 ? 'disabled' : ''} onclick="moveNavTile(${idx}, -1)" title="Lên trên"><i class="fa-solid fa-chevron-up"></i></button>
+                        <button class="btn-arrow" ${idx === editingNavTiles.length - 1 ? 'disabled' : ''} onclick="moveNavTile(${idx}, 1)" title="Xuống dưới"><i class="fa-solid fa-chevron-down"></i></button>
+                    </div>
+                    <div class="nav-sort-preview" style="color: ${t.color || 'var(--accent-cyan)'}; background: ${t.bg || 'rgba(255,255,255,0.05)'}; border: 1px solid ${t.borderColor || 'rgba(255,255,255,0.1)'};">
+                        <i class="${t.icon || 'fa-solid fa-compass'}"></i>
+                    </div>
+                    <div class="nav-sort-info">
+                        <div class="nav-sort-title" style="color: ${t.color || 'inherit'};">${escapeHtml(t.title)}</div>
+                        <div class="nav-sort-sub">${escapeHtml(t.sub || '')} &bull; <span class="nav-sort-url">${escapeHtml(t.dest)}</span></div>
+                    </div>
+                    <div class="nav-sort-actions">
+                        <button class="btn-remove-nav" onclick="removeNavTile(${idx})" title="Xóa nút này"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function moveNavTile(idx, direction) {
+            const targetIdx = idx + direction;
+            if (targetIdx < 0 || targetIdx >= editingNavTiles.length) return;
+            const temp = editingNavTiles[idx];
+            editingNavTiles[idx] = editingNavTiles[targetIdx];
+            editingNavTiles[targetIdx] = temp;
+            renderNavSortList();
+        }
+
+        function removeNavTile(idx) {
+            editingNavTiles.splice(idx, 1);
+            renderNavSortList();
+        }
+
+        function onModalQmsSelect(sel) {
+            if (!sel.value) return;
+            const opt = sel.options[sel.selectedIndex];
+            const name = opt.getAttribute('data-name') || opt.text;
+            document.getElementById('new-nav-title').value = name.split('(')[0].trim();
+            document.getElementById('new-nav-sub').value = name.includes('(') ? name.substring(name.indexOf('(')+1, name.lastIndexOf(')')).trim() : 'QMS Phân Hệ';
+            document.getElementById('new-nav-dest').value = sel.value;
+        }
+
+        function populateModalQmsDropdown() {
+            const qmsSel = document.getElementById('modal-qms-quickpick');
+            if (!qmsSel || qmsSel.options.length > 1) return;
+            const list = window.cachedQmsModules || [];
+            list.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.href;
+                opt.innerText = m.name;
+                opt.setAttribute('data-name', m.name);
+                qmsSel.appendChild(opt);
+            });
+        }
+
+        function hexToRgba(hex, alpha) {
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function addNewNavTile() {
+            const title = (document.getElementById('new-nav-title').value || '').trim();
+            const sub = (document.getElementById('new-nav-sub').value || '').trim();
+            const dest = (document.getElementById('new-nav-dest').value || '').trim();
+            const icon = document.getElementById('new-nav-icon').value;
+            const color = document.getElementById('new-nav-color').value;
+
+            if (!title) {
+                showToast("Vui lòng nhập Tên nút điều hướng!", false);
+                return;
+            }
+            if (!dest) {
+                showToast("Vui lòng nhập Đường dẫn hoặc Mã trang!", false);
+                return;
+            }
+
+            const newTile = {
+                id: 'nav_' + Date.now(),
+                title: title,
+                sub: sub,
+                dest: dest,
+                icon: icon,
+                color: color,
+                bg: hexToRgba(color, 0.08),
+                borderColor: hexToRgba(color, 0.4)
+            };
+
+            editingNavTiles.push(newTile);
+            renderNavSortList();
+
+            // Reset inputs
+            document.getElementById('new-nav-title').value = '';
+            document.getElementById('new-nav-sub').value = '';
+            document.getElementById('new-nav-dest').value = '';
+            document.getElementById('modal-qms-quickpick').value = '';
+            showToast(`Đã thêm nút "${title}"`);
+        }
+
+        function resetNavDefault() {
+            editingNavTiles = JSON.parse(JSON.stringify(DEFAULT_NAV_TILES));
+            renderNavSortList();
+            showToast("Đã khôi phục 5 nút chuẩn mặc định!");
+        }
+
+        async function saveNavConfig() {
+            if (editingNavTiles.length === 0) {
+                showToast("Vui lòng để lại ít nhất 1 nút điều hướng!", false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/nav/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tiles: editingNavTiles })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentNavTiles = JSON.parse(JSON.stringify(editingNavTiles));
+                    localStorage.setItem('sfc-custom-nav-tiles', JSON.stringify(currentNavTiles));
+                    renderNavGrid(currentNavTiles);
+                    closeNavCustomizerModal();
+                    showToast("🎉 Đã lưu & cập nhật điều hướng thành công!");
+                } else {
+                    showToast(data.error || "Lỗi lưu cấu hình", false);
+                }
+            } catch(e) {
+                showToast("Lỗi kết nối máy chủ", false);
+            }
+        }
+
         // Navigate Quick
         async function navTo(dest) {
             addLog(`Đang chuyển hướng sang: ${dest.toUpperCase()}...`, 'info');
@@ -2601,6 +3202,7 @@
             scanCurrentPage(false);
             loadFactories();
             loadMemory();
+            loadNavConfig();
             loadMqaaSummary();
             setInterval(refreshStatus, 4000);
         });

@@ -70,6 +70,84 @@ def api_memory():
             return jsonify({"error": str(e)})
     return jsonify({"modules": [], "qms_modules": []})
 
+DEFAULT_NAV_TILES = [
+    {
+        "id": "hfpa",
+        "title": "QA HFPA",
+        "sub": "Mã Q504",
+        "dest": "hfpa",
+        "icon": "fa-solid fa-clipboard-list",
+        "color": "#38bdf8",
+        "bg": "rgba(56, 189, 248, 0.08)",
+        "borderColor": "rgba(56, 189, 248, 0.35)"
+    },
+    {
+        "id": "copq",
+        "title": "COPQ Report",
+        "sub": "3 Dạng Xuất",
+        "dest": "copq",
+        "icon": "fa-solid fa-file-excel",
+        "color": "#34d399",
+        "bg": "rgba(16, 185, 129, 0.08)",
+        "borderColor": "rgba(16, 185, 129, 0.45)"
+    },
+    {
+        "id": "mqaa",
+        "title": "MQAA Check",
+        "sub": "Kiểm toán 21 Mẫu",
+        "dest": "mqaa",
+        "icon": "fa-solid fa-shoe-prints",
+        "color": "#fbbf24",
+        "bg": "rgba(251, 191, 36, 0.08)",
+        "borderColor": "rgba(251, 191, 36, 0.35)"
+    },
+    {
+        "id": "qms",
+        "title": "QMS Quality",
+        "sub": "Cây Quản trị QA",
+        "dest": "qms",
+        "icon": "fa-solid fa-diagram-project",
+        "color": "#a78bfa",
+        "bg": "rgba(167, 139, 250, 0.08)",
+        "borderColor": "rgba(167, 139, 250, 0.35)"
+    },
+    {
+        "id": "home",
+        "title": "SFC Portal",
+        "sub": "Trang chủ FlowChart",
+        "dest": "home",
+        "icon": "fa-solid fa-house",
+        "color": "#94a3b8",
+        "bg": "rgba(148, 163, 184, 0.08)",
+        "borderColor": "rgba(148, 163, 184, 0.35)"
+    }
+]
+
+@app.route("/api/nav/config", methods=["GET", "POST"])
+def api_nav_config():
+    cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "custom_nav_config.json")
+    if request.method == "POST":
+        data = request.get_json() or {}
+        tiles = data.get("tiles")
+        if not isinstance(tiles, list):
+            return jsonify({"success": False, "error": "Dữ liệu cấu hình không hợp lệ."}), 400
+        try:
+            with open(cfg_path, "w", encoding="utf-8") as f:
+                json.dump(tiles, f, ensure_ascii=False, indent=2)
+            return jsonify({"success": True, "tiles": tiles})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
+    # GET
+    if os.path.exists(cfg_path):
+        try:
+            with open(cfg_path, "r", encoding="utf-8") as f:
+                return jsonify({"success": True, "tiles": json.load(f)})
+        except Exception:
+            pass
+    return jsonify({"success": True, "tiles": DEFAULT_NAV_TILES})
+
+
 @app.route("/api/navigate", methods=["POST"])
 def api_navigate():
     data = request.get_json() or {}

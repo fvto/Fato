@@ -1,0 +1,52 @@
+[
+  {
+    "id": "hfpa",
+    "title": "QA HFPA",
+    "sub": "Mã Q504",
+    "dest": "hfpa",
+    "icon": "fa-solid fa-clipboard-list",
+    "color": "#38bdf8",
+    "bg": "rgba(56, 189, 248, 0.08)",
+    "borderColor": "rgba(56, 189, 248, 0.35)"
+  },
+  {
+    "id": "copq",
+    "title": "COPQ Report",
+    "sub": "3 Dạng Xuất",
+    "dest": "copq",
+    "icon": "fa-solid fa-file-excel",
+    "color": "#34d399",
+    "bg": "rgba(16, 185, 129, 0.08)",
+    "borderColor": "rgba(16, 185, 129, 0.45)"
+  },
+  {
+    "id": "mqaa",
+    "title": "MQAA Check",
+    "sub": "Kiểm toán 21 Mẫu",
+    "dest": "mqaa",
+    "icon": "fa-solid fa-shoe-prints",
+    "color": "#fbbf24",
+    "bg": "rgba(251, 191, 36, 0.08)",
+    "borderColor": "rgba(251, 191, 36, 0.35)"
+  },
+  {
+    "id": "qms",
+    "title": "QMS Quality",
+    "sub": "Cây Quản trị QA",
+    "dest": "qms",
+    "icon": "fa-solid fa-diagram-project",
+    "color": "#a78bfa",
+    "bg": "rgba(167, 139, 250, 0.08)",
+    "borderColor": "rgba(167, 139, 250, 0.35)"
+  },
+  {
+    "id": "home",
+    "title": "SFC Portal",
+    "sub": "Trang chủ FlowChart",
+    "dest": "home",
+    "icon": "fa-solid fa-house",
+    "color": "#94a3b8",
+    "bg": "rgba(148, 163, 184, 0.08)",
+    "borderColor": "rgba(148, 163, 184, 0.35)"
+  }
+]
