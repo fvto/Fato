@@ -442,7 +442,7 @@ INSPECT_JS = """() => {
                         else if (name.toLowerCase().includes('type')) label = 'Hạng mục lỗi';
 
                         const currentTxt = ctrl.GetText ? ctrl.GetText().trim() : '';
-                        const defaultSelected = (isChuyen && (!currentTxt || currentTxt === 'ALL')) ? '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' : (currentTxt || items[0].text);
+                        const defaultSelected = isChuyen ? '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' : (currentTxt || items[0].text);
 
                         dropdowns.push({
                             id: name,

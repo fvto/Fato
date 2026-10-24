@@ -1741,12 +1741,12 @@
             if (standardDropdowns.length > 0) {
                 standardDropdowns.forEach((d) => {
                     const hasOptions = d.options && d.options.length > 0;
-                    const defaultOpt = hasOptions ? d.options[0] : null;
+                    const isDept = (d.id ? d.id.toLowerCase() : '').includes('dept') || (d.id ? d.id.toLowerCase() : '').includes('chuyen') || (d.id ? d.id.toLowerCase() : '').includes('line');
+                    const defaultOpt = hasOptions ? (isDept ? (d.options.find(o => o.value === '') || d.options[0]) : d.options[0]) : null;
                     if (!selectedDropdownOptions[d.id] && defaultOpt) {
                         selectedDropdownOptions[d.id] = defaultOpt;
                     }
                     const currentSelected = selectedDropdownOptions[d.id] || defaultOpt;
-                    const isDept = (d.id ? d.id.toLowerCase() : '').includes('dept') || (d.id ? d.id.toLowerCase() : '').includes('chuyen') || (d.id ? d.id.toLowerCase() : '').includes('line');
 
                     html += `
                     <div class="form-group" style="margin-bottom: 14px;">
@@ -1755,11 +1755,11 @@
                             <span style="font-size:11px; color:var(--accent-cyan); font-weight:600;">${d.options ? d.options.length : 0} lựa chọn</span>
                         </label>
                         <select id="adaptive-select-${d.id}" class="form-control" onchange="onSelectDropdownChanged('${d.id}', this.value, this.options[this.selectedIndex].text)">
-                            ${hasOptions ? d.options.map(opt => `
-                                <option value="${opt.value || opt.id}" ${currentSelected && (currentSelected.value === opt.value || currentSelected.id === opt.id) ? 'selected' : ''}>
-                                    ${opt.text}
-                                </option>
-                            `).join('') : '<option value="">-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --</option>'}
+                            ${hasOptions ? d.options.map(opt => {
+                                const val = (opt.value !== undefined) ? opt.value : (opt.id || '');
+                                const isSel = currentSelected ? (currentSelected.value === val || currentSelected.text === opt.text) : (val === '');
+                                return `<option value="${val}" ${isSel ? 'selected' : ''}>${opt.text}</option>`;
+                            }).join('') : '<option value="" selected>-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --</option>'}
                         </select>
 
                         ${hasOptions && d.options.length <= 6 ? `
