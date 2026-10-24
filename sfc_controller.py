@@ -333,6 +333,334 @@ def apply_sfc_filters(date_from=None, date_to=None, factory=None, action=None, n
                         export_path, expected_plant)
 
 
+INSPECT_JS = """() => {
+    const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+    const elements = coll ? coll.elements : {};
+
+    const pageInfo = {
+        title: document.title,
+        url: location.href,
+        pathname: location.pathname
+    };
+
+    const dateInputs = [];
+    const dropdowns = [];
+    const buttons = [];
+    const checkboxes = [];
+
+    if (coll) {
+        for (let key in elements) {
+            const ctrl = elements[key];
+            if (!ctrl || !ctrl.name) continue;
+            const name = ctrl.name;
+
+            if (name.includes('_DDD_') || name.includes('_FNP') || name.includes('DXFREditor') || name.includes('DXHFP')) continue;
+
+            // 1. Date Edits
+            if (name.toLowerCase().includes('date') || name.includes('dtDate')) {
+                if (typeof ctrl.GetText === 'function') {
+                    dateInputs.push({
+                        id: name,
+                        input_id: name + '_I',
+                        name: name,
+                        label: name.toLowerCase().includes('from') ? 'Từ ngày (Date From)' : (name.toLowerCase().includes('to') ? 'Đến ngày (Date To)' : 'Ngày'),
+                        value: ctrl.GetText(),
+                        type: 'date'
+                    });
+                }
+            }
+
+            // 2. Menu Dropdowns (DevExpress ASPxMenu with sub-items)
+            else if (typeof ctrl.GetItemCount === 'function' && ctrl.GetItemCount() > 0) {
+                const item0 = ctrl.GetItem(0);
+                const subCount = (item0 && typeof item0.GetItemCount === 'function') ? item0.GetItemCount() : 0;
+                if (subCount > 0) {
+                    const subOptions = [];
+                    for (let j = 0; j < subCount; j++) {
+                        const sub = item0.GetItem(j);
+                        const subDomId = name + '_DXI0i' + j + '_';
+                        const subText = (sub.GetText ? sub.GetText() : sub.text || '').trim();
+                        subOptions.push({
+                            index: j,
+                            id: subDomId,
+                            name: sub.name || ('SUB_' + j),
+                            text: subText || ('Tùy chọn ' + (j + 1)),
+                            value: sub.name || subText
+                        });
+                    }
+                    dropdowns.push({
+                        id: name,
+                        root_dom_id: name + '_DXI0_',
+                        name: name,
+                        type: 'menu_dropdown',
+                        label: name.toLowerCase().includes('export') ? 'Tùy chọn Xuất báo cáo / File' : 'Menu thả xuống',
+                        selected: subOptions[0] ? subOptions[0].text : '',
+                        item_count: subOptions.length,
+                        options: subOptions
+                    });
+                }
+                else if (name.toLowerCase().includes('cbo') || name.toLowerCase().includes('dept') || name.toLowerCase().includes('combo')) {
+                    const items = [];
+                    for (let i = 0; i < ctrl.GetItemCount(); i++) {
+                        const it = ctrl.GetItem(i);
+                        if (it && it.text) {
+                            items.push({ value: it.value || it.text, text: it.text.trim() });
+                        }
+                    }
+                    if (items.length > 0) {
+                        dropdowns.push({
+                            id: name,
+                            name: name,
+                            type: 'combobox',
+                            label: 'Chọn Chuyền / Xưởng hoặc Tiêu chí',
+                            selected: ctrl.GetText ? ctrl.GetText() : (items[0] ? items[0].text : ''),
+                            item_count: items.length,
+                            options: items.slice(0, 200)
+                        });
+                    }
+                }
+            }
+
+            // 3. Checkboxes
+            else if (typeof ctrl.GetChecked === 'function' && (name.includes('ckb') || name.toLowerCase().includes('check'))) {
+                const domEl = document.getElementById(name);
+                const label = domEl ? (domEl.innerText || domEl.getAttribute('title') || name.split('_').pop()) : name;
+                checkboxes.push({
+                    id: name,
+                    name: name,
+                    label: label.trim().replace(/^\\s+/, ''),
+                    checked: ctrl.GetChecked(),
+                    type: 'checkbox'
+                });
+            }
+
+            // 4. Buttons
+            else if (name.toLowerCase().includes('btn') || (typeof ctrl.DoClick === 'function' && !name.includes('RoundPanel'))) {
+                const domEl = document.getElementById(name);
+                let label = ctrl.GetText ? ctrl.GetText() : '';
+                if (!label && domEl) {
+                    label = domEl.innerText || domEl.getAttribute('title') || '';
+                }
+                if (!label) {
+                    if (name.toLowerCase().includes('search')) label = 'Tìm kiếm dữ liệu';
+                    else if (name.toLowerCase().includes('export') || name.toLowerCase().includes('excel')) label = 'Xuất file Excel';
+                    else if (name.toLowerCase().includes('flowchart') || name.toLowerCase().includes('home')) label = 'Trang chủ FlowChart';
+                    else label = name.split('_').pop();
+                }
+
+                let icon = 'bolt';
+                let btnType = 'primary';
+                const lower = (name + ' ' + label).toLowerCase();
+                if (lower.includes('search') || lower.includes('tim')) {
+                    icon = 'magnifying-glass';
+                    btnType = 'search';
+                } else if (lower.includes('excel') || lower.includes('export') || lower.includes('xuat')) {
+                    icon = 'file-excel';
+                    btnType = 'export';
+                } else if (lower.includes('flowchart') || lower.includes('home')) {
+                    icon = 'house';
+                    btnType = 'nav';
+                }
+
+                const isAlreadyMenu = dropdowns.some(d => d.id === name);
+                if (!isAlreadyMenu) {
+                    buttons.push({
+                        id: name,
+                        name: name,
+                        label: label.trim(),
+                        icon: icon,
+                        btn_type: btnType
+                    });
+                }
+            }
+        }
+    }
+
+    document.querySelectorAll('select').forEach((sel, idx) => {
+        if (!dropdowns.some(d => d.id === sel.id)) {
+            const options = Array.from(sel.options).map(o => ({ value: o.value, text: o.text.trim() }));
+            if (options.length > 0) {
+                dropdowns.push({
+                    id: sel.id || ('select_' + idx),
+                    name: sel.name || sel.id,
+                    type: 'html_select',
+                    label: sel.getAttribute('title') || 'Danh mục lựa chọn',
+                    selected: sel.options[sel.selectedIndex]?.text || '',
+                    item_count: options.length,
+                    options: options.slice(0, 150)
+                });
+            }
+        }
+    });
+
+    return {
+        page: pageInfo,
+        date_inputs: dateInputs,
+        dropdowns: dropdowns,
+        buttons: buttons,
+        checkboxes: checkboxes
+    };
+}"""
+
+
+def inspect_active_page():
+    """Tự động quét và nhận diện các button, dropdown, ô chọn trên trang SFC hiện tại"""
+    with SFC_LOCK:
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.connect_over_cdp(CDP_URL, timeout=10000)
+                page = get_sfc_page(browser)
+                if not page:
+                    browser.close()
+                    return {"success": False, "error": "Chưa kết nối được trang SFC."}
+
+                data = page.evaluate(INSPECT_JS)
+                img_b64 = take_b64_screenshot(page)
+                current_plant = "VH"
+                try:
+                    for c in page.context.cookies():
+                        if c.get('name') == 'MyFactoryName' and c.get('value') in SEVEN_FACTORIES:
+                            current_plant = c.get('value')
+                            break
+                except Exception:
+                    pass
+
+                browser.close()
+                return {
+                    "success": True,
+                    "current_plant": current_plant,
+                    "available_plants": SEVEN_FACTORIES,
+                    "inspection": data,
+                    "screenshot": img_b64
+                }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+
+def execute_dynamic_action(action_type, target_id=None, params=None):
+    """Thực thi thao tác nhận diện động trên SFC (chọn dropdown menu, click button, đổi ngày...)"""
+    global LAST_STATUS_TIME
+    params = params or {}
+    with SFC_LOCK:
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.connect_over_cdp(CDP_URL, timeout=SFC_CONNECT_WAIT_MS)
+                page = get_sfc_page(browser)
+
+                # 1. Đặt ngày tháng
+                if action_type == 'set_dates':
+                    date_from = params.get('date_from')
+                    date_to = params.get('date_to')
+                    page.evaluate("""({f, t}) => {
+                        const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                        if (coll) {
+                            for (let k in coll.elements) {
+                                const c = coll.elements[k];
+                                if (!c || !c.name) continue;
+                                const n = c.name.toLowerCase();
+                                if (f && (n.includes('datefrom') || (n.includes('date') && n.includes('from')))) {
+                                    if (typeof c.SetText === 'function') c.SetText(f);
+                                }
+                                if (t && (n.includes('dateto') || (n.includes('date') && n.includes('to')))) {
+                                    if (typeof c.SetText === 'function') c.SetText(t);
+                                }
+                            }
+                        }
+                    }""", {"f": date_from, "t": date_to})
+
+                # 2. Chọn tùy chọn trong Menu xổ xuống (như Menu Xuất Excel trên COPQ)
+                elif action_type == 'select_menu':
+                    root_id = target_id
+                    sub_id = params.get('sub_id')
+                    root_el = page.query_selector(f"#{root_id}_DXI0_") or page.query_selector(f"#{root_id}")
+                    if root_el:
+                        root_el.hover()
+                        time.sleep(0.3)
+                    sub_el = page.query_selector(f"#{sub_id}")
+                    if sub_el:
+                        sub_el.click()
+                    else:
+                        page.evaluate("""(sid) => {
+                            const el = document.getElementById(sid);
+                            if (el) el.click();
+                        }""", sub_id)
+                    time.sleep(1.5)
+
+                # 3. Bấm nút hành động (Tìm kiếm, Xuất...)
+                elif action_type == 'click_button':
+                    btn_el = page.query_selector(f"#{target_id}")
+                    if btn_el:
+                        btn_el.click()
+                    else:
+                        page.evaluate("""(bid) => {
+                            const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                            const ctrl = coll ? coll.Get(bid) : null;
+                            if (ctrl && typeof ctrl.DoClick === 'function') ctrl.DoClick();
+                            else {
+                                const el = document.getElementById(bid);
+                                if (el) el.click();
+                            }
+                        }""", target_id)
+                    time.sleep(1.5)
+
+                # 4. Chọn ComboBox
+                elif action_type == 'select_combobox':
+                    val = params.get('value')
+                    txt = params.get('text')
+                    page.evaluate("""({cid, v, t}) => {
+                        const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                        const cbo = coll ? coll.Get(cid) : null;
+                        if (cbo && typeof cbo.FindItemByText === 'function') {
+                            const it = cbo.FindItemByText(t) || cbo.FindItemByValue(v);
+                            if (it) cbo.SetSelectedItem(it);
+                        } else {
+                            const sel = document.getElementById(cid);
+                            if (sel) {
+                                sel.value = v;
+                                sel.dispatchEvent(new Event('change'));
+                            }
+                        }
+                    }""", {"cid": target_id, "v": val, "t": txt})
+
+                # 5. Đổi trạng thái Checkbox
+                elif action_type == 'toggle_checkbox':
+                    chk = params.get('checked')
+                    page.evaluate("""({cid, c}) => {
+                        const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                        const ckb = coll ? coll.Get(cid) : null;
+                        if (ckb && typeof ckb.SetChecked === 'function') ckb.SetChecked(c);
+                        else {
+                            const el = document.getElementById(cid);
+                            if (el) {
+                                el.checked = c;
+                                el.dispatchEvent(new Event('change'));
+                            }
+                        }
+                    }""", {"cid": target_id, "c": chk})
+
+                try:
+                    page.wait_for_load_state("load", timeout=5000)
+                except Exception:
+                    pass
+                time.sleep(0.5)
+
+                img_b64 = take_b64_screenshot(page)
+                inspection = page.evaluate(INSPECT_JS)
+                browser.close()
+                LAST_STATUS_TIME = 0
+
+                return {
+                    "success": True,
+                    "action": action_type,
+                    "target_id": target_id,
+                    "screenshot": img_b64,
+                    "inspection": inspection,
+                    "message": "Đã thực thi thao tác trên SFC thành công."
+                }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+
 def parse_intent(text):
     from sfc_commands import parse_intent as parse
     return parse(text)

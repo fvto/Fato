@@ -16,7 +16,7 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 @app.before_request
 def prevent_overlapping_actions():
     if request.method == 'POST' and request.path in {
-        '/api/action', '/api/nike', '/api/navigate', '/api/switch_factory', '/api/mqaa/scan'
+        '/api/action', '/api/nike', '/api/navigate', '/api/switch_factory', '/api/mqaa/scan', '/api/page/execute'
     } and (sfc_command_jobs.running() or COMMAND_LOCK.locked()):
         return jsonify(success=False, error='Trợ lý đang chạy lệnh. Vui lòng chờ hoàn tất để tránh thay đổi bộ lọc.'), 409
 
@@ -95,6 +95,22 @@ def api_nike():
     if not isinstance(nike, bool):
         return jsonify({"success": False, "error": "NIKE phải là giá trị bật/tắt."}), 400
     return jsonify(sfc_controller.apply_sfc_filters(nike=nike))
+
+@app.route("/api/page/inspect", methods=["GET"])
+def api_page_inspect():
+    res = sfc_controller.inspect_active_page()
+    return jsonify(res)
+
+@app.route("/api/page/execute", methods=["POST"])
+def api_page_execute():
+    data = request.get_json() or {}
+    action_type = data.get("action_type")
+    target_id = data.get("target_id")
+    params = data.get("params", {})
+    if not action_type:
+        return jsonify({"success": False, "error": "Thiếu loại thao tác (action_type)."}), 400
+    res = sfc_controller.execute_dynamic_action(action_type, target_id, params)
+    return jsonify(res)
 
 @app.route("/api/command", methods=["POST"])
 def api_command():

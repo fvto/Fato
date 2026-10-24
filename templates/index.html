@@ -795,6 +795,163 @@
             box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
         }
 
+        /* Adaptive Control Cockpit Styles */
+        .adaptive-page-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-scan-page {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-scan-page:hover {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+
+        .btn-scan-page.scanning i {
+            animation: spin 0.8s linear infinite;
+        }
+
+        .detected-meta-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--border-color);
+            margin-bottom: 14px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .option-chips-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+
+        .option-chip {
+            padding: 7px 13px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .option-chip:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-primary);
+            background: rgba(6, 182, 212, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .option-chip.active {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(6, 182, 212, 0.3));
+            border-color: var(--accent-cyan);
+            color: #38bdf8;
+            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.25);
+        }
+
+        .adaptive-loading-skeleton {
+            padding: 24px 16px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            border: 1px dashed var(--border-color);
+        }
+
+        .dynamic-btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .dynamic-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .dynamic-btn.btn-search {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .dynamic-btn.btn-export {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .dynamic-btn.btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .dynamic-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .dynamic-btn:active {
+            transform: translateY(0);
+        }
+
         /* MQAA Section */
         .mqaa-banner {
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.1));
@@ -1277,56 +1434,43 @@
                     </div>
                 </div>
 
-                <!-- Live Filter Panel for HFPA -->
-                <div class="card">
+                <!-- Dynamic Adaptive Control Cockpit (Tự động nhận diện Button & Dropdown) -->
+                <div class="card" id="card-adaptive-cockpit">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="fa-solid fa-sliders"></i> Bộ lọc & Thao tác Chuyền / Xưởng
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent-cyan);"></i> Bộ điều khiển Tương thích Trang
                         </div>
-                        <span style="font-size: 11px; color: var(--text-muted);">Trang HFPA (Q504)</span>
-                    </div>
-
-                    <!-- Factory indicator and line selector -->
-                    <div class="form-group" style="margin-bottom: 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
-                            <label><i class="fa-solid fa-code-fork"></i> Chọn Chuyền / Xưởng sản xuất (138 Chuyền):</label>
-                            <span style="font-size: 11px; color: var(--accent-cyan); font-weight: 600;" id="active-plant-text">Nhà máy: VH</span>
-                        </div>
-                        <select id="factory-select" class="form-control">
-                            <option value="">-- Đang tải danh sách chuyền từ SFC... --</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nike-toggle" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                            <input type="checkbox" id="nike-toggle" onchange="toggleNike()"
-                                style="width:24px; height:24px; accent-color:#84cc16; cursor:pointer;" />
-                            <strong>NIKE</strong>
-                            <span id="nike-mode-text" style="color:var(--text-muted);">Nội bộ</span>
-                        </label>
-                        <div style="font-size:12px; color:var(--text-muted); margin-top:6px;">Chế độ xuất dữ liệu: Tắt — Nội bộ · Bật — External (NIKE)</div>
-                    </div>
-
-                    <!-- Date range -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label><i class="fa-regular fa-calendar"></i> Từ ngày (Date From):</label>
-                            <input type="date" id="date-from" class="form-control" value="2026-10-24" />
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fa-regular fa-calendar-check"></i> Đến ngày (Date To):</label>
-                            <input type="date" id="date-to" class="form-control" value="2026-10-24" />
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="adaptive-page-badge" id="adaptive-page-badge" title="Tên trang SFC đang kết nối">
+                                <i class="fa-solid fa-file-invoice"></i> <span id="current-page-name">Đang nhận diện...</span>
+                            </span>
+                            <button class="btn-scan-page" id="btn-scan-page" onclick="scanCurrentPage(true)" title="Quét lại các button và dropdown trên trang SFC hiện tại">
+                                <i class="fa-solid fa-arrows-rotate" id="scan-icon"></i> Quét lại
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Action buttons -->
-                    <div class="action-btn-row">
-                        <button class="btn-action btn-search" id="btn-run-search" onclick="triggerAction('search')">
-                            <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm dữ liệu
-                        </button>
-                        <button class="btn-action btn-excel" id="btn-run-excel" onclick="triggerAction('excel')">
-                            <i class="fa-solid fa-file-excel"></i> Xuất file Excel
-                        </button>
+                    <div class="detected-meta-bar" id="detected-meta-bar">
+                        <span><i class="fa-solid fa-microchip"></i> Phát hiện: <strong id="detected-counts-text" style="color:var(--text-primary);">Đang kiểm tra...</strong></span>
+                        <span id="active-plant-text" style="color:var(--accent-cyan); font-weight:700;">Nhà máy: VH</span>
+                    </div>
+
+                    <!-- Dynamic Controls Container (Generated by JS) -->
+                    <div id="adaptive-controls-body">
+                        <div class="adaptive-loading-skeleton" id="adaptive-loading-skeleton">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Đang kết nối và quét các nút bấm & dropdown trên SFC...
+                        </div>
+                    </div>
+
+                    <!-- Hidden legacy fallback containers to preserve backward compatibility -->
+                    <div style="display:none;" id="legacy-controls-fallback">
+                        <select id="factory-select"><option value="">-- Chọn chuyền --</option></select>
+                        <input type="checkbox" id="nike-toggle" onchange="toggleNike()" />
+                        <span id="nike-mode-text">Nội bộ</span>
+                        <input type="date" id="date-from" value="2026-10-24" />
+                        <input type="date" id="date-to" value="2026-10-24" />
+                        <button id="btn-run-search" onclick="triggerAction('search')"></button>
+                        <button id="btn-run-excel" onclick="triggerAction('excel')"></button>
                     </div>
                 </div>
 
@@ -1440,6 +1584,351 @@
 
     <script>
         let currentActivePlant = 'VH';
+        let currentInspectionData = null;
+        let isScanning = false;
+        let selectedDropdownOptions = {};
+
+        async function scanCurrentPage(showToastNotice = false) {
+            if (isScanning) return;
+            isScanning = true;
+            const scanBtn = document.getElementById('btn-scan-page');
+            if (scanBtn) scanBtn.classList.add('scanning');
+
+            try {
+                const res = await fetch('/api/page/inspect');
+                const data = await res.json();
+                if (data.success && data.inspection) {
+                    currentInspectionData = data.inspection;
+
+                    const pageTitle = (data.inspection.page && (data.inspection.page.title || data.inspection.page.pathname)) || 'SFC';
+                    const pageBadge = document.getElementById('current-page-name');
+                    if (pageBadge) pageBadge.innerText = pageTitle;
+                    const mirrorTitle = document.getElementById('mirror-title');
+                    if (mirrorTitle) mirrorTitle.innerText = pageTitle;
+                    if (data.inspection.page && data.inspection.page.url) {
+                        const mirrorUrl = document.getElementById('mirror-url');
+                        if (mirrorUrl) mirrorUrl.innerText = data.inspection.page.url;
+                    }
+
+                    if (data.screenshot) {
+                        const mirrorImg = document.getElementById('mirror-img');
+                        if (mirrorImg) mirrorImg.src = data.screenshot;
+                    }
+
+                    if (data.current_plant) {
+                        currentActivePlant = data.current_plant;
+                        const plantTxt = document.getElementById('active-plant-text');
+                        if (plantTxt) plantTxt.innerText = `Nhà máy: ${currentActivePlant}`;
+                        document.querySelectorAll('.plant-btn').forEach(btn => btn.classList.remove('active'));
+                        const btn = document.getElementById(`plant-btn-${currentActivePlant}`);
+                        if (btn) btn.classList.add('active');
+                    }
+
+                    renderAdaptiveControls(data.inspection);
+
+                    const dropCount = data.inspection.dropdowns ? data.inspection.dropdowns.length : 0;
+                    const btnCount = data.inspection.buttons ? data.inspection.buttons.length : 0;
+                    const dateCount = data.inspection.date_inputs ? data.inspection.date_inputs.length : 0;
+                    
+                    const countTxt = document.getElementById('detected-counts-text');
+                    if (countTxt) {
+                        countTxt.innerText = `${dropCount} Dropdown · ${btnCount} Nút bấm · ${dateCount} Ô ngày`;
+                    }
+
+                    if (showToastNotice) {
+                        showToast(`🎯 Nhận diện thành công: ${pageTitle} (${dropCount} Dropdown, ${btnCount} Nút)`);
+                        addLog(`Đã quét trang "${pageTitle}": tìm thấy ${dropCount} dropdown, ${btnCount} nút bấm, ${dateCount} ô ngày.`, 'success');
+                    }
+                } else {
+                    if (showToastNotice) showToast(data.error || 'Chưa thể quét trang SFC', false);
+                }
+            } catch(err) {
+                console.error('Scan error:', err);
+                if (showToastNotice) showToast('Lỗi khi quét trang SFC', false);
+            } finally {
+                isScanning = false;
+                if (scanBtn) scanBtn.classList.remove('scanning');
+            }
+        }
+
+        function renderAdaptiveControls(insp) {
+            const container = document.getElementById('adaptive-controls-body');
+            if (!container) return;
+
+            let html = '';
+
+            // 1. Dropdown & Menu
+            if (insp.dropdowns && insp.dropdowns.length > 0) {
+                insp.dropdowns.forEach((d) => {
+                    const hasOptions = d.options && d.options.length > 0;
+                    const defaultOpt = hasOptions ? d.options[0] : null;
+                    if (!selectedDropdownOptions[d.id] && defaultOpt) {
+                        selectedDropdownOptions[d.id] = defaultOpt;
+                    }
+                    const currentSelected = selectedDropdownOptions[d.id] || defaultOpt;
+
+                    html += `
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><i class="fa-solid fa-layer-group" style="color:var(--accent-cyan);"></i> ${d.label || 'Tùy chọn danh mục'}:</span>
+                            <span style="font-size:11px; color:var(--accent-cyan); font-weight:600;">${d.options ? d.options.length : 0} lựa chọn</span>
+                        </label>
+                        <select id="adaptive-select-${d.id}" class="form-control" onchange="onSelectDropdownChanged('${d.id}', this.value)">
+                            ${hasOptions ? d.options.map(opt => `
+                                <option value="${opt.value || opt.id}" ${currentSelected && (currentSelected.value === opt.value || currentSelected.id === opt.id) ? 'selected' : ''}>
+                                    ${opt.text}
+                                </option>
+                            `).join('') : '<option value="">(Không có lựa chọn)</option>'}
+                        </select>
+
+                        ${hasOptions && d.options.length <= 6 ? `
+                        <div class="option-chips-row">
+                            ${d.options.map((opt, oIdx) => `
+                                <div class="option-chip ${currentSelected && (currentSelected.value === opt.value || currentSelected.id === opt.id) ? 'active' : ''}"
+                                     id="chip-${d.id}-${oIdx}"
+                                     onclick="selectOptionChip('${d.id}', ${oIdx})">
+                                    <i class="fa-solid ${oIdx === 0 ? 'fa-file-lines' : (oIdx === 1 ? 'fa-table-cells' : 'fa-chart-column')}"></i>
+                                    ${opt.text}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                    </div>
+                    `;
+                });
+            }
+
+            // 2. Checkboxes (ví dụ NIKE)
+            if (insp.checkboxes && insp.checkboxes.length > 0) {
+                insp.checkboxes.forEach(c => {
+                    html += `
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                            <input type="checkbox" id="adaptive-chk-${c.id}" ${c.checked ? 'checked' : ''}
+                                   onchange="onToggleAdaptiveCheckbox('${c.id}', this.checked)"
+                                   style="width:22px; height:22px; accent-color:#10b981; cursor:pointer;" />
+                            <strong>${c.label}</strong>
+                            <span id="chk-status-${c.id}" style="color:var(--text-muted); font-size:12px;">${c.checked ? 'Bật (External)' : 'Tắt (Nội bộ)'}</span>
+                        </label>
+                    </div>
+                    `;
+                });
+            }
+
+            // 3. Date Inputs
+            if (insp.date_inputs && insp.date_inputs.length > 0) {
+                html += '<div class="form-row">';
+                insp.date_inputs.forEach((dt, idx) => {
+                    const isTo = dt.name.toLowerCase().includes('to') || idx === 1;
+                    html += `
+                    <div class="form-group">
+                        <label><i class="fa-regular ${isTo ? 'fa-calendar-check' : 'fa-calendar'}"></i> ${dt.label}:</label>
+                        <input type="date" id="adaptive-date-${dt.id}" class="form-control" value="${dt.value || '2026-10-24'}"
+                               onchange="onDateChanged('${dt.id}', this.value)" />
+                    </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // 4. Action Buttons
+            html += '<div class="dynamic-btn-row">';
+            if (insp.dropdowns && insp.dropdowns.some(d => d.type === 'menu_dropdown')) {
+                const menuD = insp.dropdowns.find(d => d.type === 'menu_dropdown');
+                const curr = selectedDropdownOptions[menuD.id] || (menuD.options ? menuD.options[0] : null);
+                const currLabel = curr ? curr.text : 'Xuất dữ liệu';
+                html += `
+                <button class="dynamic-btn btn-export" id="btn-dynamic-menu-export" onclick="triggerDynamicMenuExport('${menuD.id}')">
+                    <i class="fa-solid fa-file-excel"></i> <span id="label-menu-export">Xuất: ${currLabel}</span>
+                </button>
+                `;
+            }
+
+            if (insp.buttons && insp.buttons.length > 0) {
+                insp.buttons.forEach(b => {
+                    const isSearch = b.btn_type === 'search';
+                    const isExport = b.btn_type === 'export';
+                    const btnClass = isSearch ? 'btn-search' : (isExport ? 'btn-export' : 'btn-primary');
+                    html += `
+                    <button class="dynamic-btn ${btnClass}" id="btn-dyn-${b.id}" onclick="triggerDynamicButtonClick('${b.id}', '${b.label}')">
+                        <i class="fa-solid fa-${b.icon || 'bolt'}"></i> ${b.label}
+                    </button>
+                    `;
+                });
+            }
+
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        function selectOptionChip(dropdownId, optionIdx) {
+            if (!currentInspectionData) return;
+            const d = currentInspectionData.dropdowns.find(x => x.id === dropdownId);
+            if (!d || !d.options || !d.options[optionIdx]) return;
+            const opt = d.options[optionIdx];
+            selectedDropdownOptions[dropdownId] = opt;
+
+            const sel = document.getElementById(`adaptive-select-${dropdownId}`);
+            if (sel) sel.value = opt.value || opt.id;
+
+            d.options.forEach((_, idx) => {
+                const chip = document.getElementById(`chip-${dropdownId}-${idx}`);
+                if (chip) {
+                    if (idx === optionIdx) chip.classList.add('active');
+                    else chip.classList.remove('active');
+                }
+            });
+
+            const labelExport = document.getElementById('label-menu-export');
+            if (labelExport) {
+                labelExport.innerText = `Xuất: ${opt.text}`;
+            }
+
+            showToast(`Đã chọn: ${opt.text}`);
+        }
+
+        function onSelectDropdownChanged(dropdownId, selectedValue) {
+            if (!currentInspectionData) return;
+            const d = currentInspectionData.dropdowns.find(x => x.id === dropdownId);
+            if (!d || !d.options) return;
+            const optIdx = d.options.findIndex(o => (o.value || o.id) === selectedValue);
+            if (optIdx >= 0) {
+                selectOptionChip(dropdownId, optIdx);
+            }
+        }
+
+        async function triggerDynamicMenuExport(menuId) {
+            if (!currentInspectionData) return;
+            const d = currentInspectionData.dropdowns.find(x => x.id === menuId);
+            if (!d) return;
+            const opt = selectedDropdownOptions[menuId] || (d.options ? d.options[0] : null);
+            if (!opt) return;
+
+            const btn = document.getElementById('btn-dynamic-menu-export');
+            const origHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<span class="spinner"></span> Đang xuất báo cáo...';
+                btn.disabled = true;
+            }
+
+            addLog(`Đang kích hoạt xuất báo cáo: "${opt.text}"...`, 'info');
+            try {
+                const res = await fetch('/api/page/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action_type: 'select_menu',
+                        target_id: menuId,
+                        params: { sub_id: opt.id, index: opt.index, value: opt.value, text: opt.text }
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`✅ Đã xuất báo cáo: ${opt.text}`);
+                    addLog(`Đã thực thi xuất báo cáo: ${opt.text}`, 'success');
+                    if (data.screenshot) {
+                        document.getElementById('mirror-img').src = data.screenshot;
+                    }
+                    if (data.inspection) {
+                        currentInspectionData = data.inspection;
+                        renderAdaptiveControls(data.inspection);
+                    }
+                } else {
+                    showToast(data.error || 'Lỗi khi xuất báo cáo', false);
+                    addLog(`Lỗi: ${data.error}`, 'warn');
+                }
+            } catch(e) {
+                showToast('Lỗi kết nối máy chủ', false);
+            } finally {
+                if (btn) {
+                    btn.innerHTML = origHtml;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        async function triggerDynamicButtonClick(buttonId, label) {
+            const btn = document.getElementById(`btn-dyn-${buttonId}`);
+            const origHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<span class="spinner"></span> Đang xử lý...';
+                btn.disabled = true;
+            }
+
+            addLog(`Đang bấm nút: "${label || buttonId}"...`, 'info');
+            try {
+                const res = await fetch('/api/page/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action_type: 'click_button',
+                        target_id: buttonId
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`✅ Đã thực thi nút: ${label}`);
+                    addLog(`Đã bấm nút "${label}" thành công`, 'success');
+                    if (data.screenshot) {
+                        document.getElementById('mirror-img').src = data.screenshot;
+                    }
+                    if (data.inspection) {
+                        currentInspectionData = data.inspection;
+                        renderAdaptiveControls(data.inspection);
+                    }
+                } else {
+                    showToast(data.error || 'Lỗi khi bấm nút', false);
+                    addLog(`Lỗi: ${data.error}`, 'warn');
+                }
+            } catch(e) {
+                showToast('Lỗi kết nối máy chủ', false);
+            } finally {
+                if (btn) {
+                    btn.innerHTML = origHtml;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        async function onDateChanged(dateId, newVal) {
+            const fromEl = document.querySelector('input[id*="DateFrom"], input[id*="date-from"], input[id*="dtDateFrom"]');
+            const toEl = document.querySelector('input[id*="DateTo"], input[id*="date-to"], input[id*="dtDateTo"]');
+            const dateFrom = fromEl ? fromEl.value : null;
+            const dateTo = toEl ? toEl.value : null;
+
+            try {
+                await fetch('/api/page/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action_type: 'set_dates',
+                        params: { date_from: dateFrom, date_to: dateTo }
+                    })
+                });
+                showToast(`Đã đồng bộ ngày: ${newVal}`);
+            } catch(e) {}
+        }
+
+        async function onToggleAdaptiveCheckbox(chkId, isChecked) {
+            const statusTxt = document.getElementById(`chk-status-${chkId}`);
+            if (statusTxt) statusTxt.innerText = isChecked ? 'Bật (External)' : 'Tắt (Nội bộ)';
+            try {
+                const res = await fetch('/api/page/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action_type: 'toggle_checkbox',
+                        target_id: chkId,
+                        params: { checked: isChecked }
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Đã đổi trạng thái: ${isChecked ? 'Bật (External)' : 'Tắt (Nội bộ)'}`);
+                }
+            } catch(e) {}
+        }
 
         // Theme switch
         const themeBtn = document.getElementById('theme-toggle');
@@ -1925,6 +2414,7 @@
                         document.getElementById('mirror-img').src = data.screenshot;
                     }
                     setTimeout(refreshStatus, 1000);
+                    setTimeout(() => scanCurrentPage(true), 1200);
                 } else {
                     showToast(data.error || 'Lỗi điều hướng', false);
                 }
@@ -1972,6 +2462,7 @@
                         document.getElementById('mirror-img').src = data.screenshot;
                     }
                     setTimeout(refreshStatus, 2000);
+                    setTimeout(() => scanCurrentPage(false), 2200);
                 } else {
                     showToast(data.error || 'Lỗi thực thi', false);
                 }
@@ -2022,6 +2513,7 @@
             if (savedPrompt) document.getElementById('ai-prompt-input').value = savedPrompt;
             if (savedJob && savedPrompt) executeCommand(savedJob);
             refreshStatus();
+            scanCurrentPage(false);
             loadFactories();
             loadMemory();
             loadMqaaSummary();
