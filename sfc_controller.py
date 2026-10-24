@@ -480,18 +480,18 @@ INSPECT_JS = """() => {
             else if (name.toLowerCase().includes('btn') || typeof ctrl.DoClick === 'function') {
                 let label = ctrl.GetText ? ctrl.GetText() : (domEl ? (domEl.innerText || domEl.getAttribute('title') || '') : '');
                 if (!label) {
-                    if (name.toLowerCase().includes('search')) label = 'Tìm kiếm dữ liệu';
-                    else if (name.toLowerCase().includes('btnexcelall')) label = 'Xuất Excel theo Station (FTT Report)';
-                    else if (name.toLowerCase().includes('export') || name.toLowerCase().includes('excel')) label = 'Xuất file Excel';
-                    else if (name.toLowerCase().includes('flowchart') || name.toLowerCase().includes('home')) label = 'Trang chủ FlowChart';
-                    else if (name.toLowerCase().includes('update')) label = 'Cập nhật';
-                    else if (name.toLowerCase().includes('clear')) label = 'Xóa bộ lọc';
+                    if (name.toLowerCase().includes('search')) label = 'Search';
+                    else if (name.toLowerCase().includes('btnexcelall')) label = 'Export by Station (FTT Report)';
+                    else if (name.toLowerCase().includes('export') || name.toLowerCase().includes('excel')) label = 'Export Excel';
+                    else if (name.toLowerCase().includes('flowchart') || name.toLowerCase().includes('home')) label = 'FlowChart Home';
+                    else if (name.toLowerCase().includes('update')) label = 'Update';
+                    else if (name.toLowerCase().includes('clear')) label = 'Clear Filter';
                     else label = name.split('_').pop();
                 }
                 if (name.toLowerCase().includes('btnexcelall')) {
-                    label = 'Xuất Excel theo Station (FTT Report)';
+                    label = 'Export by Station (FTT Report)';
                 } else if (name.toLowerCase() === 'rpnlmain_contentplaceholder1_btnexcel' && pageInfo.pathname.includes('QA.aspx')) {
-                    label = 'Xuất Excel Tổng quan (Grid)';
+                    label = 'Export Overview (Grid)';
                 }
                 if (!label || !label.trim()) continue;
 

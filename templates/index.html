@@ -3415,7 +3415,7 @@
 
             const countBadge = document.getElementById('ftt-selected-count-badge');
             if (countBadge) {
-                countBadge.innerText = `Đã chọn: ${selectedFttStations.size}/${stations.length} Trạm`;
+                countBadge.innerText = `Selected: ${selectedFttStations.size}/${stations.length} Stations`;
             }
 
             grid.innerHTML = stations.map(st => {
@@ -3462,7 +3462,7 @@
         async function executeFttStationExport(reportType) {
             const stationsArray = Array.from(selectedFttStations);
             if (stationsArray.length === 0) {
-                showToast("Vui lòng chọn ít nhất 1 Station để xuất dữ liệu!", false);
+                showToast("Please select at least 1 Station to export!", false);
                 return;
             }
 
@@ -3482,11 +3482,11 @@
             const origHtml = targetBtn ? targetBtn.innerHTML : '';
             if (targetBtn) {
                 targetBtn.disabled = true;
-                targetBtn.innerHTML = '<span class="spinner"></span> Đang xuất...';
+                targetBtn.innerHTML = '<span class="spinner"></span> Exporting...';
             }
 
             const typeLabel = (reportType === 'nike') ? 'NIKE' : ((reportType === 'internal') ? 'Internal' : 'Station OK');
-            addLog(`Đang gửi yêu cầu xuất FTT (${typeLabel}) cho ${stationsArray.length} Station...`, 'info');
+            addLog(`Requesting FTT export (${typeLabel}) for ${stationsArray.length} Station(s)...`, 'info');
 
             try {
                 const res = await fetch('/api/page/execute', {
@@ -3508,10 +3508,10 @@
                 const data = await res.json();
                 if (data.success && data.downloaded_file) {
                     const file = data.downloaded_file;
-                    showToast(`✅ Đã xuất thành công: ${file.name}`);
-                    addLog(`Đã tải xuống file FTT: ${file.name}`, 'success');
+                    showToast(`✅ Exported successfully: ${file.name}`);
+                    addLog(`Downloaded FTT file: ${file.name}`, 'success');
 
-                    // Tự động tải file trên trình duyệt
+                    // Auto download in browser
                     const dlLink = document.createElement('a');
                     dlLink.href = file.url;
                     dlLink.download = file.name;
@@ -3519,20 +3519,20 @@
                     dlLink.click();
                     document.body.removeChild(dlLink);
 
-                    // Thêm vào thanh Kết quả đã lưu
+                    // Add to Saved Results
                     addSavedFilePill(file.name, file.url);
                     closeFttStationModal();
                 } else if (data.success) {
-                    showToast("Đã thực thi xuất báo cáo trên SFC!");
-                    addLog("Đã thực thi xuất báo cáo trên SFC", 'success');
+                    showToast("Executed report export on SFC!");
+                    addLog("Executed report export on SFC", 'success');
                     closeFttStationModal();
                 } else {
-                    showToast(data.error || "Không thể xuất file FTT", false);
-                    addLog(`Lỗi xuất FTT: ${data.error || 'Thất bại'}`, 'warn');
+                    showToast(data.error || "Failed to export FTT report", false);
+                    addLog(`FTT Export error: ${data.error || 'Failed'}`, 'warn');
                 }
             } catch (err) {
                 console.error("FTT export error:", err);
-                showToast("Lỗi kết nối khi xuất FTT", false);
+                showToast("Connection error while exporting FTT", false);
             } finally {
                 if (targetBtn) {
                     targetBtn.disabled = false;
@@ -3551,7 +3551,7 @@
                     det.open = true;
                     det.style.marginTop = '16px';
                     det.innerHTML = `
-                        <summary style="cursor:pointer; font-weight:600;">Kết quả đã lưu</summary>
+                        <summary style="cursor:pointer; font-weight:600;">Saved Results</summary>
                         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;" id="saved-pills-row"></div>
                     `;
                     parent.appendChild(det);
@@ -3595,9 +3595,9 @@
             <div class="modal-header">
                 <h3>
                     <i class="fa-solid fa-layer-group" style="color:var(--accent-cyan);"></i>
-                    Chọn Station Xuất Báo Cáo FTT
+                    Select Station
                 </h3>
-                <button class="modal-close-btn" onclick="closeFttStationModal()" title="Đóng">
+                <button class="modal-close-btn" onclick="closeFttStationModal()" title="Close">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -3605,16 +3605,16 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div style="font-size:13px; color:var(--text-secondary);">
                         <i class="fa-solid fa-calendar-days" style="color:var(--accent-cyan); margin-right:6px;"></i>
-                        Khoảng ngày: <strong id="ftt-modal-date-range" style="color:var(--text-primary);">2026-10-24 → 2026-10-24</strong>
+                        Date Range: <strong id="ftt-modal-date-range" style="color:var(--text-primary);">2026-10-24 → 2026-10-24</strong>
                     </div>
-                    <span style="font-size:12px; color:var(--accent-cyan); font-weight:600;" id="ftt-selected-count-badge">Đã chọn: 6/6 Trạm</span>
+                    <span style="font-size:12px; color:var(--accent-cyan); font-weight:600;" id="ftt-selected-count-badge">Selected: 6/6 Stations</span>
                 </div>
 
                 <!-- ALL toggle button card -->
                 <div class="ftt-station-item active" id="ftt-station-ALL" onclick="toggleFttAllStations()" style="grid-column: span 2; margin-bottom: 6px; border: 1.5px solid var(--accent-cyan);">
                     <div class="station-name">
                         <i class="fa-solid fa-asterisk" style="color:var(--accent-cyan);"></i>
-                        <strong>Tất cả Station (ALL - Mặc định)</strong>
+                        <strong>All Stations (ALL - Default)</strong>
                     </div>
                     <i class="fa-solid fa-circle-check check-icon" style="color:var(--accent-green);"></i>
                 </div>
@@ -3625,23 +3625,23 @@
 
                 <div style="margin-top:16px;">
                     <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:6px;">
-                        <i class="fa-regular fa-file"></i> Tên file tùy chỉnh (File Name - Tùy chọn):
+                        <i class="fa-regular fa-file"></i> File Name (Optional):
                     </label>
-                    <input type="text" id="ftt-filename-input" class="form-control" placeholder="Để trống để dùng tên file mặc định từ hệ thống SFC..." style="width:100%; font-size:13px; padding:10px 14px;">
+                    <input type="text" id="ftt-filename-input" class="form-control" placeholder="Leave empty to use default SFC filename..." style="width:100%; font-size:13px; padding:10px 14px;">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="dynamic-btn btn-export" id="btn-ftt-export-station" onclick="executeFttStationExport('station')" style="flex: 1.2; min-width: 170px;">
-                    <i class="fa-solid fa-file-excel"></i> Xuất Excel (OK)
+                    <i class="fa-solid fa-file-excel"></i> Export Excel (OK)
                 </button>
-                <button class="dynamic-btn" id="btn-ftt-export-nike" onclick="executeFttStationExport('nike')" style="flex: 1; min-width: 135px; background: #2563eb; color: #fff;">
-                    <i class="fa-solid fa-download"></i> Báo cáo NIKE
+                <button class="dynamic-btn" id="btn-ftt-export-nike" onclick="executeFttStationExport('nike')" style="flex: 1; min-width: 110px; background: #2563eb; color: #fff; font-weight: 700;">
+                    <i class="fa-solid fa-download"></i> NIKE
                 </button>
-                <button class="dynamic-btn" id="btn-ftt-export-internal" onclick="executeFttStationExport('internal')" style="flex: 1; min-width: 135px; background: #7c3aed; color: #fff;">
+                <button class="dynamic-btn" id="btn-ftt-export-internal" onclick="executeFttStationExport('internal')" style="flex: 1; min-width: 110px; background: #7c3aed; color: #fff; font-weight: 700;">
                     <i class="fa-solid fa-download"></i> Internal
                 </button>
                 <button class="dynamic-btn btn-primary" onclick="closeFttStationModal()" style="min-width: 80px;">
-                    Đóng
+                    Cancel
                 </button>
             </div>
         </div>
