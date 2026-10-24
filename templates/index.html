@@ -2198,8 +2198,8 @@
                     html += `
                     <div class="form-group" style="margin-bottom: 14px;">
                         <label style="display:flex; justify-content:space-between; align-items:center;">
-                            <span><i class="fa-solid fa-layer-group" style="color:var(--accent-cyan);"></i> ${d.label || (isDept ? 'Chọn Chuyền / Xưởng sản xuất (Mặc định: ALL)' : 'Tùy chọn danh mục')}:</span>
-                            <span style="font-size:11px; color:var(--accent-cyan); font-weight:600;">${d.options.length} lựa chọn</span>
+                            <span><i class="fa-solid fa-layer-group" style="color:var(--accent-cyan);"></i> ${d.label || (isDept ? 'Select Line / Workshop (Default: ALL)' : 'Options')}:</span>
+                            <span style="font-size:11px; color:var(--accent-cyan); font-weight:600;">${d.options.length} options</span>
                         </label>
                         <select id="adaptive-select-${d.id}" class="form-control" onchange="onSelectDropdownChanged('${d.id}', this.value, this.options[this.selectedIndex].text)">
                             ${d.options.map(opt => {
@@ -2213,7 +2213,7 @@
                         <div class="option-chips-row">
                             ${d.options.map((opt, oIdx) => {
                                 const isAllOpt = (opt.value === '' || (opt.text && (opt.text.toLowerCase() === 'all' || opt.text.toLowerCase().includes('tất cả'))));
-                                const chipLabel = isAllOpt ? (isDept ? 'Tất cả Chuyền (ALL)' : 'Tất cả (ALL)') : opt.text;
+                                const chipLabel = isAllOpt ? (isDept ? 'All Lines (ALL)' : 'All (ALL)') : opt.text;
                                 const isChipActive = currentSelected && (currentSelected.value === opt.value || currentSelected.text === opt.text || (isAllOpt && (!currentSelected || currentSelected.value === '')));
                                 return `
                                 <div class="option-chip ${isChipActive ? 'active' : ''}"
@@ -2231,7 +2231,7 @@
                 });
             }
 
-            // 3. Checkboxes (ví dụ NIKE)
+            // 3. Checkboxes (e.g. NIKE)
             if (insp.checkboxes && insp.checkboxes.length > 0) {
                 insp.checkboxes.forEach(c => {
                     html += `
@@ -2241,7 +2241,7 @@
                                    onchange="onToggleAdaptiveCheckbox('${c.id}', this.checked)"
                                    style="width:22px; height:22px; accent-color:#10b981; cursor:pointer;" />
                             <strong>${c.label}</strong>
-                            <span id="chk-status-${c.id}" style="color:var(--text-muted); font-size:12px;">${c.checked ? 'Bật (External)' : 'Tắt (Nội bộ)'}</span>
+                            <span id="chk-status-${c.id}" style="color:var(--text-muted); font-size:12px;">${c.checked ? 'Enabled (External)' : 'Disabled (Internal)'}</span>
                         </label>
                     </div>
                     `;
@@ -2322,10 +2322,10 @@
 
             const labelExport = document.getElementById('label-menu-export');
             if (labelExport) {
-                labelExport.innerText = `Xuất: ${opt.text}`;
+                labelExport.innerText = `Export: ${opt.text}`;
             }
 
-            showToast(isAll ? 'Đã chọn: Tất cả (ALL - Mặc định)' : `Đã chọn: ${opt.text}`);
+            showToast(isAll ? 'Selected: All (ALL - Default)' : `Selected: ${opt.text}`);
         }
 
         async function onSelectDropdownChanged(dropdownId, selectedValue, selectedText) {
@@ -2353,11 +2353,11 @@
             const btn = document.getElementById('btn-dynamic-menu-export') || document.getElementById(`btn-quick-export-${opt.index || 0}`);
             const origHtml = btn ? btn.innerHTML : '';
             if (btn) {
-                btn.innerHTML = '<span class="spinner"></span> Đang xuất...';
+                btn.innerHTML = '<span class="spinner"></span> Exporting...';
                 btn.disabled = true;
             }
 
-            addLog(`Đang kích hoạt xuất báo cáo: "${opt.text}"...`, 'info');
+            addLog(`Triggering report export: "${opt.text}"...`, 'info');
             try {
                 const res = await fetch('/api/page/execute', {
                     method: 'POST',
@@ -2370,8 +2370,8 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(`✅ Đã xuất báo cáo: ${opt.text}`);
-                    addLog(`Đã thực thi xuất báo cáo: ${opt.text}`, 'success');
+                    showToast(`✅ Exported report: ${opt.text}`);
+                    addLog(`Successfully executed report export: ${opt.text}`, 'success');
                     if (data.screenshot) {
                         document.getElementById('mirror-img').src = data.screenshot;
                     }
@@ -2380,11 +2380,11 @@
                         renderAdaptiveControls(data.inspection);
                     }
                 } else {
-                    showToast(data.error || 'Lỗi khi xuất báo cáo', false);
-                    addLog(`Lỗi: ${data.error}`, 'warn');
+                    showToast(data.error || 'Failed to export report', false);
+                    addLog(`Error: ${data.error}`, 'warn');
                 }
             } catch(e) {
-                showToast('Lỗi kết nối máy chủ', false);
+                showToast('Server connection error', false);
             } finally {
                 if (btn) {
                     btn.innerHTML = origHtml;
@@ -2402,11 +2402,11 @@
             const btn = document.getElementById(`btn-dyn-${buttonId}`);
             const origHtml = btn ? btn.innerHTML : '';
             if (btn) {
-                btn.innerHTML = '<span class="spinner"></span> Đang xử lý...';
+                btn.innerHTML = '<span class="spinner"></span> Processing...';
                 btn.disabled = true;
             }
 
-            addLog(`Đang bấm nút: "${label || buttonId}"...`, 'info');
+            addLog(`Triggering action: "${label || buttonId}"...`, 'info');
             try {
                 const currentSelections = {};
                 for (let k in selectedDropdownOptions) {
@@ -3355,14 +3355,37 @@
             }
         }
 
-        // FTT Station Modal Functions
+        // FTT Station Modal Functions & Mappings (Enforced Official English)
+        const STATION_EN_MAP = {
+            'T01': 'Cutting',
+            'T09': 'Stitching',
+            'T11': 'Assembly',
+            'T22': 'HFPA',
+            'T23': 'Assembly IPQC',
+            'T24': 'Stockfitting',
+            'Chặt': 'Cutting',
+            'May': 'Stitching',
+            'Thành hình': 'Assembly',
+            'Thành hình IPQC': 'Assembly IPQC',
+            'Gia công đế': 'Stockfitting'
+        };
+
+        const STATION_ICONS = {
+            'T01': 'fa-scissors',
+            'T09': 'fa-shirt',
+            'T11': 'fa-shoe-prints',
+            'T22': 'fa-award',
+            'T23': 'fa-clipboard-check',
+            'T24': 'fa-wrench'
+        };
+
         const FTT_DEFAULT_STATIONS = [
-            { index: 0, text: 'Chặt', value: 'T01', icon: 'fa-scissors' },
-            { index: 1, text: 'May', value: 'T09', icon: 'fa-shirt' },
-            { index: 2, text: 'Thành hình', value: 'T11', icon: 'fa-shoe-prints' },
+            { index: 0, text: 'Cutting', value: 'T01', icon: 'fa-scissors' },
+            { index: 1, text: 'Stitching', value: 'T09', icon: 'fa-shirt' },
+            { index: 2, text: 'Assembly', value: 'T11', icon: 'fa-shoe-prints' },
             { index: 3, text: 'HFPA', value: 'T22', icon: 'fa-award' },
-            { index: 4, text: 'Thành hình IPQC', value: 'T23', icon: 'fa-clipboard-check' },
-            { index: 5, text: 'Gia công đế', value: 'T24', icon: 'fa-wrench' }
+            { index: 4, text: 'Assembly IPQC', value: 'T23', icon: 'fa-clipboard-check' },
+            { index: 5, text: 'Stockfitting', value: 'T24', icon: 'fa-wrench' }
         ];
 
         let selectedFttStations = new Set(['T01', 'T09', 'T11', 'T22', 'T23', 'T24']);
@@ -3420,12 +3443,13 @@
 
             grid.innerHTML = stations.map(st => {
                 const isSel = selectedFttStations.has(st.value);
-                const icon = st.icon || 'fa-industry';
+                const displayName = STATION_EN_MAP[st.value] || STATION_EN_MAP[st.text] || st.text;
+                const icon = st.icon || STATION_ICONS[st.value] || 'fa-industry';
                 return `
                 <div class="ftt-station-item ${isSel ? 'active' : ''}" id="ftt-st-${st.value}" onclick="toggleFttStation('${st.value}')">
                     <div class="station-name">
                         <i class="fa-solid ${icon}" style="color:var(--accent-cyan); font-size:16px;"></i>
-                        <span>${st.text}</span>
+                        <span>${displayName}</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span class="station-badge">${st.value}</span>
@@ -3620,7 +3644,7 @@
                 </div>
 
                 <div class="ftt-station-grid" id="ftt-station-grid">
-                    <!-- Dynamic station items populated by JS: Chặt, May, Thành hình, HFPA, Thành hình IPQC, Gia công đế -->
+                    <!-- Dynamic station items populated by JS: Cutting, Stitching, Assembly, HFPA, Assembly IPQC, Stockfitting -->
                 </div>
 
                 <div style="margin-top:16px;">

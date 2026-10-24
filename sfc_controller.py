@@ -78,6 +78,25 @@ def get_connection_status():
         CONNECTION_STATUS_LOCK.release()
     return dict(CONNECTION_STATUS_CACHE, mqaa_status=MQAA_STATUS)
 
+def ensure_sfc_english(page_or_context):
+    try:
+        ctx = page_or_context if hasattr(page_or_context, 'cookies') else getattr(page_or_context, 'context', None)
+        if not ctx:
+            return
+        cookies_to_add = []
+        existing = {c['name']: c['value'] for c in ctx.cookies() if 'chingluh' in c.get('domain', '')}
+        for pl in SEVEN_FACTORIES:
+            k = f'MyLanguageName{pl}'
+            if existing.get(k) != 'en':
+                cookies_to_add.append({'name': k, 'value': 'en', 'domain': 'sfc.chingluh.com', 'path': '/'})
+        if existing.get('MyLanguageName') != 'en':
+            cookies_to_add.append({'name': 'MyLanguageName', 'value': 'en', 'domain': 'sfc.chingluh.com', 'path': '/'})
+        if cookies_to_add:
+            ctx.add_cookies(cookies_to_add)
+    except Exception:
+        pass
+
+
 def get_sfc_page(browser):
     from urllib.parse import urlparse
     page = next((pg for ctx in browser.contexts for pg in ctx.pages
@@ -88,6 +107,7 @@ def get_sfc_page(browser):
         raise RuntimeError('Phiên SFC chưa đăng nhập. Vui lòng đăng nhập trên cửa sổ Chrome SFC rồi thử lại.')
     page.set_default_timeout(SFC_WAIT_MS)
     page.set_default_navigation_timeout(SFC_WAIT_MS)
+    ensure_sfc_english(page)
     return page
 
 
@@ -389,7 +409,7 @@ INSPECT_JS = """() => {
                         id: name,
                         input_id: name + '_I',
                         name: name,
-                        label: name.toLowerCase().includes('from') ? 'Từ ngày (Date From)' : (name.toLowerCase().includes('to') ? 'Đến ngày (Date To)' : 'Ngày'),
+                        label: name.toLowerCase().includes('from') ? 'Date From' : (name.toLowerCase().includes('to') ? 'Date To' : 'Date'),
                         value: ctrl.GetText(),
                         type: 'date'
                     });
@@ -410,7 +430,7 @@ INSPECT_JS = """() => {
                             index: j,
                             id: subDomId,
                             name: sub.name || ('SUB_' + j),
-                            text: subText || ('Tùy chọn ' + (j + 1)),
+                            text: subText || ('Option ' + (j + 1)),
                             value: sub.name || subText
                         });
                     }
@@ -419,7 +439,7 @@ INSPECT_JS = """() => {
                         root_dom_id: name + '_DXI0_',
                         name: name,
                         type: 'menu_dropdown',
-                        label: name.toLowerCase().includes('export') ? 'Tùy chọn Xuất báo cáo COPQ' : 'Menu thả xuống',
+                        label: name.toLowerCase().includes('export') ? 'COPQ Report Export Options' : 'Dropdown Menu',
                         selected: subOptions[0] ? subOptions[0].text : '',
                         item_count: subOptions.length,
                         options: subOptions
@@ -429,8 +449,8 @@ INSPECT_JS = """() => {
                     const items = [];
                     const isChuyen = name.toLowerCase().includes('dept') || name.toLowerCase().includes('chuyen') || name.toLowerCase().includes('line');
                     
-                    // LUÔN LUÔN thêm option ALL làm mặc định cho MỌI dropdown chọn lọc
-                    const allText = isChuyen ? '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' : '-- Tất cả (ALL - Mặc định) --';
+                    // Always include ALL as default for all dropdowns
+                    const allText = isChuyen ? '-- All Lines / Workshops (ALL - Default) --' : '-- All (ALL - Default) --';
                     items.push({ value: '', text: allText, is_all: true });
 
                     for (let i = 0; i < ctrl.GetItemCount(); i++) {
@@ -442,11 +462,11 @@ INSPECT_JS = """() => {
                         }
                     }
                     if (items.length > 0) {
-                        let label = isChuyen ? 'Chọn Chuyền / Xưởng sản xuất (Mặc định: ALL)' : 'Chọn Tiêu chí lọc';
-                        if (name.toLowerCase().includes('category')) label = 'Phân loại (Mặc định: ALL)';
-                        else if (name.toLowerCase().includes('type')) label = 'Hạng mục lỗi (Mặc định: ALL)';
-                        else if (name.toLowerCase().includes('reason')) label = 'Mã nguyên nhân / Lý do (Mặc định: ALL)';
-                        else if (name.toLowerCase().includes('kind')) label = 'Loại kiểm tra (Mặc định: ALL)';
+                        let label = isChuyen ? 'Select Line / Workshop (Default: ALL)' : 'Filter Criteria';
+                        if (name.toLowerCase().includes('category')) label = 'Category (Default: ALL)';
+                        else if (name.toLowerCase().includes('type')) label = 'Defect Type (Default: ALL)';
+                        else if (name.toLowerCase().includes('reason')) label = 'Reason Code (Default: ALL)';
+                        else if (name.toLowerCase().includes('kind')) label = 'Inspection Kind (Default: ALL)';
 
                         // Mặc định luôn là ALL
                         const defaultSelected = allText;
@@ -526,23 +546,39 @@ INSPECT_JS = """() => {
         }
     }
 
-    // Trích xuất danh sách Station cho hệ thống FTT
+    // Extract Station list for FTT system in official English
+    const stationEnMap = {
+        'T01': 'Cutting',
+        'T09': 'Stitching',
+        'T11': 'Assembly',
+        'T22': 'HFPA',
+        'T23': 'Assembly IPQC',
+        'T24': 'Stockfitting',
+        'Chặt': 'Cutting',
+        'May': 'Stitching',
+        'Thành hình': 'Assembly',
+        'Thành hình IPQC': 'Assembly IPQC',
+        'Gia công đế': 'Stockfitting'
+    };
     const fttStations = [];
     const isQAPage = pageInfo.pathname.includes('QA.aspx');
     const chkl = elements['rpnlMain_ContentPlaceHolder1_popupSetArea_chklStation'];
     if (chkl && typeof chkl.GetItemCount === 'function' && chkl.GetItemCount() > 0) {
         for (let i = 0; i < chkl.GetItemCount(); i++) {
             const it = chkl.GetItem(i);
-            if (it) fttStations.push({ index: i, text: it.text, value: it.value });
+            if (it) {
+                const enName = stationEnMap[it.value] || stationEnMap[it.text] || it.text;
+                fttStations.push({ index: i, text: enName, value: it.value });
+            }
         }
     } else if (isQAPage) {
         fttStations.push(
-            { index: 0, text: 'Chặt', value: 'T01' },
-            { index: 1, text: 'May', value: 'T09' },
-            { index: 2, text: 'Thành hình', value: 'T11' },
+            { index: 0, text: 'Cutting', value: 'T01' },
+            { index: 1, text: 'Stitching', value: 'T09' },
+            { index: 2, text: 'Assembly', value: 'T11' },
             { index: 3, text: 'HFPA', value: 'T22' },
-            { index: 4, text: 'Thành hình IPQC', value: 'T23' },
-            { index: 5, text: 'Gia công đế', value: 'T24' }
+            { index: 4, text: 'Assembly IPQC', value: 'T23' },
+            { index: 5, text: 'Stockfitting', value: 'T24' }
         );
     }
 
@@ -848,7 +884,7 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
                 LAST_STATUS_TIME = 0
 
                 downloaded_file_info = locals().get('downloaded_file')
-                msg = f"Đã xuất thành công: {downloaded_file_info['name']}" if downloaded_file_info else "Đã thực thi thao tác trên SFC thành công."
+                msg = f"Exported successfully: {downloaded_file_info['name']}" if downloaded_file_info else "Executed action on SFC successfully."
                 return {
                     "success": True,
                     "action": action_type,
