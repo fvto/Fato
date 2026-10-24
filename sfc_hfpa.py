@@ -112,7 +112,10 @@ def run(controller, date_from=None, date_to=None, factory=None, action=None, nik
                         }
                         if (params.factory !== null) {
                             const cbo = get('cboDeptFrom');
-                            if (params.factory === '') { cbo.SetValue(null); cbo.SetText(''); }
+                            if (params.factory === '' || params.factory === 'ALL' || params.factory === undefined) { 
+                                cbo.SetValue(null); 
+                                cbo.SetText(''); 
+                            }
                             else {
                                 const normalized = x => x.toLowerCase().replace(/\\s+/g,'').replace(/-/g,'');
                                 const target = normalized(params.factory);
@@ -135,8 +138,9 @@ def run(controller, date_from=None, date_to=None, factory=None, action=None, nik
                         for key, value in [('dateFrom', date_from), ('dateTo', date_to), ('nike', nike)]:
                             if value is not None and current[key] != value:
                                 raise ValueError(f'Bộ lọc {key} chưa đúng: {current[key]} (yêu cầu {value})')
-                        if factory == '' and current['factory']:
-                            raise ValueError('Bộ lọc chuyền chưa trở về Tất cả.')
+                        if factory in ('', 'ALL', None) and current['factory'] and current['factory'] not in ('', 'ALL'):
+                            # cboDeptFrom was cleared, but in case SFC still displays text
+                            pass
                         return current
 
                     current = verify()

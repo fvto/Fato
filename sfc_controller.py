@@ -37,7 +37,9 @@ URL_MAPPING = {
     "mqaa": "https://sfc.chingluh.com/vhmes/QA/MQAACheck.aspx",
     "mqaa_report": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx",
     "aql": "https://sfc.chingluh.com/vhmes/QA/AQLTracking.aspx",
-    "copq": "https://sfc.chingluh.com/vhmes/QA/QARecordCOPQ.aspx",
+    "copq": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx",
+    "copq_report": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx",
+    "copq_record": "https://sfc.chingluh.com/vhmes/QA/QARecordCOPQ.aspx",
     "bond_test": "https://sfc.chingluh.com/vhmes/QA/BondTest.aspx",
     "qa_analysis": "https://sfc.chingluh.com/vhmes/QA/QAAnalysis.aspx"
 }
@@ -343,6 +345,23 @@ INSPECT_JS = """() => {
         pathname: location.pathname
     };
 
+    const isGarbage = (name) => {
+        const n = name.toLowerCase();
+        return n.includes('_ddd') || n.includes('_fnp') || n.includes('dxfreditor') ||
+               n.includes('dxhfp') || n.includes('dxcbtn') || n.includes('_cell') ||
+               n.includes('dxpager') || n.includes('dxp-') || n.includes('pcupdatecost') ||
+               n.includes('titlename') || (n.includes('grd') && !n.includes('btn') && !n.includes('cbo')) ||
+               n.includes('txttmp') || n.includes('lbl_msg') || n.includes('popupmsg') ||
+               n.endsWith('_i') || n.endsWith('_b') || n.endsWith('_t') || n.endsWith('_d');
+    };
+
+    const isVisible = (el) => {
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+    };
+
     const dateInputs = [];
     const dropdowns = [];
     const buttons = [];
@@ -354,10 +373,14 @@ INSPECT_JS = """() => {
             if (!ctrl || !ctrl.name) continue;
             const name = ctrl.name;
 
-            if (name.includes('_DDD_') || name.includes('_FNP') || name.includes('DXFREditor') || name.includes('DXHFP')) continue;
+            if (isGarbage(name)) continue;
+
+            const domEl = document.getElementById(name) || document.getElementById(name + '_I');
+            if (domEl && !isVisible(domEl)) continue;
+            if (domEl && (domEl.closest('.dxpc-mainDiv') || domEl.closest('.dxgvTable') || domEl.closest('table[id*="grd"]'))) continue;
 
             // 1. Date Edits
-            if (name.toLowerCase().includes('date') || name.includes('dtDate')) {
+            if ((name.toLowerCase().includes('date') || name.includes('dtDate')) && !name.toLowerCase().includes('btn')) {
                 if (typeof ctrl.GetText === 'function') {
                     dateInputs.push({
                         id: name,
@@ -393,7 +416,7 @@ INSPECT_JS = """() => {
                         root_dom_id: name + '_DXI0_',
                         name: name,
                         type: 'menu_dropdown',
-                        label: name.toLowerCase().includes('export') ? 'Tùy chọn Xuất báo cáo / File' : 'Menu thả xuống',
+                        label: name.toLowerCase().includes('export') ? 'Tùy chọn Xuất báo cáo COPQ' : 'Menu thả xuống',
                         selected: subOptions[0] ? subOptions[0].text : '',
                         item_count: subOptions.length,
                         options: subOptions
@@ -401,19 +424,32 @@ INSPECT_JS = """() => {
                 }
                 else if (name.toLowerCase().includes('cbo') || name.toLowerCase().includes('dept') || name.toLowerCase().includes('combo')) {
                     const items = [];
+                    const isChuyen = name.toLowerCase().includes('dept') || name.toLowerCase().includes('chuyen') || name.toLowerCase().includes('line');
+                    if (isChuyen) {
+                        items.push({ value: '', text: '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' });
+                    }
                     for (let i = 0; i < ctrl.GetItemCount(); i++) {
                         const it = ctrl.GetItem(i);
                         if (it && it.text) {
-                            items.push({ value: it.value || it.text, text: it.text.trim() });
+                            const txt = it.text.trim();
+                            if (isChuyen && (txt === '' || txt.toLowerCase().includes('tất cả') || txt.toLowerCase().includes('all'))) continue;
+                            items.push({ value: it.value || txt, text: txt });
                         }
                     }
                     if (items.length > 0) {
+                        let label = isChuyen ? 'Chọn Chuyền / Xưởng sản xuất (Mặc định: ALL)' : 'Chọn Tiêu chí lọc';
+                        if (name.toLowerCase().includes('category')) label = 'Phân loại (Internal / External)';
+                        else if (name.toLowerCase().includes('type')) label = 'Hạng mục lỗi';
+
+                        const currentTxt = ctrl.GetText ? ctrl.GetText().trim() : '';
+                        const defaultSelected = (isChuyen && (!currentTxt || currentTxt === 'ALL')) ? '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' : (currentTxt || items[0].text);
+
                         dropdowns.push({
                             id: name,
                             name: name,
                             type: 'combobox',
-                            label: 'Chọn Chuyền / Xưởng hoặc Tiêu chí',
-                            selected: ctrl.GetText ? ctrl.GetText() : (items[0] ? items[0].text : ''),
+                            label: label,
+                            selected: defaultSelected,
                             item_count: items.length,
                             options: items.slice(0, 200)
                         });
@@ -423,7 +459,6 @@ INSPECT_JS = """() => {
 
             // 3. Checkboxes
             else if (typeof ctrl.GetChecked === 'function' && (name.includes('ckb') || name.toLowerCase().includes('check'))) {
-                const domEl = document.getElementById(name);
                 const label = domEl ? (domEl.innerText || domEl.getAttribute('title') || name.split('_').pop()) : name;
                 checkboxes.push({
                     id: name,
@@ -435,18 +470,17 @@ INSPECT_JS = """() => {
             }
 
             // 4. Buttons
-            else if (name.toLowerCase().includes('btn') || (typeof ctrl.DoClick === 'function' && !name.includes('RoundPanel'))) {
-                const domEl = document.getElementById(name);
-                let label = ctrl.GetText ? ctrl.GetText() : '';
-                if (!label && domEl) {
-                    label = domEl.innerText || domEl.getAttribute('title') || '';
-                }
+            else if (name.toLowerCase().includes('btn') || typeof ctrl.DoClick === 'function') {
+                let label = ctrl.GetText ? ctrl.GetText() : (domEl ? (domEl.innerText || domEl.getAttribute('title') || '') : '');
                 if (!label) {
                     if (name.toLowerCase().includes('search')) label = 'Tìm kiếm dữ liệu';
                     else if (name.toLowerCase().includes('export') || name.toLowerCase().includes('excel')) label = 'Xuất file Excel';
                     else if (name.toLowerCase().includes('flowchart') || name.toLowerCase().includes('home')) label = 'Trang chủ FlowChart';
+                    else if (name.toLowerCase().includes('update')) label = 'Cập nhật';
+                    else if (name.toLowerCase().includes('clear')) label = 'Xóa bộ lọc';
                     else label = name.split('_').pop();
                 }
+                if (!label || !label.trim()) continue;
 
                 let icon = 'bolt';
                 let btnType = 'primary';
@@ -475,23 +509,6 @@ INSPECT_JS = """() => {
             }
         }
     }
-
-    document.querySelectorAll('select').forEach((sel, idx) => {
-        if (!dropdowns.some(d => d.id === sel.id)) {
-            const options = Array.from(sel.options).map(o => ({ value: o.value, text: o.text.trim() }));
-            if (options.length > 0) {
-                dropdowns.push({
-                    id: sel.id || ('select_' + idx),
-                    name: sel.name || sel.id,
-                    type: 'html_select',
-                    label: sel.getAttribute('title') || 'Danh mục lựa chọn',
-                    selected: sel.options[sel.selectedIndex]?.text || '',
-                    item_count: options.length,
-                    options: options.slice(0, 150)
-                });
-            }
-        }
-    });
 
     return {
         page: pageInfo,
@@ -572,18 +589,22 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
                 elif action_type == 'select_menu':
                     root_id = target_id
                     sub_id = params.get('sub_id')
-                    root_el = page.query_selector(f"#{root_id}_DXI0_") or page.query_selector(f"#{root_id}")
-                    if root_el:
-                        root_el.hover()
-                        time.sleep(0.3)
-                    sub_el = page.query_selector(f"#{sub_id}")
-                    if sub_el:
-                        sub_el.click()
-                    else:
-                        page.evaluate("""(sid) => {
-                            const el = document.getElementById(sid);
-                            if (el) el.click();
-                        }""", sub_id)
+                    index = params.get('index', 0)
+                    root_selector = f"#{root_id}_DXI0_"
+                    sub_selector = f"#{sub_id}" if sub_id else f"#{root_id}_DXI0i{index}_"
+                    try:
+                        if page.query_selector(root_selector):
+                            page.hover(root_selector)
+                            time.sleep(0.3)
+                        if page.query_selector(sub_selector):
+                            page.click(sub_selector)
+                        else:
+                            page.evaluate("""({sid}) => {
+                                const el = document.getElementById(sid);
+                                if (el) el.click();
+                            }""", {"sid": sub_id or f"{root_id}_DXI0i{index}_"})
+                    except Exception as me:
+                        print("Menu click error:", me)
                     time.sleep(1.5)
 
                 # 3. Bấm nút hành động (Tìm kiếm, Xuất...)
@@ -605,14 +626,22 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
 
                 # 4. Chọn ComboBox
                 elif action_type == 'select_combobox':
-                    val = params.get('value')
-                    txt = params.get('text')
+                    val = params.get('value', '')
+                    txt = params.get('text', '')
                     page.evaluate("""({cid, v, t}) => {
                         const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
                         const cbo = coll ? coll.Get(cid) : null;
-                        if (cbo && typeof cbo.FindItemByText === 'function') {
-                            const it = cbo.FindItemByText(t) || cbo.FindItemByValue(v);
-                            if (it) cbo.SetSelectedItem(it);
+                        if (cbo) {
+                            if (!v || v === 'ALL' || (t && (t.includes('Tất cả') || t.includes('ALL')))) {
+                                if (typeof cbo.SetValue === 'function') cbo.SetValue(null);
+                                if (typeof cbo.SetText === 'function') cbo.SetText('');
+                            } else if (typeof cbo.FindItemByText === 'function') {
+                                const it = cbo.FindItemByText(t) || cbo.FindItemByValue(v);
+                                if (it) cbo.SetSelectedItem(it);
+                                else if (typeof cbo.SetText === 'function') cbo.SetText(t || v);
+                            } else if (typeof cbo.SetValue === 'function') {
+                                cbo.SetValue(v);
+                            }
                         } else {
                             const sel = document.getElementById(cid);
                             if (sel) {

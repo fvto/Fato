@@ -676,9 +676,20 @@
         /* Quick Destination Tiles */
         .nav-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
             margin-bottom: 16px;
+        }
+
+        @media (max-width: 992px) {
+            .nav-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 640px) {
+            .nav-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .nav-tile {
@@ -1398,22 +1409,27 @@
                         </div>
                     </div>
                     <div class="nav-grid">
-                        <div class="nav-tile" onclick="navTo('hfpa')">
+                        <div class="nav-tile" onclick="navTo('hfpa')" title="Mở trang QA HFPA (Q504)">
                             <i class="fa-solid fa-clipboard-list"></i>
                             <span class="title">QA HFPA</span>
                             <span class="sub">Mã Q504</span>
                         </div>
-                        <div class="nav-tile" onclick="navTo('mqaa')">
+                        <div class="nav-tile" onclick="navTo('copq')" title="Mở trang COPQ Report với 3 tùy chọn xuất" style="border-color: rgba(16, 185, 129, 0.45); background: rgba(16, 185, 129, 0.08);">
+                            <i class="fa-solid fa-file-excel" style="color:var(--accent-green);"></i>
+                            <span class="title" style="color:#34d399;">COPQ Report</span>
+                            <span class="sub" style="color:#a7f3d0;">3 Dạng Xuất</span>
+                        </div>
+                        <div class="nav-tile" onclick="navTo('mqaa')" title="Kiểm toán 21 Mẫu MQAA">
                             <i class="fa-solid fa-shoe-prints"></i>
                             <span class="title">MQAA Check</span>
                             <span class="sub">Kiểm toán 21 Mẫu</span>
                         </div>
-                        <div class="nav-tile" onclick="navTo('qms')">
+                        <div class="nav-tile" onclick="navTo('qms')" title="Cây Quản trị QMS">
                             <i class="fa-solid fa-diagram-project"></i>
                             <span class="title">QMS Quality</span>
                             <span class="sub">Cây Quản trị QA</span>
                         </div>
-                        <div class="nav-tile" onclick="navTo('home')">
+                        <div class="nav-tile" onclick="navTo('home')" title="Trang chủ SFC FlowChart">
                             <i class="fa-solid fa-house"></i>
                             <span class="title">SFC Portal</span>
                             <span class="sub">Trang chủ FlowChart</span>
@@ -1657,28 +1673,93 @@
 
             let html = '';
 
-            // 1. Dropdown & Menu
-            if (insp.dropdowns && insp.dropdowns.length > 0) {
-                insp.dropdowns.forEach((d) => {
+            const pathname = (insp.page && (insp.page.pathname || insp.page.url || '')) || '';
+            const isRecordPage = pathname.includes('QARecordCOPQ');
+
+            // 0. Smart Banner: If on QARecordCOPQ, provide 1-click switch to COPQ Report
+            if (isRecordPage) {
+                html += `
+                <div class="copq-switch-banner" style="background: linear-gradient(135deg, rgba(37,99,235,0.18), rgba(6,182,212,0.18)); border: 1px solid rgba(59,130,246,0.4); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:38px; height:38px; border-radius:10px; background:rgba(59,130,246,0.25); display:flex; align-items:center; justify-content:center; color:#60a5fa; font-size:18px;">
+                            <i class="fa-solid fa-lightbulb"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight:700; font-size:13px; color:#f8fafc;">Bạn đang ở màn hình Nhập liệu CoPQ (QARecordCOPQ)</div>
+                            <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Để tải <strong>3 dạng báo cáo COPQ</strong> (1. Report COPQ, 2. COPQ Data, 3. COPQ By Monthly), hãy chuyển sang trang Báo cáo.</div>
+                        </div>
+                    </div>
+                    <button class="dynamic-btn btn-export" style="padding: 8px 16px; font-size: 13px; border-radius: 10px; white-space: nowrap; font-weight:700;" onclick="navTo('copq')">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i> Chuyển sang COPQ Report
+                    </button>
+                </div>
+                `;
+            }
+
+            // 1. Dedicated COPQ Menu Options (If ASPxMenu with sub-items is detected)
+            const menuDropdown = insp.dropdowns ? insp.dropdowns.find(d => d.type === 'menu_dropdown') : null;
+            if (menuDropdown && menuDropdown.options && menuDropdown.options.length > 0) {
+                const curr = selectedDropdownOptions[menuDropdown.id] || menuDropdown.options[0];
+                html += `
+                <div class="menu-export-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15)); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 14px; padding: 18px; margin-bottom: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.2);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+                        <div style="display:flex; align-items:center; gap:10px; font-weight:700; color:var(--text-primary); font-size:15px;">
+                            <i class="fa-solid fa-file-excel" style="color:var(--accent-green); font-size:20px;"></i>
+                            3 Tùy Chọn Xuất Báo Cáo COPQ (Excel):
+                        </div>
+                        <span style="background:rgba(16,185,129,0.25); color:#34d399; font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px; border:1px solid rgba(52,211,153,0.3);">
+                            <i class="fa-solid fa-check"></i> 3 Dạng Báo Cáo
+                        </span>
+                    </div>
+                    <div class="copq-options-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
+                        ${menuDropdown.options.map((opt, oIdx) => `
+                            <div class="option-chip ${(curr && (curr.value === opt.value || curr.id === opt.id)) ? 'active' : ''}"
+                                 id="chip-${menuDropdown.id}-${oIdx}"
+                                 style="padding: 14px 12px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; cursor:pointer;"
+                                 onclick="selectOptionChip('${menuDropdown.id}', ${oIdx})">
+                                <i class="fa-solid ${oIdx === 0 ? 'fa-file-lines' : (oIdx === 1 ? 'fa-table-cells' : 'fa-chart-column')}" style="font-size:20px;"></i>
+                                <span style="font-weight:700; font-size:13px;">${opt.text}</span>
+                                <span style="font-size:11px; opacity:0.85;">Bấm để tải nhanh</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="display:flex; gap: 10px; flex-wrap:wrap;">
+                        ${menuDropdown.options.map((opt, oIdx) => `
+                            <button class="dynamic-btn btn-export" style="flex:1; min-width:140px; font-size:13px; padding:10px 14px; font-weight:600;"
+                                    id="btn-quick-export-${oIdx}"
+                                    onclick="triggerDynamicMenuExportByIndex('${menuDropdown.id}', ${oIdx})">
+                                <i class="fa-solid fa-download"></i> Xuất: ${opt.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }
+
+            // 2. Standard Dropdown & ComboBox (excluding menu_dropdown already rendered)
+            const standardDropdowns = insp.dropdowns ? insp.dropdowns.filter(d => d.type !== 'menu_dropdown') : [];
+            if (standardDropdowns.length > 0) {
+                standardDropdowns.forEach((d) => {
                     const hasOptions = d.options && d.options.length > 0;
                     const defaultOpt = hasOptions ? d.options[0] : null;
                     if (!selectedDropdownOptions[d.id] && defaultOpt) {
                         selectedDropdownOptions[d.id] = defaultOpt;
                     }
                     const currentSelected = selectedDropdownOptions[d.id] || defaultOpt;
+                    const isDept = (d.id ? d.id.toLowerCase() : '').includes('dept') || (d.id ? d.id.toLowerCase() : '').includes('chuyen') || (d.id ? d.id.toLowerCase() : '').includes('line');
 
                     html += `
                     <div class="form-group" style="margin-bottom: 14px;">
                         <label style="display:flex; justify-content:space-between; align-items:center;">
-                            <span><i class="fa-solid fa-layer-group" style="color:var(--accent-cyan);"></i> ${d.label || 'Tùy chọn danh mục'}:</span>
+                            <span><i class="fa-solid fa-layer-group" style="color:var(--accent-cyan);"></i> ${d.label || (isDept ? 'Chọn Chuyền / Xưởng sản xuất (Mặc định: ALL)' : 'Tùy chọn danh mục')}:</span>
                             <span style="font-size:11px; color:var(--accent-cyan); font-weight:600;">${d.options ? d.options.length : 0} lựa chọn</span>
                         </label>
-                        <select id="adaptive-select-${d.id}" class="form-control" onchange="onSelectDropdownChanged('${d.id}', this.value)">
+                        <select id="adaptive-select-${d.id}" class="form-control" onchange="onSelectDropdownChanged('${d.id}', this.value, this.options[this.selectedIndex].text)">
                             ${hasOptions ? d.options.map(opt => `
                                 <option value="${opt.value || opt.id}" ${currentSelected && (currentSelected.value === opt.value || currentSelected.id === opt.id) ? 'selected' : ''}>
                                     ${opt.text}
                                 </option>
-                            `).join('') : '<option value="">(Không có lựa chọn)</option>'}
+                            `).join('') : '<option value="">-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --</option>'}
                         </select>
 
                         ${hasOptions && d.options.length <= 6 ? `
@@ -1687,7 +1768,7 @@
                                 <div class="option-chip ${currentSelected && (currentSelected.value === opt.value || currentSelected.id === opt.id) ? 'active' : ''}"
                                      id="chip-${d.id}-${oIdx}"
                                      onclick="selectOptionChip('${d.id}', ${oIdx})">
-                                    <i class="fa-solid ${oIdx === 0 ? 'fa-file-lines' : (oIdx === 1 ? 'fa-table-cells' : 'fa-chart-column')}"></i>
+                                    <i class="fa-solid ${oIdx === 0 ? 'fa-tag' : 'fa-check'}"></i>
                                     ${opt.text}
                                 </div>
                             `).join('')}
@@ -1698,7 +1779,7 @@
                 });
             }
 
-            // 2. Checkboxes (ví dụ NIKE)
+            // 3. Checkboxes (ví dụ NIKE)
             if (insp.checkboxes && insp.checkboxes.length > 0) {
                 insp.checkboxes.forEach(c => {
                     html += `
@@ -1715,11 +1796,11 @@
                 });
             }
 
-            // 3. Date Inputs
+            // 4. Date Inputs
             if (insp.date_inputs && insp.date_inputs.length > 0) {
                 html += '<div class="form-row">';
                 insp.date_inputs.forEach((dt, idx) => {
-                    const isTo = dt.name.toLowerCase().includes('to') || idx === 1;
+                    const isTo = (dt.name ? dt.name.toLowerCase().includes('to') : false) || (dt.id ? dt.id.toLowerCase().includes('to') : false) || idx === 1;
                     html += `
                     <div class="form-group">
                         <label><i class="fa-regular ${isTo ? 'fa-calendar-check' : 'fa-calendar'}"></i> ${dt.label}:</label>
@@ -1731,19 +1812,8 @@
                 html += '</div>';
             }
 
-            // 4. Action Buttons
+            // 5. Action Buttons (Search, FlowChart, Update...)
             html += '<div class="dynamic-btn-row">';
-            if (insp.dropdowns && insp.dropdowns.some(d => d.type === 'menu_dropdown')) {
-                const menuD = insp.dropdowns.find(d => d.type === 'menu_dropdown');
-                const curr = selectedDropdownOptions[menuD.id] || (menuD.options ? menuD.options[0] : null);
-                const currLabel = curr ? curr.text : 'Xuất dữ liệu';
-                html += `
-                <button class="dynamic-btn btn-export" id="btn-dynamic-menu-export" onclick="triggerDynamicMenuExport('${menuD.id}')">
-                    <i class="fa-solid fa-file-excel"></i> <span id="label-menu-export">Xuất: ${currLabel}</span>
-                </button>
-                `;
-            }
-
             if (insp.buttons && insp.buttons.length > 0) {
                 insp.buttons.forEach(b => {
                     const isSearch = b.btn_type === 'search';
@@ -1756,7 +1826,6 @@
                     `;
                 });
             }
-
             html += '</div>';
 
             container.innerHTML = html;
@@ -1788,7 +1857,7 @@
             showToast(`Đã chọn: ${opt.text}`);
         }
 
-        function onSelectDropdownChanged(dropdownId, selectedValue) {
+        async function onSelectDropdownChanged(dropdownId, selectedValue, selectedText) {
             if (!currentInspectionData) return;
             const d = currentInspectionData.dropdowns.find(x => x.id === dropdownId);
             if (!d || !d.options) return;
@@ -1796,6 +1865,25 @@
             if (optIdx >= 0) {
                 selectOptionChip(dropdownId, optIdx);
             }
+            if (d.type === 'combobox') {
+                try {
+                    await fetch('/api/page/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action_type: 'select_combobox',
+                            target_id: dropdownId,
+                            params: { value: selectedValue, text: selectedText || '' }
+                        })
+                    });
+                    showToast(selectedValue ? `Đã chọn: ${selectedText || selectedValue}` : 'Đã chọn: Tất cả Chuyền / Xưởng (ALL - Mặc định)');
+                } catch(e) {}
+            }
+        }
+
+        async function triggerDynamicMenuExportByIndex(menuId, optionIdx) {
+            selectOptionChip(menuId, optionIdx);
+            await triggerDynamicMenuExport(menuId);
         }
 
         async function triggerDynamicMenuExport(menuId) {
@@ -1805,10 +1893,10 @@
             const opt = selectedDropdownOptions[menuId] || (d.options ? d.options[0] : null);
             if (!opt) return;
 
-            const btn = document.getElementById('btn-dynamic-menu-export');
+            const btn = document.getElementById('btn-dynamic-menu-export') || document.getElementById(`btn-quick-export-${opt.index || 0}`);
             const origHtml = btn ? btn.innerHTML : '';
             if (btn) {
-                btn.innerHTML = '<span class="spinner"></span> Đang xuất báo cáo...';
+                btn.innerHTML = '<span class="spinner"></span> Đang xuất...';
                 btn.disabled = true;
             }
 
@@ -2068,7 +2156,7 @@
                 const res = await fetch('/api/factories');
                 const data = await res.json();
                 const sel = document.getElementById('factory-select');
-                sel.innerHTML = '<option value="">-- Chọn Chuyền / Xưởng sản xuất --</option>';
+                sel.innerHTML = '<option value="" selected>-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --</option>';
                 if (data.factories) {
                     data.factories.forEach(f => {
                         const opt = document.createElement('option');
@@ -2431,28 +2519,25 @@
             const dateTo = document.getElementById('date-to').value;
             const factory = document.getElementById('factory-select').value;
 
-            if (action === 'excel' && !factory) {
-                if (!dateFrom || !dateTo || dateTo < dateFrom) {
-                    showToast('Vui lòng chọn khoảng ngày hợp lệ.', false);
-                    return;
-                }
-                document.getElementById('ai-prompt-input').value = `Xuất Excel HFPA ${currentActivePlant} từ ngày ${dateFrom} đến ngày ${dateTo} ${nike ? 'NIKE (external)' : 'nội bộ'}`;
-                await executeCommand();
+            if (!dateFrom || !dateTo || dateTo < dateFrom) {
+                showToast('Vui lòng chọn khoảng ngày hợp lệ.', false);
                 return;
             }
 
             const btn = action === 'search' ? document.getElementById('btn-run-search') : document.getElementById('btn-run-excel');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner"></span> Đang gửi lệnh...';
-            btn.disabled = true;
+            const orig = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<span class="spinner"></span> Đang gửi lệnh...';
+                btn.disabled = true;
+            }
 
-            addLog(`Đang thực hiện ${action === 'search' ? 'Tìm kiếm' : 'Xuất Excel'} Chuyền [${factory || 'Tất cả'} | ${dateFrom} -> ${dateTo}]...`, 'info');
+            addLog(`Đang thực hiện ${action === 'search' ? 'Tìm kiếm' : 'Xuất Excel'} Chuyền [${factory || 'Tất cả (ALL)'} | ${dateFrom} -> ${dateTo}]...`, 'info');
 
             try {
                 const res = await fetch('/api/action', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dateFrom, dateTo, factory, action, nike })
+                    body: JSON.stringify({ dateFrom, dateTo, factory: factory || '', action, nike })
                 });
                 const data = await res.json();
                 if (data.success) {

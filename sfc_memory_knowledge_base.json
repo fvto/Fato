@@ -159,7 +159,7 @@
       "href": "https://sfc.chingluh.com/vhmes/QA/AQLTracking.aspx"
     },
     {
-      "name": "Cost Of Poor Quality (CoPQ)",
+      "name": "Cost Of Poor Quality (CoPQ) - Nhập liệu Record",
       "href": "https://sfc.chingluh.com/vhmes/QA/QARecordCOPQ.aspx"
     },
     {
@@ -235,7 +235,7 @@
       "href": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx"
     },
     {
-      "name": "COPQ Report",
+      "name": "COPQ Report (3 Tùy chọn Xuất: 1.Report COPQ, 2.COPQ Data, 3.Monthly)",
       "href": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx"
     },
     {

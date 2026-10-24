@@ -12,6 +12,8 @@ from dashboard_paths import APP_ROOT, mqaa_master_file
 sys.stdout.reconfigure(encoding='utf-8')
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.jinja_env.auto_reload = True
 
 @app.before_request
 def prevent_overlapping_actions():
