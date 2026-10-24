@@ -244,7 +244,7 @@ def export_batch(controller, intent, prompt):
                 else:
                     for update in session.export_period(
                             first, last, intent['nike'],
-                            folder / f'HFPA_{plant}_{mode}_{first}_{last}', factory=intent['target_line'] or ''):
+                            folder / f'HFPA_{plant}_{mode}_{first}_{last}-{plant}', factory=intent['target_line'] or ''):
                         if update.get('message'):
                             yield event(4, 'running', f'[{count + 1}/{total}] ' + update['message'], completed=count, total=total)
                         if update.get('file'):
@@ -259,7 +259,7 @@ def export_batch(controller, intent, prompt):
                 yield event(4, 'running', f'[{count}/{total}] Đã lưu và kiểm tra {item["name"]}', completed=count, total=total, nike=intent['nike'])
             if intent['combine']:
                 yield event(4, 'running', f'Đang gộp {len(plant_files)} file của {plant}...')
-                path = folder / f'HFPA_{plant}_{mode}_{intent["date_from"]}_{intent["date_to"]}_Combined.xlsx'
+                path = folder / f'HFPA_{plant}_{mode}_{intent["date_from"]}_{intent["date_to"]}_Combined-{plant}.xlsx'
                 combined = combine_exports(plant_files, path, plant, intent['nike'])
                 manifest['combined_files'].append(combined)
                 save_manifest()

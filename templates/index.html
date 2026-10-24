@@ -2539,8 +2539,21 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(`✅ Exported report: ${opt.text}`);
-                    addLog(`Successfully executed report export: ${opt.text}`, 'success');
+                    if (data.downloaded_file) {
+                        const file = data.downloaded_file;
+                        showToast(`✅ Exported: ${file.name}`);
+                        addLog(`Downloaded file: ${file.name}`, 'success');
+                        const dlLink = document.createElement('a');
+                        dlLink.href = file.url;
+                        dlLink.download = file.name;
+                        document.body.appendChild(dlLink);
+                        dlLink.click();
+                        document.body.removeChild(dlLink);
+                        addSavedFilePill(file.name, file.url);
+                    } else {
+                        showToast(`✅ Exported report: ${opt.text}`);
+                        addLog(`Successfully executed report export: ${opt.text}`, 'success');
+                    }
                     if (data.screenshot) {
                         document.getElementById('mirror-img').src = data.screenshot;
                     }
@@ -2597,8 +2610,21 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(`✅ Đã thực thi nút: ${label}`);
-                    addLog(`Đã bấm nút "${label}" thành công`, 'success');
+                    if (data.downloaded_file) {
+                        const file = data.downloaded_file;
+                        showToast(`✅ Exported: ${file.name}`);
+                        addLog(`Downloaded file: ${file.name}`, 'success');
+                        const dlLink = document.createElement('a');
+                        dlLink.href = file.url;
+                        dlLink.download = file.name;
+                        document.body.appendChild(dlLink);
+                        dlLink.click();
+                        document.body.removeChild(dlLink);
+                        addSavedFilePill(file.name, file.url);
+                    } else {
+                        showToast(`✅ Executed action: ${label || buttonId}`);
+                        addLog(`Executed button "${label || buttonId}" successfully`, 'success');
+                    }
                     if (data.screenshot) {
                         document.getElementById('mirror-img').src = data.screenshot;
                     }
@@ -2607,8 +2633,8 @@
                         renderAdaptiveControls(data.inspection);
                     }
                 } else {
-                    showToast(data.error || 'Lỗi khi bấm nút', false);
-                    addLog(`Lỗi: ${data.error}`, 'warn');
+                    showToast(data.error || 'Failed to click button', false);
+                    addLog(`Error: ${data.error}`, 'warn');
                 }
             } catch(e) {
                 showToast('Lỗi kết nối máy chủ', false);

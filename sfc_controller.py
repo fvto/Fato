@@ -4,9 +4,11 @@ import re
 import json
 import time
 import base64
+import shutil
 import subprocess
 import threading
 from datetime import datetime
+from pathlib import Path
 from playwright.sync_api import sync_playwright
 from dashboard_paths import mqaa_workspace, mqaa_master_file
 
@@ -28,6 +30,25 @@ CONNECTION_STATUS_TIME = 0
 CONNECTION_STATUS_LOCK = threading.Lock()
 
 SEVEN_FACTORIES = ["VH4", "VH3", "VH2", "VH", "JVB", "JV2", "JV"]
+SELECTED_FACTORIES = ["VH"]
+
+def format_download_filename(filename, plant=None):
+    """
+    Đảm bảo mọi file xuất ra từ SFC đều có hậu tố mã nhà máy,
+    Ví dụ: QAStation_2026-10-24_2026-10-24.xlsx -> QAStation_2026-10-24_2026-10-24-VH.xlsx
+    """
+    if not filename:
+        return filename
+    path = Path(filename)
+    stem = path.stem
+    suffix = path.suffix
+    if not plant:
+        plant = SELECTED_FACTORIES[0] if SELECTED_FACTORIES else 'VH'
+    plant = str(plant).upper().strip()
+    plant_suffix = f"-{plant}"
+    if stem.endswith(plant_suffix):
+        return f"{stem}{suffix}"
+    return f"{stem}-{plant}{suffix}"
 
 URL_MAPPING = {
     "home": "https://sfc.chingluh.com/vhmes/FlowChart.aspx",
@@ -749,20 +770,57 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
                         }
                     }""", {"selections": selections, "bid": target_id})
 
-                    btn_el = page.query_selector(f"#{target_id}")
-                    if btn_el:
-                        btn_el.click()
-                    else:
-                        page.evaluate("""(bid) => {
-                            const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
-                            const ctrl = coll ? coll.Get(bid) : null;
-                            if (ctrl && typeof ctrl.DoClick === 'function') ctrl.DoClick();
-                            else {
-                                const el = document.getElementById(bid);
-                                if (el) el.click();
+                    is_export_click = any(k in (target_id or '').lower() for k in ['excel', 'export', 'xuat', 'download'])
+                    if is_export_click:
+                        try:
+                            with page.expect_download(timeout=15000) as dl_info:
+                                btn_el = page.query_selector(f"#{target_id}")
+                                if btn_el:
+                                    btn_el.click()
+                                else:
+                                    page.evaluate("""(bid) => {
+                                        const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                                        const ctrl = coll ? coll.Get(bid) : null;
+                                        if (ctrl && typeof ctrl.DoClick === 'function') ctrl.DoClick();
+                                        else {
+                                            const el = document.getElementById(bid);
+                                            if (el) el.click();
+                                        }
+                                    }""", target_id)
+                            dl = dl_info.value
+                            plant_to_use = actual_plant or current_plant or (SELECTED_FACTORIES[0] if SELECTED_FACTORIES else 'VH')
+                            formatted_name = format_download_filename(dl.suggested_filename, plant_to_use)
+                            export_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Report", "HFPAExports")
+                            os.makedirs(export_dir, exist_ok=True)
+                            save_path = os.path.join(export_dir, formatted_name)
+                            dl.save_as(save_path)
+                            if formatted_name != dl.suggested_filename:
+                                try:
+                                    shutil.copyfile(save_path, os.path.join(export_dir, dl.suggested_filename))
+                                except Exception:
+                                    pass
+                            downloaded_file = {
+                                "name": formatted_name,
+                                "url": f"/api/exports/{formatted_name}",
+                                "path": save_path
                             }
-                        }""", target_id)
-                    time.sleep(1.5)
+                        except Exception as dl_err:
+                            time.sleep(1.0)
+                    else:
+                        btn_el = page.query_selector(f"#{target_id}")
+                        if btn_el:
+                            btn_el.click()
+                        else:
+                            page.evaluate("""(bid) => {
+                                const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                                const ctrl = coll ? coll.Get(bid) : null;
+                                if (ctrl && typeof ctrl.DoClick === 'function') ctrl.DoClick();
+                                else {
+                                    const el = document.getElementById(bid);
+                                    if (el) el.click();
+                                }
+                            }""", target_id)
+                        time.sleep(1.5)
 
                 # 4. Chọn ComboBox
                 elif action_type == 'select_combobox':
@@ -900,13 +958,20 @@ def execute_dynamic_action(action_type, target_id=None, params=None):
                                 }
                             }""", target_btn_id)
                         dl = dl_info.value
+                        plant_to_use = actual_plant or current_plant or (SELECTED_FACTORIES[0] if SELECTED_FACTORIES else 'VH')
+                        formatted_name = format_download_filename(dl.suggested_filename, plant_to_use)
                         export_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Report", "HFPAExports")
                         os.makedirs(export_dir, exist_ok=True)
-                        save_path = os.path.join(export_dir, dl.suggested_filename)
+                        save_path = os.path.join(export_dir, formatted_name)
                         dl.save_as(save_path)
+                        if formatted_name != dl.suggested_filename:
+                            try:
+                                shutil.copyfile(save_path, os.path.join(export_dir, dl.suggested_filename))
+                            except Exception:
+                                pass
                         downloaded_file = {
-                            "name": dl.suggested_filename,
-                            "url": f"/api/exports/{dl.suggested_filename}",
+                            "name": formatted_name,
+                            "url": f"/api/exports/{formatted_name}",
                             "path": save_path
                         }
                     except Exception as dl_err:

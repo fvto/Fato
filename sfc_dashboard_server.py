@@ -1,6 +1,8 @@
 import os
 import sys
+import re
 import json
+import shutil
 import logging
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context, send_from_directory
 import openpyxl
@@ -22,11 +24,57 @@ def prevent_overlapping_actions():
     } and (sfc_command_jobs.running() or COMMAND_LOCK.locked()):
         return jsonify(success=False, error='Trợ lý đang chạy lệnh. Vui lòng chờ hoàn tất để tránh thay đổi bộ lọc.'), 409
 
+def format_download_filename(filename, plant=None):
+    if not filename:
+        return filename
+    stem, ext = os.path.splitext(filename)
+    if not plant:
+        m = re.search(r'[-_](VH\d?|JV[B2]?)\b', stem, re.IGNORECASE)
+        if m:
+            plant = m.group(1).upper()
+        else:
+            plant = getattr(sfc_controller, 'SELECTED_FACTORIES', ['VH'])[0]
+    plant = str(plant).upper().strip()
+    plant_suffix = f"-{plant}"
+    if stem.endswith(plant_suffix):
+        return f"{stem}{ext}"
+    return f"{stem}-{plant}{ext}"
+
 @app.route('/api/exports/<path:filename>')
 def api_export_file(filename):
     if not filename.lower().endswith(('.xls', '.xlsx')) or '.partial' in filename:
         return jsonify(error='Không phải file Excel đã hoàn tất.'), 404
-    return send_from_directory(EXPORT_ROOT, filename, as_attachment=True)
+
+    target_path = EXPORT_ROOT / filename
+    curr_plant = getattr(sfc_controller, 'SELECTED_FACTORIES', ['VH'])[0]
+
+    # If the file doesn't exist under the requested path, try alternative with or without plant suffix
+    if not target_path.is_file():
+        stem, ext = os.path.splitext(target_path.name)
+        parent = target_path.parent
+        # Try finding with -<plant>
+        alt1 = parent / f"{stem}-{curr_plant}{ext}"
+        if alt1.is_file():
+            target_path = alt1
+        else:
+            # Try removing -<plant> if requested with suffix
+            m = re.search(r'-(VH\d?|JV[B2]?)$', stem, re.IGNORECASE)
+            if m:
+                base_stem = stem[:m.start()]
+                alt2 = parent / f"{base_stem}{ext}"
+                if alt2.is_file():
+                    target_path = alt2
+
+    if not target_path.is_file():
+        return jsonify(error='File không tồn tại trên hệ thống.'), 404
+
+    # Determine factory for download_name
+    m = re.search(r'[-_](VH\d?|JV[B2]?)\b', target_path.stem, re.IGNORECASE)
+    plant = m.group(1).upper() if m else curr_plant
+
+    download_name = format_download_filename(target_path.name, plant)
+    rel_path = target_path.relative_to(EXPORT_ROOT)
+    return send_from_directory(EXPORT_ROOT, str(rel_path).replace('\\', '/'), as_attachment=True, download_name=download_name)
 
 @app.route("/api/health", methods=["GET"])
 def api_health():

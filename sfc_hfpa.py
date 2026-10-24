@@ -175,7 +175,7 @@ def run(controller, date_from=None, date_to=None, factory=None, action=None, nik
                             raise ValueError('SFC không trả về định dạng Excel: ' + download.suggested_filename)
                         if export_path is None:
                             run_id = datetime.now(timezone(timedelta(hours=7))).strftime('%Y%m%d_%H%M%S') + '_' + uuid4().hex[:6]
-                            export_path = EXPORT_ROOT / run_id / f'HFPA_{plant}_{"NIKE" if use_nike else "Internal"}_{current["dateFrom"]}_{current["dateTo"]}'
+                            export_path = EXPORT_ROOT / run_id / f'HFPA_{plant}_{"NIKE" if use_nike else "Internal"}_{current["dateFrom"]}_{current["dateTo"]}-{plant}'
                         destination = Path(str(export_path) + suffix)
                         destination.parent.mkdir(parents=True, exist_ok=True)
                         temporary = destination.with_suffix('.partial' + suffix)
