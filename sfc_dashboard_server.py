@@ -2,27 +2,54 @@ import os
 import sys
 import re
 import json
-import shutil
 import logging
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context, send_from_directory
 import openpyxl
 import sfc_controller
 import sfc_command_jobs
+import sfc_report_tools
 from sfc_commands import EXPORT_ROOT, COMMAND_LOCK
 from dashboard_paths import APP_ROOT, mqaa_master_file
+from sfc_downloads import EXCEL_EXTENSIONS
 
 sys.stdout.reconfigure(encoding='utf-8')
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.jinja_env.auto_reload = True
+from spreadsheet_compare_web import blueprint as comparison_blueprint
+app.register_blueprint(comparison_blueprint)
+from spreadsheet_combine_web import blueprint as combine_blueprint
+app.register_blueprint(combine_blueprint)
+
+
+@app.before_request
+def protect_local_report_mutations():
+    if request.method == 'POST' and request.path.startswith(('/api/report-tools/', '/api/compare/', '/api/combine/')):
+        origin = request.headers.get('Origin')
+        if origin and origin.rstrip('/') != request.host_url.rstrip('/'):
+            return jsonify(error='Chỉ chấp nhận thao tác từ trang Dashboard đang mở.'), 403
+
+
+@app.after_request
+def private_report_responses(response):
+    if request.path.startswith(('/api/report-tools', '/api/compare', '/api/combine')) or request.path in ('/reports', '/compare', '/combine'):
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
+
+
+@app.errorhandler(413)
+def upload_too_large(error):
+    return jsonify(error='Tổng file vượt giới hạn 640 MB. Chọn ít file hơn hoặc chia nhỏ dữ liệu.'), 413
 
 @app.before_request
 def prevent_overlapping_actions():
     if request.method == 'POST' and request.path in {
-        '/api/action', '/api/nike', '/api/navigate', '/api/switch_factory', '/api/mqaa/scan', '/api/page/execute'
-    } and (sfc_command_jobs.running() or COMMAND_LOCK.locked()):
-        return jsonify(success=False, error='Trợ lý đang chạy lệnh. Vui lòng chờ hoàn tất để tránh thay đổi bộ lọc.'), 409
+        '/api/action', '/api/nike', '/api/navigate', '/api/switch_factory', '/api/mqaa/scan', '/api/page/execute',
+        '/api/command', '/api/command/stream'
+    } and (sfc_command_jobs.running() or COMMAND_LOCK.locked() or sfc_controller.DYNAMIC_ACTION_LOCK.locked() or sfc_report_tools.browser_reserved()):
+        return jsonify(success=False, error='Đang xử lý một thao tác SFC. Vui lòng chờ hoàn tất; không cần bấm xuất lại.'), 409
 
 def format_download_filename(filename, plant=None):
     if not filename:
@@ -42,10 +69,12 @@ def format_download_filename(filename, plant=None):
 
 @app.route('/api/exports/<path:filename>')
 def api_export_file(filename):
-    if not filename.lower().endswith(('.xls', '.xlsx')) or '.partial' in filename:
+    if not filename.lower().endswith(EXCEL_EXTENSIONS) or '.partial' in filename:
         return jsonify(error='Không phải file Excel đã hoàn tất.'), 404
 
-    target_path = EXPORT_ROOT / filename
+    target_path = (EXPORT_ROOT / filename).resolve()
+    if not target_path.is_relative_to(EXPORT_ROOT.resolve()):
+        return jsonify(error='Đường dẫn file không hợp lệ.'), 404
     curr_plant = getattr(sfc_controller, 'SELECTED_FACTORIES', ['VH'])[0]
 
     # If the file doesn't exist under the requested path, try alternative with or without plant suffix
@@ -79,6 +108,135 @@ def api_export_file(filename):
 @app.route("/api/health", methods=["GET"])
 def api_health():
     return jsonify({"service": "sfc-dashboard", "ready": True, "app_root": str(APP_ROOT)})
+
+
+@app.route('/reports')
+def report_tools_page():
+    return render_template('report_tools.html')
+
+
+@app.route('/api/report-tools')
+def api_report_tools():
+    return jsonify(tools=sfc_report_tools.registry(include_inputs=request.args.get('catalog') != '0'), runs=sfc_report_tools.runs())
+
+
+@app.route('/api/report-tools/<tool>/inputs')
+def api_report_tool_inputs(tool):
+    source = request.args.get('source')
+    if source not in ('local','sfc') or tool not in sfc_report_tools.TOOLS:
+        return jsonify(error='Tool hoặc nguồn dữ liệu không hợp lệ.'), 400
+    return jsonify(inputs=sfc_report_tools.input_catalog(tool, source=source))
+
+
+@app.route('/api/report-tools/<tool>/runs', methods=['POST'])
+@app.route('/api/report-tools/<tool>/validate', methods=['POST'])
+def api_start_report_tool(tool):
+    try:
+        request.max_content_length = 640 * 1024 * 1024
+        data = request.get_json(silent=True) if request.is_json else request.form.to_dict()
+        data = data or {}
+        if not isinstance(data, dict):
+            raise ValueError('Dữ liệu yêu cầu phải là một đối tượng cấu hình.')
+        if not all(isinstance(data.get(key, ''), str) for key in ('period','mode')):
+            raise ValueError('Tháng và chế độ xử lý phải là chuỗi hợp lệ.')
+        selections = data.get('selections', [])
+        if isinstance(selections, str): selections = json.loads(selections)
+        if not isinstance(selections, list) or not all(isinstance(item, dict) for item in selections):
+            raise ValueError('Danh sách file đầu vào không hợp lệ.')
+        if not all(isinstance(item.get('id'), str) and isinstance(item.get('group', ''), str) for item in selections):
+            raise ValueError('Mã file hoặc nhóm dữ liệu không hợp lệ.')
+        uploads = [(group, storage) for group in sfc_report_tools.TOOLS.get(tool, {}).get('groups', {})
+                   for storage in request.files.getlist(group) if storage.filename]
+        automatic = data.get('acquire_missing') in (True, 'true', '1', 1)
+        validate_only = request.path.endswith('/validate')
+        if automatic:
+            if not COMMAND_LOCK.acquire(blocking=False):
+                return jsonify(error='SFC đang chạy lệnh khác. Chờ hoàn tất rồi chạy báo cáo.'), 409
+            locked = sfc_controller.SFC_LOCK.acquire(blocking=False)
+            try:
+                if not locked or sfc_command_jobs.running():
+                    return jsonify(error='SFC đang bận. Chờ thao tác hiện tại hoàn tất.'), 409
+                run = sfc_report_tools.start_run(tool, data.get('period'), data.get('mode','all'),
+                                                selections, uploads, acquire_missing=True, validate_only=validate_only,
+                                                cutoff=data.get('cutoff'))
+            finally:
+                if locked: sfc_controller.SFC_LOCK.release()
+                COMMAND_LOCK.release()
+        else:
+            run = sfc_report_tools.start_run(tool, data.get('period'), data.get('mode', 'all'), selections, uploads, validate_only=validate_only)
+        return jsonify(run), 200 if validate_only else 202
+    except sfc_report_tools.PreflightError as error:
+        return jsonify(error=str(error), valid=False, validation=error.reports), 422
+    except RuntimeError as error:
+        return jsonify(error=str(error)), 409
+    except (ValueError, OSError, KeyError) as error:
+        return jsonify(error=str(error) if isinstance(error, ValueError) else 'Không đọc/ghi được file. Kiểm tra quyền và đóng file đang mở.'), 400
+
+
+@app.route('/api/report-tools/<tool>/cell', methods=['POST'])
+def api_report_cell(tool):
+    request.max_content_length = 256 * 1024
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or not isinstance(data.get('token'), str):
+        return jsonify(error='Yêu cầu sửa ô không hợp lệ.'), 400
+    value = data.get('value')
+    delete_row = data.get('delete_row', False)
+    row_tokens = data.get('row_tokens', [])
+    if (type(delete_row) is not bool or (delete_row and 'value' in data)
+            or not isinstance(row_tokens, list) or len(row_tokens) > 99
+            or any(not isinstance(token, str) for token in row_tokens)
+            or (row_tokens and not delete_row)):
+        return jsonify(error='Yêu cầu xóa dòng không hợp lệ.'), 400
+    if 'value' in data and not isinstance(value, str):
+        return jsonify(error='Nhập giá trị cần lưu.'), 400
+    try:
+        return jsonify(sfc_report_tools.report_cell(tool, data['token'], value, delete_row=delete_row, row_tokens=row_tokens))
+    except RuntimeError as error:
+        return jsonify(error=str(error)), 409
+    except ValueError as error:
+        return jsonify(error=str(error)), 422
+    except OSError:
+        return jsonify(error='Không đọc/ghi được file. Đóng file Excel và kiểm tra quyền truy cập rồi thử lại.'), 409
+
+
+@app.route('/api/report-tools/runs/<run_id>/cancel', methods=['POST'])
+def api_cancel_report_tool(run_id):
+    try:
+        return jsonify(sfc_report_tools.request_cancel(run_id)), 202
+    except (ValueError, OSError) as error:
+        return jsonify(error=str(error)), 409
+
+
+@app.route('/api/report-tools/runs/<run_id>')
+def api_report_tool_run(run_id):
+    try:
+        return jsonify(sfc_report_tools.snapshot(run_id))
+    except (ValueError, OSError) as error:
+        return jsonify(error=str(error)), 404
+
+
+@app.route('/api/report-tools/runs/<run_id>/files/<path:filename>')
+def api_report_tool_file(run_id, filename):
+    try:
+        run = sfc_report_tools.snapshot(run_id)
+        allowed = {item['name'] for item in run.get('files', [])}
+        if run.get('bundle'): allowed.add(run['bundle']['name'])
+        output = (sfc_report_tools.run_folder(run_id) / 'workspace' / 'Output').resolve()
+        path = (output / filename).resolve()
+        if filename not in allowed or not path.is_relative_to(output) or not path.is_file():
+            raise FileNotFoundError('File báo cáo không tồn tại hoặc chưa hoàn tất.')
+        metadata = next((item for item in run.get('files', []) if item['name']==filename), run.get('bundle') or {})
+        if metadata.get('sha256') and sfc_report_tools.file_hash(path) != metadata['sha256']:
+            return jsonify(error='File đã thay đổi sau khi kiểm tra. Chạy lại hoặc kiểm tra bản gốc trước khi tải.'), 409
+        if run.get('requires_ack') and request.args.get('ack') != '1':
+            return jsonify(error='Có sai lệch hoặc kết quả chưa hoàn tất. Xem đối chiếu và xác nhận trước khi tải.', export_review=run.get('export_review')), 409
+        response = send_from_directory(output, path.relative_to(output).as_posix(), as_attachment=True,
+                                       download_name=sfc_report_tools.safe_name(path.name))
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+    except (ValueError, OSError) as error:
+        return jsonify(error=str(error)), 404
 
 @app.route("/")
 def index():
@@ -358,5 +516,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)s %(message)s')
     port = 5050
     print(f"🚀 SFC CONTROL COCKPIT SERVER DANG CHAY TAI: http://localhost:{port}")
-    app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
+    app.run(host=os.environ.get('CHINGLUH_BIND_HOST', '127.0.0.1'), port=port, debug=False, threaded=True)
 

@@ -1,0 +1,818 @@
+"""
+Populate Database/HFPA_Template.xlsx with accurate data from HFPA (Mes410) and QAStation.
+Adheres strictly to Database/2026 FTT&HFPA EN.pdf and QAStation_Tool_Agent_Spec.md:
+- Never overwrite formula cells (=SUM, =1-J9/J2, =F22/E22, etc.).
+- Input production and defects into exact month columns.
+- Populate Top 5 Models and Top 5 Defect Matrix per factory.
+- Preserves all existing sheets, cell formatting, and formulas.
+"""
+
+import os
+import re
+import shutil
+from collections import defaultdict
+
+import openpyxl
+import pandas as pd
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl.utils import get_column_letter
+
+from file_utils import ensure_file_writable
+from hfpa_common import (normalize_model_name, normalize_defect_name, hfpa_defect_columns,
+                         hfpa_defect_header_height, hfpa_defect_layout_issues)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_TEMPLATE = os.path.join(BASE_DIR, "Database", "HFPA_Template.xlsx")
+OUTPUT_DIR = os.path.join(BASE_DIR, "Output")
+
+MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+FACTORIES = ["VH", "VH2", "JV", "JV2"]
+
+
+def populate_hfpa_database(data_bus):
+    """Write the summary from the same corrected data as the master."""
+    if not os.path.exists(DATABASE_TEMPLATE):
+        raise FileNotFoundError(DATABASE_TEMPLATE)
+    target_month, target_year = data_bus.active_month, data_bus.active_year
+    inspection = data_bus.pivot1_df
+    pair_metrics = inspection.groupby("FTY")[["InspQty", "FailQty"]].sum()
+    top5_dict = data_bus.top5_dict
+    p2_df = data_bus.pivot2_df
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    target_output_filename = f"HFPA_Template_Updated_{target_month}_{target_year}.xlsx"
+    target_output_path = os.path.join(OUTPUT_DIR, target_output_filename)
+    target_output_path = ensure_file_writable(target_output_path, f"Template đầu ra (Output/{target_output_filename})")
+
+    # Remove legacy un-suffixed file if present
+    legacy_excel = os.path.join(OUTPUT_DIR, "HFPA_Template_Updated.xlsx")
+    if os.path.exists(legacy_excel) and legacy_excel != target_output_path:
+        try:
+            os.remove(legacy_excel)
+        except Exception:
+            pass
+
+    shutil.copy2(DATABASE_TEMPLATE, target_output_path)
+    print(f"[+] Loaded database template into: {target_output_path}")
+
+    wb = openpyxl.load_workbook(target_output_path, data_only=False)
+
+    if "HFPA" not in wb.sheetnames:
+        wb.close()
+        raise ValueError("Sheet 'HFPA' không tồn tại trong template Database/HFPA_Template.xlsx!")
+
+    ws = wb["HFPA"]
+    print("   [+] Updating Sheet 'HFPA' strictly preserving formulas...")
+
+    # Locate month column in row 1 - RAISE EXPLICIT ERROR if missing
+    month_col = None
+    for c in range(1, ws.max_column + 1):
+        val = str(ws.cell(1, c).value or "").strip()
+        if val.lower() == target_month.lower():
+            month_col = c
+            break
+
+    if not month_col:
+        wb.close()
+        raise ValueError(
+            f"Template thiếu cột tháng '{target_month}' trong Sheet 'HFPA' (hàng 1). "
+            f"Vui lòng kiểm tra lại template báo cáo."
+        )
+
+    col_letter = get_column_letter(month_col)
+    print(f"   [+] Found month '{target_month}' at column {col_letter} ({month_col})")
+
+    # 1. Update Monthly Production (Audit Sample Size) & Defective Pairs
+    fty_prod_rows = {"VH": 2, "VH2": 3, "JV": 4, "JV2": 5}
+    fty_def_rows = {"VH": 9, "VH2": 10, "JV": 11, "JV2": 12}
+
+    for fty in FACTORIES:
+        tot_sample, tot_defective = pair_metrics.loc[fty] if fty in pair_metrics.index else (0, 0)
+
+        prod_r = fty_prod_rows[fty]
+        def_r = fty_def_rows[fty]
+
+        ws.cell(prod_r, month_col).value = int(tot_sample)
+        ws.cell(prod_r, month_col).number_format = "#,##0"
+
+        ws.cell(def_r, month_col).value = int(tot_defective)
+        ws.cell(def_r, month_col).number_format = "#,##0"
+
+    # Restore and calculate totals across 4 factories with 'Grand Total' title (Rows 6, 13, 20)
+    bold_hdr_font = Font(name="Calibri", size=11, bold=True)
+
+    # Row 6: Grand Total for Production
+    ws.cell(6, 1).value = "Grand Total"
+    ws.cell(6, 1).font = bold_hdr_font
+    ws.cell(6, 2).value = "Total pair produced"
+    ws.cell(6, 2).font = bold_hdr_font
+    ws.cell(6, month_col).value = f"=SUM({col_letter}2:{col_letter}5)"
+    ws.cell(6, month_col).number_format = "#,##0"
+
+    # Row 13: Grand Total for Defect Pairs
+    ws.cell(13, 1).value = "Grand Total"
+    ws.cell(13, 1).font = bold_hdr_font
+    ws.cell(13, 2).value = "Defect"
+    ws.cell(13, 2).font = bold_hdr_font
+    ws.cell(13, month_col).value = f"=SUM({col_letter}9:{col_letter}12)"
+    ws.cell(13, month_col).number_format = "#,##0"
+
+    # Row 20: Grand Total for HFPA%
+    ws.cell(20, 1).value = "Grand Total"
+    ws.cell(20, 1).font = bold_hdr_font
+    ws.cell(20, 2).value = "HFPA%"
+    ws.cell(20, 2).font = bold_hdr_font
+    ws.cell(20, month_col).value = f"=1-{col_letter}13/{col_letter}6"
+    ws.cell(20, month_col).number_format = "0.0%"
+
+    print(f"   [+] Updated monthly Production and Defective pairs with 'Grand Total' in rows 6, 13, 20.")
+
+    # 2. Update Top 5 Models and Top 5 Defect Matrix per Factory
+    model_rows_to_clear = list(range(22, 27)) + list(range(28, 33)) + list(range(34, 39)) + list(range(40, 45))
+    for r in model_rows_to_clear:
+        for c in [4, 5, 6]:
+            cell = ws.cell(r, c)
+            if cell.__class__.__name__ != "MergedCell":
+                cell.value = None
+
+    table_clear_end = max(27, ws.max_column)
+    for r in range(21, 51):
+        for c in range(11, table_clear_end + 1):
+            cell = ws.cell(r, c)
+            if cell.__class__.__name__ != "MergedCell":
+                cell.value = None
+
+    for r in range(45, 52):
+        for c in range(3, 21):
+            cell = ws.cell(r, c)
+            if cell.__class__.__name__ != "MergedCell":
+                cell.value = None
+
+    bold_hdr_title_font = Font(name="Calibri", size=11, bold=True)
+    ws.cell(21, 2).value = f"Top 5 model ({target_month}, {target_year})"
+    ws.cell(21, 2).font = bold_hdr_title_font
+    ws.cell(21, 10).value = f"Top 5 defect ({target_month}, {target_year})"
+    ws.cell(21, 10).font = bold_hdr_title_font
+
+    layout_config = {
+        "VH": {"header_row": 21, "data_start_row": 22},
+        "VH2": {"header_row": 27, "data_start_row": 28},
+        "JV": {"header_row": 33, "data_start_row": 34},
+        "JV2": {"header_row": 39, "data_start_row": 40},
+    }
+
+    hdr_font = Font(name="Calibri", size=11, bold=True)
+    bold_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+
+    # Unmerge/re-merge columns C and K cleanly
+    for rng in list(ws.merged_cells.ranges):
+        if (rng.min_col in (3, 11) and rng.max_col in (3, 11)) and rng.min_row >= 21:
+            ws.unmerge_cells(str(rng))
+
+    ws.merge_cells("C22:C26")
+    ws.merge_cells("K22:K26")
+    ws.merge_cells("C28:C32")
+    ws.merge_cells("K28:K32")
+    ws.merge_cells("C34:C38")
+    ws.merge_cells("K34:K38")
+    ws.merge_cells("C40:C44")
+    ws.merge_cells("K40:K44")
+
+    # Load top 3 defect data per model
+    records = defaultdict(lambda: defaultdict(dict))
+    no_defect_models = set()
+    if "Data Status" in p2_df:
+        no_defect_models = set(p2_df.loc[p2_df["Data Status"] == "No_Defects", ["FTY", "Shoename"]].itertuples(index=False, name=None))
+    if not p2_df.empty:
+        fields = ["FTY", "Shoename", "Defect Type", "Defect Share %"]
+        for fty, model, defect, share in p2_df[fields].itertuples(index=False, name=None):
+            if pd.notna(share) and share > 0:
+                records[fty][normalize_model_name(model)][normalize_defect_name(defect)] = float(share)
+
+    for fty, cfg in layout_config.items():
+        # Clear the previous period's rows, including unused model slots.
+        for row in range(cfg["data_start_row"], cfg["data_start_row"] + 5):
+            for col in (*range(4, 8), *range(12, table_clear_end + 1)):
+                ws.cell(row, col).value = None
+        for col in range(13, table_clear_end + 1):
+            ws.cell(cfg["header_row"], col).value = None
+
+        t5_df = top5_dict.get(fty)
+        if t5_df is None or t5_df.empty:
+            continue
+        t5_df = t5_df.head(5)
+        tot_factory_sample = int(t5_df["Sum of InspQty"].iloc[0])
+        top5_models = t5_df["Shoename"].tolist()
+        top5_pairs = t5_df["Sum of FailQty (Validated)"].tolist()
+
+        # Collect unique defect types across Top 3 of all 5 models
+        defect_sums = defaultdict(float)
+        defect_order = []
+        for m in top5_models:
+            m_norm = normalize_model_name(m)
+            m_defects = records[fty].get(m_norm, {})
+            for d, pct in m_defects.items():
+                defect_sums[d] += pct
+                if d not in defect_order:
+                    defect_order.append(d)
+
+        top_def_types = sorted(defect_order, key=lambda d: defect_sums[d], reverse=True)
+
+        hdr_r = cfg["header_row"]
+        data_r = cfg["data_start_row"]
+
+        # Left Table Header (Model, Insp., Def. q'ty (prs), HFPA DR%)
+        ws.cell(hdr_r, 4).value = "Model"
+        ws.cell(hdr_r, 4).font = hdr_font
+        ws.cell(hdr_r, 5).value = "Insp."
+        ws.cell(hdr_r, 5).font = hdr_font
+        ws.cell(hdr_r, 6).value = "Def. q'ty (prs)"
+        ws.cell(hdr_r, 6).font = hdr_font
+        ws.cell(hdr_r, 7).value = "HFPA DR%"
+        ws.cell(hdr_r, 7).font = hdr_font
+
+        # Right Table Header (Factory, Model, Dynamic Defect Types)
+        ws.cell(hdr_r, 11).value = "Factory"
+        ws.cell(hdr_r, 11).font = hdr_font
+        ws.cell(hdr_r, 12).value = "Model"
+        ws.cell(hdr_r, 12).font = hdr_font
+
+        for d_idx, def_name in enumerate(top_def_types):
+            c_cell = ws.cell(hdr_r, 13 + d_idx)
+            c_cell.value = def_name
+            c_cell.font = hdr_font
+            c_cell.alignment = bold_center
+
+        for c in range(13 + len(top_def_types), table_clear_end + 1):
+            ws.cell(hdr_r, c).value = None
+
+        # Write Models (Left Table) & Defect Matrix (Right Table)
+        for idx, (model_name, def_pairs) in enumerate(zip(top5_models, top5_pairs)):
+            curr_r = data_r + idx
+            m_norm = normalize_model_name(model_name)
+
+            # Left Table:
+            if idx == 0:
+                ws.cell(curr_r, 3).value = fty
+                ws.cell(curr_r, 3).font = hdr_font
+                ws.cell(curr_r, 3).alignment = bold_center
+
+            ws.cell(curr_r, 4).value = model_name
+            ws.cell(curr_r, 4).alignment = align_left
+
+            ws.cell(curr_r, 5).value = tot_factory_sample
+            ws.cell(curr_r, 5).number_format = "#,##0"
+            ws.cell(curr_r, 5).alignment = align_right
+
+            ws.cell(curr_r, 6).value = int(def_pairs)
+            ws.cell(curr_r, 6).number_format = "#,##0"
+            ws.cell(curr_r, 6).alignment = align_right
+
+            ws.cell(curr_r, 7).value = f'=IF(E{curr_r}>0,F{curr_r}/E{curr_r},"")'
+            ws.cell(curr_r, 7).number_format = "0.00%"
+            ws.cell(curr_r, 7).alignment = align_right
+
+            # Right Table (Defect Matrix):
+            if idx == 0:
+                ws.cell(curr_r, 11).value = fty
+                ws.cell(curr_r, 11).font = hdr_font
+                ws.cell(curr_r, 11).alignment = bold_center
+
+            ws.cell(curr_r, 12).value = model_name
+            ws.cell(curr_r, 12).alignment = align_left
+
+            if not records[fty].get(m_norm):
+                ws.cell(curr_r, 13).value = "Không có lỗi" if (fty, m_norm) in no_defect_models else "Thiếu dữ liệu (QAStation)"
+                ws.cell(curr_r, 13).alignment = align_left
+                for c in range(14, table_clear_end + 1):
+                    ws.cell(curr_r, c).value = None
+            else:
+                m_top3 = records[fty].get(m_norm, {})
+                for d_idx, def_name in enumerate(top_def_types):
+                    c_cell = ws.cell(curr_r, 13 + d_idx)
+                    if def_name in m_top3:
+                        c_cell.value = round(m_top3[def_name], 6)
+                        c_cell.number_format = "0.00%"
+                        c_cell.alignment = align_right
+                    else:
+                        c_cell.value = None
+
+                for c in range(13 + len(top_def_types), table_clear_end + 1):
+                    ws.cell(curr_r, c).value = None
+
+        print(f"   [+] Updated Top 5 Models & Defect Matrix for Factory: {fty} ({len(top_def_types)} defect columns)")
+
+    # Apply modern, beautiful borders and styling to Sheet HFPA
+    apply_elegant_borders(ws, target_month=target_month, target_year=target_year)
+    print("   [+] Applied professional corporate borders and styling to Sheet HFPA!")
+
+    # Populate Defect Color Legend in columns U & V matching process_ftt.py & user's reference
+    populate_custom_defect_color_legend(ws, target_month=target_month, target_year=target_year)
+    layout_issues = hfpa_defect_layout_issues(ws)
+    if layout_issues:
+        raise ValueError(f"Bảng Top defect chưa nằm đầy đủ trong khung: {layout_issues[:5]}")
+
+    # Purge any redundant ColorMap_ sheets to keep workbook clean and optimal
+    for s_name in list(wb.sheetnames):
+        if s_name.startswith("ColorMap_"):
+            del wb[s_name]
+
+    target_output_path = ensure_file_writable(target_output_path, f"File kết quả (Output/{target_output_filename})")
+    wb.save(target_output_path)
+    wb.close()
+
+    # Synchronize to Database/HFPA_Template.xlsx
+    ensure_file_writable(DATABASE_TEMPLATE, "Template gốc (Database/HFPA_Template.xlsx)")
+    try:
+        shutil.copy2(target_output_path, DATABASE_TEMPLATE)
+        print(f"[+] Successfully synchronized to master: {DATABASE_TEMPLATE}")
+    except Exception as e:
+        print(f"[-] Notice: Could not overwrite master template (may be open in Office): {e}")
+
+    # Remove temporary fallback file if target_output_path is active
+    fallback_new = os.path.join(OUTPUT_DIR, f"HFPA_Template_Updated_{target_month}_{target_year}_New.xlsx")
+    if os.path.exists(fallback_new) and target_output_path != fallback_new:
+        try:
+            os.remove(fallback_new)
+        except Exception:
+            pass
+
+    data_bus.output_excel_path = target_output_path
+    print(f"[+] Output database written to: {target_output_path}")
+    return True
+
+
+def populate_custom_defect_color_legend(ws, target_month="Jul", target_year="2026"):
+    """
+    Populate the defect color key below the matrix, expanding for all detected headers.
+    Arranges 4 site palettes in an executive 2x2 grid directly under Columns K through P:
+      - Left Column: Columns K & L (Site VH: Rows 48-54, Site JV: Rows 56-60)
+        Col K = Color Chip (width 11.5)
+        Col L = Defect Name (width 49.8)
+      - Right Column: Columns N & O:P (Site VH2: Rows 48-53, Site JV2: Rows 56-62)
+        Col N = Color Chip (width 13.0)
+        Cols O:P merged = Defect Name (width 13.0 + 30.3 = 43.3)
+      - Column M = Clean vertical spacer column (width 16.0)
+    """
+    from process_pptx import get_defect_color, load_defect_color_map
+    color_template_path = os.path.join(BASE_DIR, "Color_template.xlsx")
+    color_map = load_defect_color_map(color_template_path)
+    fallback_cache = {}
+
+    fill_hdr = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
+    font_hdr = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_txt = Font(name="Calibri", size=9.5, color="000000")
+    thin_black = Side(style="thin", color="000000")
+    thin_border = Border(left=thin_black, right=thin_black, top=thin_black, bottom=thin_black)
+    no_fill = PatternFill(fill_type=None)
+
+    # Only clear old legend cells below the data tables.
+    merged_to_remove = []
+    for rng in list(ws.merged_cells.ranges):
+        if rng.min_row >= 45 and rng.min_col >= 21 and rng.max_col <= 22:
+            merged_to_remove.append(rng)
+    for rng in merged_to_remove:
+        ws.unmerge_cells(str(rng))
+
+    for r in range(45, ws.max_row + 1):
+        for c in (21, 22):
+            cell = ws.cell(r, c)
+            cell.value = None
+            cell.fill = no_fill
+            cell.border = Border()
+
+    # 2. Extract defect names for each site from header rows in Top 5 Defect table
+    site_header_rows = {"VH": 21, "VH2": 27, "JV": 33, "JV2": 39}
+    site_defects = {}
+    for fty, r_hdr in site_header_rows.items():
+        defects = []
+        for c in hfpa_defect_columns(ws, r_hdr):
+            val = ws.cell(r_hdr, c).value
+            if val and str(val).strip():
+                defects.append(str(val).strip())
+        site_defects[fty] = defects
+
+    # Reserve enough room for both legend rows without overlap.
+    bottom_start = 50 + max(len(site_defects["VH"]), len(site_defects["VH2"]))
+    legend_end = max(ws.max_row, bottom_start + max(len(site_defects["JV"]), len(site_defects["JV2"])))
+    legend_merged_to_remove = []
+    for rng in list(ws.merged_cells.ranges):
+        if rng.min_row >= 45 and rng.min_col >= 11:
+            legend_merged_to_remove.append(rng)
+    for rng in legend_merged_to_remove:
+        ws.unmerge_cells(str(rng))
+
+    for r in range(45, legend_end + 1):
+        for c in range(11, max(27, ws.max_column) + 1):
+            cell = ws.cell(r, c)
+            cell.value = None
+            cell.fill = no_fill
+            cell.border = Border()
+
+    # 4. Section Title at Row 46
+    ws.row_dimensions[45].height = 14
+    ws.row_dimensions[46].height = 22
+    ws.row_dimensions[47].height = 8
+
+    title_cell = ws.cell(46, 11, value=f"Defect Color Legend by Factory ({target_month}, {target_year})")
+    title_cell.font = Font(name="Century Gothic", size=11, bold=True, color="1F4E78")
+    title_cell.alignment = Alignment(horizontal="left", vertical="center")
+
+    # 5. Render 2x2 Grid:
+    # Row 48: Site VH (K..L) & Site VH2 (N..P)
+    # Row 56: Site JV (K..L) & Site JV2 (N..P)
+    grid_config = {
+        "VH":  {"start_r": 48, "chip_col": 11, "txt_col_start": 12, "txt_col_end": 12, "hdr_start": 11, "hdr_end": 12},
+        "VH2": {"start_r": 48, "chip_col": 14, "txt_col_start": 15, "txt_col_end": 16, "hdr_start": 14, "hdr_end": 16},
+        "JV":  {"start_r": bottom_start, "chip_col": 11, "txt_col_start": 12, "txt_col_end": 12, "hdr_start": 11, "hdr_end": 12},
+        "JV2": {"start_r": bottom_start, "chip_col": 14, "txt_col_start": 15, "txt_col_end": 16, "hdr_start": 14, "hdr_end": 16},
+    }
+
+    for fty, cfg in grid_config.items():
+        start_r = cfg["start_r"]
+        chip_col = cfg["chip_col"]
+        txt_s = cfg["txt_col_start"]
+        txt_e = cfg["txt_col_end"]
+        hdr_s = cfg["hdr_start"]
+        hdr_e = cfg["hdr_end"]
+        defects = site_defects.get(fty, [])
+
+        # Header row
+        ws.row_dimensions[start_r].height = 20
+        if hdr_s != hdr_e:
+            ws.merge_cells(start_row=start_r, start_column=hdr_s, end_row=start_r, end_column=hdr_e)
+        c_hdr = ws.cell(start_r, hdr_s, value=f"Site {fty}")
+        c_hdr.fill = fill_hdr
+        c_hdr.font = font_hdr
+        c_hdr.alignment = Alignment(horizontal="center", vertical="center")
+        for c in range(hdr_s, hdr_e + 1):
+            ws.cell(start_r, c).border = thin_border
+            ws.cell(start_r, c).fill = fill_hdr
+
+        # Defect rows
+        for i, d_name in enumerate(defects, start=1):
+            r = start_r + i
+            ws.row_dimensions[r].height = 30
+            hex_val = get_defect_color(d_name, color_map, fallback_cache)
+
+            # Color chip
+            c_chip = ws.cell(r, chip_col)
+            c_chip.fill = PatternFill(start_color=hex_val, end_color=hex_val, fill_type="solid")
+            c_chip.border = thin_border
+
+            # Defect text
+            if txt_s != txt_e:
+                ws.merge_cells(start_row=r, start_column=txt_s, end_row=r, end_column=txt_e)
+            c_txt = ws.cell(r, txt_s, value=str(d_name))
+            c_txt.font = font_txt
+            c_txt.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+            for c in range(txt_s, txt_e + 1):
+                ws.cell(r, c).border = thin_border
+
+    print(f"   [+] Populated Defect Color Legend below the data tables through row {legend_end}.")
+    right_edge = max(16, *(max(hfpa_defect_columns(ws, row), default=15)
+                           for row in site_header_rows.values()))
+    ws.print_area = f"A1:{get_column_letter(right_edge)}{legend_end}"
+
+
+def apply_elegant_borders(ws, target_month="Jul", target_year="2026"):
+    """
+    Apply modern, beautiful corporate borders and styling to Sheet HFPA:
+    - Visible gridlines in all spreadsheet viewers (WPS Office & Excel)
+    - Executive framing with Corporate Navy (#1F4E78) outer borders
+    - Soft ice blue header fills (#D9E1F2) with dark navy bold headers
+    - Refined silver interior data gridlines (#BFBFBF)
+    - Factory badge cells with soft shading (#F4F6F9) and clean vertical borders
+    - Accounting-standard double underline on Grand Total rows
+    - Wrap text and optimized row heights for clean readability
+    - Defect Matrix borders strictly match each factory's actual columns
+    """
+    ws.sheet_view.showGridLines = True
+    try:
+        ws.views.sheetView[0].showGridLines = True
+    except Exception:
+        pass
+
+    font_family = "Century Gothic"
+    f_title = Font(name=font_family, size=11, bold=True, color="1F4E78")
+    f_hdr = Font(name=font_family, size=10, bold=True, color="1F4E78")
+    f_bold = Font(name=font_family, size=10, bold=True, color="000000")
+    f_regular = Font(name=font_family, size=10, bold=False, color="000000")
+    f_factory = Font(name=font_family, size=11, bold=True, color="1F4E78")
+
+    # Corporate fills
+    hdr_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")      # Soft ice blue
+    total_fill = PatternFill(start_color="F2F4F8", end_color="F2F4F8", fill_type="solid")    # Soft highlight
+    badge_fill = PatternFill(start_color="F4F6F9", end_color="F4F6F9", fill_type="solid")    # Factory badge fill
+
+    # Border sides
+    thin_gray = Side(style="thin", color="BFBFBF")
+    med_navy = Side(style="medium", color="1F4E78")
+    top_black = Side(style="thin", color="000000")
+    bot_double = Side(style="double", color="000000")
+    no_side = None
+
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_center_wrap = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+    for col in ("D", "L"):
+        ws.column_dimensions[col].width = 40
+    for col in ("E", "F"):
+        ws.column_dimensions[col].width = 14
+    ws.column_dimensions["G"].width = 12
+    table_end = max(27, ws.max_column)
+    for col in range(13, table_end + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 16
+
+    # -------------------------------------------------------------
+    # 1. TOP SECTION TABLES:
+    # Table 1: Production (Rows 1 to 6, Cols A to N)
+    # Table 2: Defects (Rows 8 to 13, Cols A to N)
+    # Table 3: HFPA% (Rows 15 to 20, Cols A to N)
+    # -------------------------------------------------------------
+    top_sections = [
+        (1, 2, 5, 6, "Total pair produced"),
+        (8, 9, 12, 13, "Defect"),
+        (15, 16, 19, 20, "HFPA%")
+    ]
+
+    for r_hdr, r_start, r_end, r_tot, label in top_sections:
+        # Header Row
+        ws.row_dimensions[r_hdr].height = 24
+        if ws.cell(r_hdr, 1).value is None:
+            ws.cell(r_hdr, 1).value = "FTY"
+        if ws.cell(r_hdr, 2).value is None:
+            ws.cell(r_hdr, 2).value = label
+
+        for c in range(1, 15):
+            cell = ws.cell(r_hdr, c)
+            cell.font = f_hdr
+            cell.fill = hdr_fill
+            cell.alignment = align_center if c > 2 else (align_center if c == 1 else align_left)
+            left_b = med_navy if c == 1 else thin_gray
+            right_b = med_navy if c == 14 else thin_gray
+            cell.border = Border(left=left_b, right=right_b, top=med_navy, bottom=med_navy)
+
+        # Data Rows (Rows r_start to r_end)
+        for r in range(r_start, r_end + 1):
+            ws.row_dimensions[r].height = 19
+            for c in range(1, 15):
+                cell = ws.cell(r, c)
+                left_b = med_navy if c == 1 else thin_gray
+                right_b = med_navy if c == 14 else thin_gray
+                cell.border = Border(left=left_b, right=right_b, top=thin_gray, bottom=thin_gray)
+
+                if c == 1:
+                    cell.font = f_bold
+                    cell.alignment = align_center
+                elif c == 2:
+                    cell.font = f_regular
+                    cell.alignment = align_left
+                else:
+                    cell.font = f_regular
+                    cell.alignment = align_right
+                    if r_hdr in (1, 8) and isinstance(cell.value, (int, float)):
+                        cell.number_format = "#,##0"
+                    elif r_hdr == 15 and isinstance(cell.value, (int, float)):
+                        cell.number_format = "0.00%"
+
+        # Grand Total Row
+        ws.row_dimensions[r_tot].height = 20
+        ws.cell(r_tot, 1).value = "Grand Total"
+        if ws.cell(r_tot, 2).value is None:
+            ws.cell(r_tot, 2).value = label
+
+        for c in range(1, 15):
+            cell = ws.cell(r_tot, c)
+            cell.font = f_bold
+            cell.fill = total_fill
+            left_b = med_navy if c == 1 else thin_gray
+            right_b = med_navy if c == 14 else thin_gray
+            cell.border = Border(left=left_b, right=right_b, top=top_black, bottom=bot_double)
+            if c == 1:
+                cell.alignment = align_center
+            elif c == 2:
+                cell.alignment = align_left
+            else:
+                cell.alignment = align_right
+                if r_hdr in (1, 8) and isinstance(cell.value, (int, float)):
+                    cell.number_format = "#,##0"
+                elif r_hdr == 15 and isinstance(cell.value, (int, float)):
+                    cell.number_format = "0.00%"
+
+        # Clean Table 3 (HFPA%) future month formulas so they don't show #DIV/0!
+        if r_hdr == 15:
+            for r in range(16, 21):
+                for c in range(3, 15):
+                    col_l = get_column_letter(c)
+                    val = str(ws.cell(r, c).value or "")
+                    if val.startswith("=1-") and not val.startswith("=IF"):
+                        if r < 20:
+                            p_r = r - 14
+                            d_r = r - 7
+                            ws.cell(r, c).value = f'=IF({col_l}{p_r}>0, 1-{col_l}{d_r}/{col_l}{p_r}, "")'
+                        else:
+                            ws.cell(r, c).value = f'=IF({col_l}6>0, 1-{col_l}13/{col_l}6, "")'
+
+    # Clear borders on gap rows (Row 7, Row 14)
+    for r in [7, 14]:
+        ws.row_dimensions[r].height = 14
+        for c in range(1, 25):
+            cell = ws.cell(r, c)
+            cell.border = Border()
+            cell.fill = PatternFill(fill_type=None)
+
+    # -------------------------------------------------------------
+    # 2. SECTION TITLES AT ROW 21
+    # -------------------------------------------------------------
+    ws.cell(21, 2).value = f"Top 5 model ({target_month}, {target_year})"
+    ws.cell(21, 2).font = f_title
+    ws.cell(21, 2).border = Border()
+
+    ws.cell(21, 10).value = f"Top 5 defect ({target_month}, {target_year})"
+    ws.cell(21, 10).font = f_title
+    ws.cell(21, 10).border = Border()
+
+    # -------------------------------------------------------------
+    # 3. TOP 5 MODEL & DEFECT TABLES (Rows 21 to 44)
+    # Factory Blocks:
+    #   VH:  Header Row 21, Data Rows 22-26
+    #   VH2: Header Row 27, Data Rows 28-32
+    #   JV:  Header Row 33, Data Rows 34-38
+    #   JV2: Header Row 39, Data Rows 40-44
+    # -------------------------------------------------------------
+    factory_blocks = [
+        (21, 22, 26, "VH"),
+        (27, 28, 32, "VH2"),
+        (33, 34, 38, "JV"),
+        (39, 40, 44, "JV2")
+    ]
+
+    for r_hdr, r_start, r_end, fty_name in factory_blocks:
+        active_def_cols = hfpa_defect_columns(ws, r_hdr)
+        ws.row_dimensions[r_hdr].height = hfpa_defect_header_height(ws.cell(r_hdr, c).value for c in active_def_cols)
+
+        # A. Left Table Header (Cols C to G: FTY, Model, Insp., Def. q'ty (prs), HFPA DR%)
+        if ws.cell(r_hdr, 3).value is None:
+            ws.cell(r_hdr, 3).value = "FTY"
+        ws.cell(r_hdr, 4).value = "Model"
+        ws.cell(r_hdr, 5).value = "Insp."
+        ws.cell(r_hdr, 6).value = "Def. q'ty (prs)"
+        ws.cell(r_hdr, 7).value = "HFPA DR%"
+
+        for c in range(3, 8):
+            cell = ws.cell(r_hdr, c)
+            cell.font = f_hdr
+            cell.fill = hdr_fill
+            cell.alignment = align_center
+            left_b = med_navy if c == 3 else thin_gray
+            right_b = med_navy if c == 7 else thin_gray
+            cell.border = Border(left=left_b, right=right_b, top=med_navy, bottom=med_navy)
+
+        # Frame all actual headers rather than stopping at a fixed template column.
+        last_def_col = max(active_def_cols) if active_def_cols else 15
+
+        # B. Right Table Header (Cols K to last_def_col)
+        if ws.cell(r_hdr, 11).value is None:
+            ws.cell(r_hdr, 11).value = "Factory"
+        if ws.cell(r_hdr, 12).value is None:
+            ws.cell(r_hdr, 12).value = "Model"
+
+        for c in range(11, last_def_col + 1):
+            cell = ws.cell(r_hdr, c)
+            cell.font = f_hdr
+            cell.fill = hdr_fill
+            cell.alignment = align_center_wrap
+            left_b = med_navy if c == 11 else thin_gray
+            right_b = med_navy if c == last_def_col else thin_gray
+            cell.border = Border(left=left_b, right=right_b, top=med_navy, bottom=med_navy)
+
+        # Clear unused header columns beyond last_def_col
+        for c in range(last_def_col + 1, table_end + 1):
+            cell = ws.cell(r_hdr, c)
+            cell.value = None
+            cell.border = Border()
+            cell.fill = PatternFill(fill_type=None)
+
+        # C. Factory Data Rows (Rows r_start to r_end)
+        for r in range(r_start, r_end + 1):
+            ws.row_dimensions[r].height = 19
+            is_last_row = (r == r_end)
+            divider_bot = med_navy if is_last_row else thin_gray
+
+            # --- Left Table: C to G ---
+            cell_c = ws.cell(r, 3)
+            cell_c.fill = badge_fill
+            cell_c.font = f_factory
+            cell_c.alignment = align_center
+            top_c = thin_gray if r == r_start else no_side
+            bot_c = divider_bot if is_last_row else no_side
+            cell_c.border = Border(left=med_navy, right=thin_gray, top=top_c, bottom=bot_c)
+
+            cell_d = ws.cell(r, 4)
+            cell_d.font = f_regular
+            cell_d.alignment = align_left
+            cell_d.border = Border(left=thin_gray, right=thin_gray, top=thin_gray, bottom=divider_bot)
+
+            cell_e = ws.cell(r, 5)
+            cell_e.font = f_regular
+            cell_e.alignment = align_right
+            if isinstance(cell_e.value, (int, float)):
+                cell_e.number_format = "#,##0"
+            cell_e.border = Border(left=thin_gray, right=thin_gray, top=thin_gray, bottom=divider_bot)
+
+            cell_f = ws.cell(r, 6)
+            cell_f.font = f_regular
+            cell_f.alignment = align_right
+            if isinstance(cell_f.value, (int, float)):
+                cell_f.number_format = "#,##0"
+            cell_f.border = Border(left=thin_gray, right=thin_gray, top=thin_gray, bottom=divider_bot)
+
+            cell_g = ws.cell(r, 7)
+            cell_g.font = f_bold
+            cell_g.alignment = align_right
+            if isinstance(cell_g.value, (int, float)):
+                cell_g.number_format = "0.00%"
+            cell_g.border = Border(left=thin_gray, right=med_navy, top=thin_gray, bottom=divider_bot)
+
+            # --- Right Table: K to last_def_col ---
+            cell_k = ws.cell(r, 11)
+            cell_k.fill = badge_fill
+            cell_k.font = f_factory
+            cell_k.alignment = align_center
+            top_k = thin_gray if r == r_start else no_side
+            bot_k = divider_bot if is_last_row else no_side
+            cell_k.border = Border(left=med_navy, right=thin_gray, top=top_k, bottom=bot_k)
+
+            cell_l = ws.cell(r, 12)
+            cell_l.font = f_regular
+            cell_l.alignment = align_left
+            cell_l.border = Border(left=thin_gray, right=thin_gray, top=thin_gray, bottom=divider_bot)
+
+            for c in range(13, last_def_col + 1):
+                cell_def = ws.cell(r, c)
+                cell_def.font = f_regular
+                cell_def.alignment = align_right
+                if isinstance(cell_def.value, (int, float)):
+                    cell_def.number_format = "0.00%"
+                right_def = med_navy if c == last_def_col else thin_gray
+                cell_def.border = Border(left=thin_gray, right=right_def, top=thin_gray, bottom=divider_bot)
+
+            # Clear trailing columns strictly beyond last_def_col
+            for c in range(last_def_col + 1, table_end + 1):
+                c_clear = ws.cell(r, c)
+                if c_clear.value is not None:
+                    raise ValueError(f"Có số liệu ngoài tiêu đề bảng Top defect tại {c_clear.coordinate}; cần kiểm tra nguồn.")
+                c_clear.border = Border()
+                c_clear.fill = PatternFill(fill_type=None)
+
+    # -------------------------------------------------------------
+    # 4. CLEAN SPACING & CLEAR ROWS 45+
+    # -------------------------------------------------------------
+    for r in range(21, 45):
+        for c in [1, 8, 9]:
+            cell = ws.cell(r, c)
+            cell.border = Border()
+            cell.fill = PatternFill(fill_type=None)
+        if r > 21:
+            ws.cell(r, 2).border = Border()
+            ws.cell(r, 10).border = Border()
+
+    # Unmerge and clear rows 45 to 66 across all data columns before legend is rendered
+    for rng in list(ws.merged_cells.ranges):
+        if rng.min_row >= 45 and rng.max_row <= 66:
+            ws.unmerge_cells(str(rng))
+
+    for r in range(45, 66):
+        ws.row_dimensions[r].height = 16
+        for c in range(1, 25):
+            cell = ws.cell(r, c)
+            if cell.__class__.__name__ != "MergedCell":
+                cell.value = None
+            cell.border = Border()
+            cell.fill = PatternFill(fill_type=None)
+
+
+if __name__ == "__main__":
+    import argparse
+    from types import SimpleNamespace
+
+    parser = argparse.ArgumentParser(description="Tạo Excel tổng hợp từ master HFPA đã hiệu chỉnh.")
+    parser.add_argument("month", choices=MONTH_NAMES)
+    parser.add_argument("year", type=int)
+    args = parser.parse_args()
+    master = os.path.join(OUTPUT_DIR, f"HFPA_FTT_Combined_Master_{args.month}_{args.year}.xlsx")
+    sheets = ["HFPA_Quality_Tracking_Adjusted", "Pivot1_Validation", "Top5_Models", "Top3_Defects"]
+    with pd.ExcelFile(master) as book:
+        if any(sheet not in book.sheet_names for sheet in sheets):
+            raise ValueError("Master thiếu dữ liệu HFPA đã hiệu chỉnh của kỳ được chọn.")
+        pivot = book.parse("Pivot1_Validation")
+        top5 = book.parse("Top5_Models")
+        defects = book.parse("Top3_Defects")
+    populate_hfpa_database(SimpleNamespace(
+        active_month=args.month, active_year=str(args.year), pivot1_df=pivot,
+        top5_dict=dict(tuple(top5.groupby("FTY"))), pivot2_df=defects,
+    ))

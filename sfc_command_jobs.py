@@ -12,6 +12,7 @@ LOCK = threading.Lock()
 def saved_results(limit=8):
     """Only completed, existing exports are offered as downloadable results."""
     from sfc_commands import EXPORT_ROOT
+    from sfc_downloads import EXCEL_EXTENSIONS
     from urllib.parse import quote
     root = EXPORT_ROOT.resolve()
     results = []
@@ -19,19 +20,22 @@ def saved_results(limit=8):
     for path in paths:
         try:
             manifest = json.loads(path.read_text(encoding='utf-8'))
-            if manifest.get('status') != 'done':
+            partial = manifest.get('status') == 'error' and (bool(manifest.get('failed_plants')) or
+                (manifest.get('intent', {}).get('combine') is True and bool(manifest.get('monthly_files'))))
+            if manifest.get('status') != 'done' and not partial:
                 continue
             files = []
             for item in manifest.get('combined_files') or manifest.get('monthly_files', []):
                 source = Path(item['path']).resolve()
                 if (not source.is_relative_to(root) or not source.is_file()
-                        or source.suffix.lower() not in ('.xls', '.xlsx') or '.partial' in source.name):
+                        or source.suffix.lower() not in EXCEL_EXTENSIONS or '.partial' in source.name):
                     continue
                 files.append(dict(item, name=source.name,
                     url='/api/exports/' + quote(source.relative_to(root).as_posix(), safe='/')))
             if files:
                 results.append(dict(id='saved_' + path.parent.name, prompt=manifest['prompt'],
                     intent=manifest['intent'], files=files, monthly_count=len(manifest.get('monthly_files', [])),
+                    status='error' if partial else 'done', error=manifest.get('error'),
                     saved_at=datetime.fromtimestamp(path.stat().st_mtime, timezone(timedelta(hours=7))).isoformat()))
                 if len(results) >= limit:
                     break
@@ -50,11 +54,11 @@ def restore_saved_result():
         result = results[0]
         job_id = result['id']
         events = [dict(step=1, status='success', msg='Đã khôi phục kết quả đã lưu.', intent=result['intent']),
-                  dict(step=5, status='done', msg='Kết quả đã hoàn tất; có thể tải file bên dưới.',
+                  dict(step=5, status=result['status'], msg=(result.get('error') or 'Kết quả đã hoàn tất; có thể tải file bên dưới.'),
                        files=result['files'], completed=result['monthly_count'], total=result['monthly_count'])]
         for index, item in enumerate(events):
             item.update(job_id=job_id, event_index=index)
-        JOBS[job_id] = dict(id=job_id, prompt=result['prompt'], status='done', events=events,
+        JOBS[job_id] = dict(id=job_id, prompt=result['prompt'], status=result['status'], events=events,
                            condition=threading.Condition(), started_at=result['saved_at'])
 
 

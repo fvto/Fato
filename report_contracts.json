@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "max_file_bytes": 52428800,
+  "max_expanded_bytes": 268435456,
+  "max_rows": 500000,
+  "max_columns": 2048,
+  "schemas": {
+    "quarterly_quality": {},
+    "copq": {
+      "header_scan": 10,
+      "required": [
+        "Date",
+        "Category",
+        "Type",
+        "Factory",
+        "Model",
+        "Ttl cost ($)"
+      ],
+      "dates": [
+        "Date"
+      ],
+      "numbers": [
+        "Ttl cost ($)",
+        "Defective Qty(Pair)",
+        "Working hours",
+        "Labor cost ($)",
+        "Manpower",
+        "FOB ($)",
+        "SGS Retest Qty (Pic)",
+        "SGS Test unit price/pic ($)"
+      ],
+      "keys": [
+        "Date"
+      ],
+      "multiple_sheets": false
+    },
+    "ftt": {
+      "required": [
+        "Date",
+        "Model",
+        "Metric",
+        "Defect Issues",
+        "Issues Q'ty"
+      ],
+      "dates": [
+        "Date"
+      ],
+      "numbers": [
+        "Issues Q'ty",
+        "Total Pair Produced",
+        "Number of pairs"
+      ],
+      "keys": [
+        "Date",
+        "Model",
+        "Metric"
+      ],
+      "multiple_sheets": true
+    },
+    "qastation": {
+      "required": [
+        "InspDate",
+        "Line",
+        "ShoeName",
+        "InspQty",
+        "FailQty",
+        "Station",
+        "Issues",
+        "IssueQty"
+      ],
+      "dates": [
+        "InspDate"
+      ],
+      "numbers": [
+        "InspQty",
+        "FailQty",
+        "IssueQty"
+      ],
+      "keys": [
+        "InspDate",
+        "Line",
+        "ShoeName",
+        "Station"
+      ],
+      "multiple_sheets": false,
+      "aliases": {
+        "Shoename": "ShoeName"
+      }
+    },
+    "hfpa": {
+      "required": [
+        "Audit Date (dd-mmm-yyyy)",
+        "Plant",
+        "Line",
+        "Model 2",
+        "SO#",
+        "Country",
+        "Pass/Fail",
+        "Audit Sample Size",
+        "Defect Q'ty (Total Defect Q'ty)"
+      ],
+      "dates": [
+        "Audit Date (dd-mmm-yyyy)"
+      ],
+      "numbers": [
+        "Audit Sample Size",
+        "Defect Q'ty (Total Defect Q'ty)"
+      ],
+      "keys": [
+        "Audit Date (dd-mmm-yyyy)",
+        "Plant",
+        "Line",
+        "Model 2",
+        "Pass/Fail"
+      ],
+      "defects_after": "Defect Q'ty (Total Defect Q'ty)",
+      "multiple_sheets": false,
+      "aliases": {
+        "Audit Date": "Audit Date (dd-mmm-yyyy)",
+        "Audit Sample": "Audit Sample Size"
+      }
+    },
+    "reinspection": {
+      "required": [
+        "Audit Date (dd-mmm-yyyy)",
+        "Category",
+        "SO#",
+        "Country",
+        "Model 2",
+        "Reinspection Q'ty",
+        "2nd Audit Sample Size",
+        "2nd Pass/Fail",
+        "Remark"
+      ],
+      "dates": [
+        "Audit Date (dd-mmm-yyyy)"
+      ],
+      "numbers": [
+        "Reinspection Q'ty",
+        "2nd Audit Sample Size",
+        "Defect Q'ty (Total Defect Q'ty)",
+        "Reinspection Defective Q'ty",
+        "Audit Sample Size",
+        "Defective Q'ty(pair)"
+      ],
+      "keys": [
+        "Category",
+        "SO#",
+        "Country",
+        "Model 2"
+      ],
+      "defects_after": "Remark",
+      "multiple_sheets": false,
+      "aliases": {
+        "Audit Date": "Audit Date (dd-mmm-yyyy)",
+        "Model": "Model 2"
+      }
+    }
+  }
+}

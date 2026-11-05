@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest / Caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / JS dependencies
+node_modules/
+*/node_modules/
+npm-debug.log*
+
+# Environment and secrets
+.env
+.env*.local
+*.key
+*.pem
+
+# Logs
+*.log
+scratch/*.log
+
+# Runtime and generated report directories
+.runtime/
+outputs/
+Report/ToolRuns/
+Report/Comparisons/
+Report/CombinedExcel/
+Report/InputBackups/
+Report/HFPAExports/
+
+# Temporary and Office lock files
+~$*.xlsx
+~$*.pptx
+~$*.docx
+*.tmp
+*.bak
+
+# Temporary scratch outputs and debug scripts
+scratch/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+.vscode/
+.idea/

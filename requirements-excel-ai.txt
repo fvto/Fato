@@ -1,0 +1,6 @@
+# Isolated optional runtime; install with scripts/setup_excel_ai.py.
+# Upstream: https://github.com/haris-musa/excel-mcp-server (MIT)
+excel-mcp-server==2.2.2
+mcp==2.2.0
+openpyxl==3.1.5
+xlrd==2.0.2

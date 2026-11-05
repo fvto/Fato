@@ -50,6 +50,8 @@ class SavedDashboardResults(unittest.TestCase):
     response=client.get('/');self.assertEqual(response.status_code,200)
     html=response.get_data(as_text=True)
     self.assertIn('Kết quả đã lưu',html);self.assertIn(item['url'],html);self.assertIn('data-last-job="saved_vh"',html)
+    self.assertIn('class="prompt-input" value=""',html)
+    self.assertNotIn('id="saved-command-results" style="margin-top:16px;" open',html)
     response=client.get('/api/command/jobs/saved_vh/stream')
     self.assertIn('"status": "done"',response.get_data(as_text=True))
 

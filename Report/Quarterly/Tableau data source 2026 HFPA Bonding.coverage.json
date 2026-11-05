@@ -1,0 +1,167 @@
+{
+  "sha256": "97ec4c08815fed995c3f45b50b224b5048c30b4265c7130221bdc220c273d4b6",
+  "coverage": {
+    "FTT|2026-09|VH": "2026-09-30",
+    "FTT|2026-09|VH2": "2026-09-30",
+    "FTT|2026-09|JV": "2026-09-30",
+    "FTT|2026-09|JV2": "2026-09-30",
+    "FTT|2026-10|VH": "2026-10-31",
+    "FTT|2026-10|VH2": "2026-10-31",
+    "FTT|2026-10|JV": "2026-10-31",
+    "FTT|2026-10|JV2": "2026-10-31",
+    "HFPA|2026-11|VH": "2026-11-04",
+    "HFPA|2026-11|VH2": "2026-11-04",
+    "HFPA|2026-11|JV": "2026-11-04",
+    "HFPA|2026-11|JV2": "2026-11-04",
+    "FTT|2026-11|VH": "2026-11-04",
+    "FTT|2026-11|VH2": "2026-11-04",
+    "FTT|2026-11|JV": "2026-11-04",
+    "FTT|2026-11|JV2": "2026-11-04"
+  },
+  "metrics": {
+    "HFPA|2026-09|VH": {
+      "inspected": 191303.0,
+      "defects": 30535.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-09|VH2": {
+      "inspected": 175515.0,
+      "defects": 25464.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-09|JV": {
+      "inspected": 97919.0,
+      "defects": 12584.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-09|JV2": {
+      "inspected": 79079.0,
+      "defects": 4580.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-10|VH": {
+      "inspected": 223724.0,
+      "defects": 35623.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-10|VH2": {
+      "inspected": 219229.0,
+      "defects": 31489.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-10|JV": {
+      "inspected": 95371.0,
+      "defects": 12145.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-10|JV2": {
+      "inspected": 86293.0,
+      "defects": 5092.0,
+      "grade": null,
+      "rework": null
+    },
+    "FTT|2026-09|VH": {
+      "inspected": 1275402.5,
+      "defects": 240824.5,
+      "grade": 1275327.0,
+      "rework": 240749.0
+    },
+    "FTT|2026-09|VH2": {
+      "inspected": 945928.5,
+      "defects": 244434.5,
+      "grade": 945922.0,
+      "rework": 244428.0
+    },
+    "FTT|2026-09|JV": {
+      "inspected": 577359.0,
+      "defects": 125753.0,
+      "grade": 576965.0,
+      "rework": 125359.0
+    },
+    "FTT|2026-09|JV2": {
+      "inspected": 480674.0,
+      "defects": 86922.0,
+      "grade": 480626.0,
+      "rework": 86874.0
+    },
+    "FTT|2026-10|VH": {
+      "inspected": 1527208.5,
+      "defects": 265411.5,
+      "grade": 1527114.0,
+      "rework": 265317.0
+    },
+    "FTT|2026-10|VH2": {
+      "inspected": 1150806.0,
+      "defects": 289230.0,
+      "grade": 1150795.0,
+      "rework": 289219.0
+    },
+    "FTT|2026-10|JV": {
+      "inspected": 565707.0,
+      "defects": 105855.0,
+      "grade": 565229.0,
+      "rework": 105377.0
+    },
+    "FTT|2026-10|JV2": {
+      "inspected": 494707.0,
+      "defects": 137353.0,
+      "grade": 494662.0,
+      "rework": 137308.0
+    },
+    "HFPA|2026-11|VH": {
+      "inspected": 24601.0,
+      "defects": 3933.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-11|VH2": {
+      "inspected": 24624.0,
+      "defects": 3501.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-11|JV": {
+      "inspected": 12527.0,
+      "defects": 1589.0,
+      "grade": null,
+      "rework": null
+    },
+    "HFPA|2026-11|JV2": {
+      "inspected": 13249.0,
+      "defects": 1769.0,
+      "grade": null,
+      "rework": null
+    },
+    "FTT|2026-11|VH": {
+      "inspected": 177338.0,
+      "defects": 29320.0,
+      "grade": 177323.0,
+      "rework": 29305.0
+    },
+    "FTT|2026-11|VH2": {
+      "inspected": 124226.5,
+      "defects": 30316.5,
+      "grade": 124225.0,
+      "rework": 30315.0
+    },
+    "FTT|2026-11|JV": {
+      "inspected": 79394.0,
+      "defects": 14200.0,
+      "grade": 79321.0,
+      "rework": 14127.0
+    },
+    "FTT|2026-11|JV2": {
+      "inspected": 75992.5,
+      "defects": 21227.5,
+      "grade": 75990.0,
+      "rework": 21225.0
+    }
+  }
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f3f2ee">
+<title>Tool báo cáo · FATO</title>
+<link rel="stylesheet" href="/static/workspace.css?v=nothing-1">
+<link rel="stylesheet" href="/static/report-tools.css?v=quarterly-quality-sfc-1">
+<script src="/static/workspace.js?v=nothing-1" defer></script>
+</head>
+<body class="reports-page">
+{% include '_nothing_shell.html' %}
+<main id="main-content">
+<section class="reports-hero reveal" aria-labelledby="reports-heading">
+<div class="hero-copy"><p class="eyebrow">FATO / Công cụ báo cáo nội bộ</p><h1 id="reports-heading">Mọi báo cáo.<br><em>Một không gian.</em></h1><p>Từ dữ liệu đầu vào đến kết quả hoàn tất.<br>Đúng nguồn. Đúng kỳ. Rõ ràng từng bước.</p></div>
+<div class="hero-art" aria-hidden="true"><img src="/static/report-object.svg" alt="" width="480" height="416"></div>
+<span class="hero-corner" aria-hidden="true">( RE-INSPECTION / COPQ / HFPA / QBR )</span>
+</section>
+<section class="tools-section reveal" aria-labelledby="tools-heading">
+<div class="section-heading"><div><p class="eyebrow">01 / Công cụ</p><h2 id="tools-heading">Chọn công cụ.</h2></div><button id="refresh" type="button">Làm mới <span aria-hidden="true">↻</span></button></div>
+<div class="tools-filter"><label class="search-field"><span class="sr-only" hidden>Tìm tool</span><input id="search" type="search" aria-label="Tìm tool" placeholder="Tìm theo tên hoặc chức năng"></label><label class="favorite-filter"><input id="favorites-only" type="checkbox"> Chỉ yêu thích</label></div>
+<div class="tools" id="tools" aria-label="Danh sách tool báo cáo"></div>
+</section>
+<section class="panel" id="workspace" aria-labelledby="tool-title">
+<div class="panel-head"><div><p class="eyebrow">02 / Chuẩn bị báo cáo</p><h2 id="tool-title"></h2><p id="tool-description"></p></div><ol class="flow" aria-label="Các bước xử lý"><li><span>1</span>Chọn dữ liệu</li><li><span>2</span>Kiểm tra</li><li><span>3</span>Chạy tool</li><li><span>4</span>Kết quả</li></ol></div>
+<div class="fields">
+<label id="month-field">Tháng báo cáo<input id="period" type="month" required></label>
+<label id="quarter-field" hidden>Quý tài chính<select id="quarter-period"></select></label>
+<label id="mode-field">Chế độ xử lý<select id="mode"></select></label>
+<label id="source-field">Nguồn dữ liệu<select id="source"><option value="auto">Tự động: dùng dữ liệu có sẵn, tải thiếu từ SFC</option><option value="local">File trong thư mục tool hiện có</option><option value="sfc">File đã tải từ SFC Dashboard</option><option value="upload">Chọn file từ máy</option></select></label>
+<label id="cutoff-field" hidden>Ngày chốt SFC<input id="cutoff" type="date"></label>
+</div>
+<div class="preset-actions"><button id="save-preset" type="button">Lưu preset +</button><button id="load-preset" type="button">Dùng preset đã lưu</button></div>
+<div class="groups" id="groups"></div>
+<div class="actions"><button id="validate" type="button">2. Kiểm tra đầu vào</button><button id="start" type="button" class="primary" disabled>3. Chạy tool</button><span class="note" id="source-note">Mỗi nhóm chỉ chọn một file cho mỗi nhà máy trong tháng. Mỗi lượt dùng bản sao đầu vào và mẫu riêng. Kết quả được giữ lại khi đóng hoặc tải lại trang.</span></div>
+<div id="notice" role="status" aria-live="polite"></div><div id="validation"></div>
+</section>
+<section class="panel runs-panel" aria-labelledby="results-heading"><div class="section-heading"><div><p class="eyebrow">03 / Theo dõi &amp; kết quả</p><h2 id="results-heading">Từng bước. Từng kết quả.</h2></div></div><p>Chỉ chạy khi bạn bấm “Chạy báo cáo”. Tải lại trang không chạy lại tool.</p><div id="runs"><p>Đang tải...</p></div></section>
+</main>
+<footer class="workspace-footer"><span>FATO © 2026 · Nội bộ</span><a href="/">Điều khiển SFC ↗</a></footer>
+<aside class="panel" style="margin:28px 40px;"><h2>Spreadsheet Compare</h2><p>Check calculations or compare two Excel datasets using your own ranges, keys and tolerance.</p><a class="pill-link" href="/compare">Open comparison workspace ↗</a></aside>
+<script src="/static/report_tools.js?v=quarterly-quality-single-flow"></script>
+</body></html>

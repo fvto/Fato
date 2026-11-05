@@ -1,42 +1,52 @@
 [
   {
-    "id": "hfpa",
-    "title": "QA HFPA",
-    "sub": "Mã Q504",
+    "bg": "rgba(56, 189, 248, 0.08)",
+    "borderColor": "rgba(56, 189, 248, 0.35)",
+    "color": "#38bdf8",
     "dest": "hfpa",
     "icon": "fa-solid fa-clipboard-list",
-    "color": "#38bdf8",
-    "bg": "rgba(56, 189, 248, 0.08)",
-    "borderColor": "rgba(56, 189, 248, 0.35)"
+    "id": "hfpa",
+    "sub": "Mã Q504",
+    "title": "QA HFPA"
   },
   {
-    "id": "nav_1792824533904",
-    "title": "COPQ Report",
-    "sub": "3 Tùy chọn Xuất: 1.Report COPQ, 2.COPQ Data, 3.Monthly",
+    "bg": "rgba(56, 189, 248, 0.08)",
+    "borderColor": "rgba(56, 189, 248, 0.4)",
+    "color": "#38bdf8",
     "dest": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx",
     "icon": "fa-solid fa-clipboard-list",
-    "color": "#38bdf8",
-    "bg": "rgba(56, 189, 248, 0.08)",
-    "borderColor": "rgba(56, 189, 248, 0.4)"
+    "id": "nav_1792824533904",
+    "sub": "3 Tùy chọn Xuất: 1.Report COPQ, 2.COPQ Data, 3.Monthly",
+    "title": "COPQ Report"
   },
   {
-    "id": "nav_1792824558648",
-    "title": "Kiểm tra lại",
-    "sub": "Re-Inspection",
+    "bg": "rgba(56, 189, 248, 0.08)",
+    "borderColor": "rgba(56, 189, 248, 0.4)",
+    "color": "#38bdf8",
     "dest": "https://sfc.chingluh.com/vhmes/QA/QCRECHK.aspx",
     "icon": "fa-solid fa-clipboard-list",
-    "color": "#38bdf8",
-    "bg": "rgba(56, 189, 248, 0.08)",
-    "borderColor": "rgba(56, 189, 248, 0.4)"
+    "id": "nav_1792824558648",
+    "sub": "Re-Inspection",
+    "title": "Kiểm tra lại"
   },
   {
-    "id": "nav_1792824578560",
-    "title": "FTT",
-    "sub": "First Time Through",
+    "bg": "rgba(56, 189, 248, 0.08)",
+    "borderColor": "rgba(56, 189, 248, 0.4)",
+    "color": "#38bdf8",
     "dest": "https://sfc.chingluh.com/vhmes/QA/QA.aspx",
     "icon": "fa-solid fa-clipboard-list",
-    "color": "#38bdf8",
-    "bg": "rgba(56, 189, 248, 0.08)",
-    "borderColor": "rgba(56, 189, 248, 0.4)"
+    "id": "nav_1792824578560",
+    "sub": "First Time Through",
+    "title": "FTT"
+  },
+  {
+    "id": "nav_1792987388309",
+    "title": "Báo cáo MQAA",
+    "sub": "Report",
+    "dest": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx",
+    "icon": "fa-solid fa-shoe-prints",
+    "color": "#34d399",
+    "bg": "rgba(52, 211, 153, 0.08)",
+    "borderColor": "rgba(52, 211, 153, 0.4)"
   }
 ]

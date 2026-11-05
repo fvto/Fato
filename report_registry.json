@@ -1,0 +1,465 @@
+{
+  "reinspection": {
+    "title": "Re-Inspection",
+    "description": "Database, Recycle Report và PowerPoint kiểm tra lại.",
+    "source": "Re-Inspection",
+    "plants": [
+      "VH",
+      "VH2",
+      "JV",
+      "JV2"
+    ],
+    "groups": {
+      "reinspection": [
+        "Re-Inspection",
+        "Re-Inspection"
+      ],
+      "ftt": [
+        "FTT",
+        "FTT"
+      ],
+      "hfpa": [
+        "HFPA / MES410",
+        "HFPA"
+      ]
+    },
+    "modes": {
+      "all": "Toàn bộ Excel và PowerPoint",
+      "database": "Database Excel",
+      "recycle": "Recycle Report Excel",
+      "pptx": "PowerPoint"
+    },
+    "automatic": true,
+    "required_groups": {
+      "all": [
+        "reinspection",
+        "ftt",
+        "hfpa"
+      ],
+      "database": [
+        "reinspection",
+        "ftt",
+        "hfpa"
+      ],
+      "recycle": [
+        "reinspection",
+        "ftt",
+        "hfpa"
+      ],
+      "pptx": [
+        "reinspection",
+        "ftt",
+        "hfpa"
+      ]
+    },
+    "schemas": {
+      "reinspection": "reinspection",
+      "ftt": "ftt",
+      "hfpa": "hfpa"
+    },
+    "formats": {
+      "reinspection": [
+        ".xls",
+        ".xlsx",
+        ".xlsm"
+      ],
+      "ftt": [
+        ".xls",
+        ".xlsx",
+        ".xlsm"
+      ],
+      "hfpa": [
+        ".xls",
+        ".xlsx",
+        ".xlsm"
+      ]
+    },
+    "steps": {
+      "all": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "metrics",
+          "title": "Tổng hợp dữ liệu theo nhà máy"
+        },
+        {
+          "id": "database",
+          "title": "Cập nhật bản sao Database"
+        },
+        {
+          "id": "recycle",
+          "title": "Tạo Recycle Report"
+        },
+        {
+          "id": "presentation",
+          "title": "Tạo PowerPoint"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ],
+      "database": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "metrics",
+          "title": "Tổng hợp dữ liệu theo nhà máy"
+        },
+        {
+          "id": "database",
+          "title": "Cập nhật bản sao Database"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ],
+      "recycle": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "metrics",
+          "title": "Tổng hợp dữ liệu theo nhà máy"
+        },
+        {
+          "id": "recycle",
+          "title": "Tạo Recycle Report"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ],
+      "pptx": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "metrics",
+          "title": "Tổng hợp dữ liệu theo nhà máy"
+        },
+        {
+          "id": "presentation",
+          "title": "Tạo PowerPoint"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ]
+    },
+    "expected_extensions": {
+      "all": [
+        ".xlsx",
+        ".pptx"
+      ],
+      "database": [
+        ".xlsx"
+      ],
+      "recycle": [
+        ".xlsx"
+      ],
+      "pptx": [
+        ".pptx"
+      ]
+    }
+  },
+  "copq": {
+    "title": "combine_COPQ",
+    "description": "Gộp COPQ, xử lý FTT B/C, cập nhật database và báo cáo tháng.",
+    "source": "combine_COPQ",
+    "plants": [
+      "VH",
+      "VH2",
+      "VH3",
+      "VH4",
+      "JV",
+      "JV2",
+      "JVB"
+    ],
+    "groups": {
+      "copq": [
+        "COPQ Data",
+        "COPQ_Input"
+      ],
+      "ftt": [
+        "FTT nội bộ",
+        "FTT_Input"
+      ]
+    },
+    "modes": {
+      "all": "Toàn bộ Excel và PowerPoint",
+      "combine": "Gộp và phân tích COPQ",
+      "ftt": "Báo cáo FTT B/C"
+    },
+    "automatic": true,
+    "required_groups": {
+      "all": [
+        "copq",
+        "ftt"
+      ],
+      "combine": [
+        "copq"
+      ],
+      "ftt": [
+        "ftt"
+      ]
+    },
+    "schemas": {
+      "copq": "copq",
+      "ftt": "ftt"
+    },
+    "formats": {
+      "copq": [
+        ".xls",
+        ".xlsx",
+        ".xlsm",
+        ".csv"
+      ],
+      "ftt": [
+        ".xls",
+        ".xlsx",
+        ".xlsm"
+      ]
+    },
+    "steps": {
+      "all": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "copq_combine",
+          "title": "Gộp COPQ"
+        },
+        {
+          "id": "ftt",
+          "title": "Xử lý FTT B/C"
+        },
+        {
+          "id": "database",
+          "title": "Cập nhật bản sao Database"
+        },
+        {
+          "id": "presentation",
+          "title": "Tạo PowerPoint"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ],
+      "combine": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "copq_combine",
+          "title": "Gộp COPQ"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ],
+      "ftt": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "ftt",
+          "title": "Xử lý FTT B/C"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ]
+    },
+    "expected_extensions": {
+      "all": [
+        ".xlsx",
+        ".pptx"
+      ],
+      "combine": [
+        ".xlsx"
+      ],
+      "ftt": [
+        ".xlsx"
+      ]
+    }
+  },
+  "hfpa": {
+    "title": "HFPA",
+    "description": "Đối chiếu QAStation với MES410, Top 5 model và báo cáo HFPA.",
+    "source": "HFPA",
+    "plants": [
+      "VH",
+      "VH2",
+      "JV",
+      "JV2"
+    ],
+    "groups": {
+      "ftt": [
+        "QAStation / FTT",
+        "Input/FTT"
+      ],
+      "hfpa": [
+        "HFPA / MES410",
+        "Input/HFPA"
+      ]
+    },
+    "modes": {
+      "all": "Toàn bộ Excel và PowerPoint",
+      "excel": "Đối chiếu và xuất Excel",
+      "check": "Kiểm tra đầu vào"
+    },
+    "automatic": true,
+    "required_groups": {
+      "all": [
+        "ftt",
+        "hfpa"
+      ],
+      "excel": [
+        "ftt",
+        "hfpa"
+      ],
+      "check": [
+        "ftt",
+        "hfpa"
+      ]
+    },
+    "schemas": {
+      "ftt": "qastation",
+      "hfpa": "hfpa"
+    },
+    "formats": {
+      "ftt": [
+        ".xls",
+        ".xlsx",
+        ".xlsm"
+      ],
+      "hfpa": [
+        ".xls",
+        ".xlsx",
+        ".xlsm"
+      ]
+    },
+    "steps": {
+      "all": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "readiness",
+          "title": "Kiểm tra HFPA sẵn sàng"
+        },
+        {
+          "id": "reconciliation",
+          "title": "Đối chiếu QAStation / MES410"
+        },
+        {
+          "id": "database",
+          "title": "Cập nhật bản sao Database"
+        },
+        {
+          "id": "presentation",
+          "title": "Tạo PowerPoint"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ],
+      "excel": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "readiness",
+          "title": "Kiểm tra HFPA sẵn sàng"
+        },
+        {
+          "id": "reconciliation",
+          "title": "Đối chiếu QAStation / MES410"
+        },
+        {
+          "id": "database",
+          "title": "Cập nhật bản sao Database"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ],
+      "check": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra đầu vào"
+        },
+        {
+          "id": "readiness",
+          "title": "Kiểm tra HFPA sẵn sàng"
+        },
+        {
+          "id": "export",
+          "title": "Kiểm tra và đóng gói kết quả"
+        }
+      ]
+    },
+    "expected_extensions": {
+      "all": [
+        ".xlsx",
+        ".pptx"
+      ],
+      "excel": [
+        ".xlsx"
+      ],
+      "check": [
+        ".json"
+      ]
+    }
+  },
+  "quarterly_quality": {
+    "title": "HFPA & FTT theo quý",
+    "description": "Xuất báo cáo QBR với KPI của quý đã chọn đến ngày chốt, xu hướng từng tháng và Consumer Promise cho VH, JV, CLG.",
+    "source": "Quarterly Quality",
+    "plants": ["VH", "VH2", "JV", "JV2"],
+    "groups": {
+      "workbook": ["Workbook Quarterly Report HFPA-FTT", "Input"],
+      "hfpa": ["MES410 nội bộ", "Input/HFPA"],
+      "qastation": ["QAStation HFPA", "Input/QAStation"],
+      "ftt": ["FTT Internal", "Input/FTT"]
+    },
+    "modes": {"all": "Excel và PowerPoint theo mẫu"},
+    "required_groups": {"all": ["workbook"]},
+    "schemas": {"workbook": "quarterly_quality"},
+    "formats": {"workbook": [".xlsx"], "hfpa": [".xls", ".xlsx", ".xlsm"], "qastation": [".xls", ".xlsx", ".xlsm"], "ftt": [".xls", ".xlsx", ".xlsm"]},
+    "upload_only": true,
+    "automatic": true,
+    "period_kind": "fiscal_quarter",
+    "dependencies": ["lxml"],
+    "runner": "report_tools.quarterly_quality.quarterly_quality:run_report",
+    "steps": {
+      "all": [
+        {"id": "validation", "title": "Kiểm tra workbook và quý tài chính"},
+        {"id": "processing", "title": "Tổng hợp và đối chiếu KPI quý"},
+        {"id": "presentation", "title": "Tạo PowerPoint"},
+        {"id": "export", "title": "Kiểm tra và đóng gói kết quả"}
+      ]
+    },
+    "expected_extensions": {"all": [".xlsx", ".pptx"]}
+  }
+}

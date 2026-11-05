@@ -22,6 +22,8 @@ def parse_intent(text):
     t = normalize(text.strip())
     today = datetime.now(timezone(timedelta(hours=7))).date()
     plants = list(dict.fromkeys(p.upper() for p in re.findall(r'\b(vh[234]?|jv2|jvb|jv)\b', t)))
+    if re.search(r'\b7\s+nha may\b|\btat ca\s+(?:cac\s+)?nha may\b|\ball\s+(?:7\s+)?factor', t):
+        plants = list(PLANTS)
     if not plants:
         m = re.search(r'nha may\s*([1-4])\b', t)
         if m:
@@ -30,6 +32,7 @@ def parse_intent(text):
                target_line=None, target_page=None, date_from=None, date_to=None,
                action=None, nike=None, monthly=False, combine=False, summary=[])
     pages = [(('hfpa', 'q504'), 'hfpa'), (('bao cao mqaa', 'mqaareport'), 'mqaa_report'),
+             (('copq',), 'copq'),
              (('mqaa', 'kiem toan'), 'mqaa'), (('aql',), 'aql'),
              (('trang chu', 'portal', 'flowchart'), 'home'), (('qms', 'quan ly chat luong'), 'qms')]
     for words, key in pages:
@@ -43,6 +46,9 @@ def parse_intent(text):
 
     if 'hom nay' in t or 'today' in t:
         out['date_from'] = out['date_to'] = today.isoformat()
+    elif re.search(r'\blast month\b|\bthang truoc\b', t):
+        last = date(today.year, today.month, 1) - timedelta(days=1)
+        out['date_from'], out['date_to'] = date(last.year, last.month, 1).isoformat(), last.isoformat()
     else:
         raw_dates = re.findall(r'\b(?:\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4})\b', t)
         parsed = []
@@ -119,9 +125,31 @@ def execute(controller, prompt):
         yield event(1, 'error', 'Đang xử lý một lệnh khác. Vui lòng chờ hoàn tất.')
         return
     try:
+        if hasattr(controller, 'browser_reserved') and controller.browser_reserved():
+            raise RuntimeError('COPQ đang tự tải dữ liệu SFC; vui lòng chờ hoàn tất.')
         yield event(1, 'running', 'Đang phân tích yêu cầu...')
         intent = parse_intent(prompt)
         batch = len(intent['target_plants']) > 1 or intent['monthly'] or intent['combine']
+        if intent['target_page'] == 'copq' and intent['action'] == 'excel':
+            if intent['monthly'] or intent['combine']:
+                raise ValueError('COPQ hỗ trợ xuất từng nhà máy theo một kỳ ngày; chưa hỗ trợ gộp hoặc chia từng tháng.')
+            yield event(1, 'success', 'Đã nhận diện: ' + ' | '.join(intent['summary']), intent=intent)
+            if intent['target_plants']:
+                require_success(controller.set_selected_factories(intent['target_plants']))
+            yield event(2, 'success', 'Nhà máy: ' + ', '.join(controller.SELECTED_FACTORIES))
+            require_success(controller.navigate_to('copq_data'))
+            yield event(3, 'success', 'Đã mở COPQ Data (Category / Type)')
+            yield event(4, 'running', 'Đang tải Excel COPQ cho các nhà máy đã chọn...')
+            result = controller.execute_dynamic_action('click_button', 'rpnlMain_ContentPlaceHolder1_btnExcel',
+                dict(date_from=intent['date_from'], date_to=intent['date_to']))
+            files = result.get('downloaded_files') or ([result['downloaded_file']] if result.get('downloaded_file') else [])
+            if files:
+                yield event(4, 'success', f'Đã lưu {len(files)} file Excel COPQ.', files=files)
+            require_success(result)
+            if not files:
+                raise RuntimeError('SFC chưa trả về file Excel COPQ.')
+            yield event(5, 'done', result['message'], files=files, completed=len(files), total=len(controller.SELECTED_FACTORIES))
+            return
         if batch and (intent['action'] != 'excel' or intent['target_page'] != 'hfpa'):
             raise ValueError('Xuất nhiều nhà máy/chia tháng hiện hỗ trợ Excel HFPA. Hãy chỉ rõ HFPA và xuất Excel.')
         if batch and intent['nike'] is None:

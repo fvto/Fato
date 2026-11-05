@@ -1,0 +1,1299 @@
+"""
+Module: process_pptx.py
+Automates mapping of HFPA & QAStation analysis data from Output/ into Database/HFPA_Template.pptx.
+Implements:
+1. Header & metric cards updates with pixel-perfect typography (Calibri, Calibri Light, Arial).
+2. Dynamic native PowerPoint Defect Color Legend Table replacing static Picture 2 (matches Image 2 & process_ftt.py).
+3. Interactive hyperlinks on navigation buttons, site icons, and metric cards.
+4. Updating all 12 charts in the 4x3 layout:
+   - Column 1: HFPA Analysis (Combination Stacked Column + Line chart across months).
+   - Column 2: Top 5 models (Clustered Column chart with DR%, 7.5pt bold labels).
+   - Column 3: Top defect of top models (Stacked Column chart with exact defect color chips,
+               following process_ftt.py ranking and Color_template.xlsx styling, 7pt contrasting labels).
+5. Dual saving to Database/HFPA_Template.pptx and Output/HFPA_Performance_Report.pptx.
+"""
+
+import os
+import re
+import sys
+import shutil
+import math
+import openpyxl
+from xml.sax.saxutils import escape
+import pptx
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+from pptx.oxml.ns import qn
+from pptx.oxml import parse_xml
+from openpyxl.utils import get_column_letter
+from PIL import Image, ImageDraw, ImageFont
+
+from file_utils import ensure_file_writable
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="backslashreplace")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_DIR = os.path.join(BASE_DIR, "Database")
+OUTPUT_DIR = os.path.join(BASE_DIR, "Output")
+TEMPLATE_PPTX = os.path.join(DATABASE_DIR, "HFPA_Template.pptx")
+BACKUP_PPTX = os.path.join(DATABASE_DIR, "HFPA_Template_Backup.pptx")
+OUTPUT_PPTX = os.path.join(OUTPUT_DIR, "HFPA_Performance_Report.pptx")
+ANALYSIS_EXCEL = os.path.join(OUTPUT_DIR, "QAStation_HFPA_Analysis_Report.xlsx")
+COLOR_TEMPLATE = os.path.join(BASE_DIR, "Color_template.xlsx")
+
+FACTORIES = ["VH", "VH2", "JV", "JV2"]
+MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+# Fallback palette matching process_ftt.py
+FALLBACK_PALETTE = [
+    "4472C4", "ED7D31", "A5A5A5", "FFC000", "5B9BD5",
+    "70AD47", "264478", "9E480E", "636363", "997300",
+    "255E91", "43682B", "698ED0", "F1975A", "B7B7B7",
+]
+
+# Standard legend defects ordering (matches template layout / Image 2)
+STANDARD_DEFECT_ORDER = [
+    "Rocking",
+    "Cleanness",
+    "Thread end",
+    "Over buffing",
+    "Over cement",
+    "Collar shape",
+    "Bottom Cosmetic",
+    "Components inconsistent",
+    "Midsole/Outsole to upper bond gap",
+    "Sole attachment",
+    "Toe off center",
+]
+
+# Chart mapping per factory
+SITE_CHART_MAP = {
+    "VH": {
+        "analysis": "Chart 51",
+        "top5": "Chart 194",
+        "top_defect": "Chart 63",
+        "pentagon": "Pentagon 39",
+        "dr_rect": "Rectangle 176",
+        "excel_rows": {"prod": 2, "defect": 9, "hfpa": 16, "top5_header": 21, "top5_start": 22, "top5_end": 26},
+    },
+    "VH2": {
+        "analysis": "Chart 52",
+        "top5": "Chart 195",
+        "top_defect": "Chart 64",
+        "pentagon": "Pentagon 151",
+        "dr_rect": "Rectangle 178",
+        "excel_rows": {"prod": 3, "defect": 10, "hfpa": 17, "top5_header": 27, "top5_start": 28, "top5_end": 32},
+    },
+    "JV": {
+        "analysis": "Chart 53",
+        "top5": "Chart 196",
+        "top_defect": "Chart 65",
+        "pentagon": "Pentagon 152",
+        "dr_rect": "Rectangle 180",
+        "excel_rows": {"prod": 4, "defect": 11, "hfpa": 18, "top5_header": 33, "top5_start": 34, "top5_end": 38},
+    },
+    "JV2": {
+        "analysis": "Chart 54",
+        "top5": "Chart 197",
+        "top_defect": "Chart 66",
+        "pentagon": "Pentagon 156",
+        "dr_rect": "Rectangle 181",
+        "excel_rows": {"prod": 5, "defect": 12, "hfpa": 19, "top5_header": 39, "top5_start": 40, "top5_end": 44},
+    },
+}
+
+
+# ======================================================================
+# 1. COLOR MAPPING HELPERS
+DEFECT_ALIASES = {
+    "damagedscratch": "damagescratch",
+    "distancedecostitchtobiteline": "distancebetweendecostitchbiteline",
+    "distancedecostitchbiteline": "distancebetweendecostitchbiteline",
+    "missmatchstyleonupcwithshoestylenumber": "missmatchstyleonupcwithshoesstylenumber",
+    "wrinklecounterlump": "wrinkletrlump",
+    "stitchingmarginspi": "stitchingmarginspi",
+    "colormigration": "colormigration",
+    "hairyedge": "hairyedge",
+}
+
+
+def normalize_defect_name(name):
+    """Normalize a defect name for matching: lowercase, alphanumeric only, with alias mapping."""
+    clean = re.sub(r"[^a-z0-9]", "", str(name).strip().lower())
+    return DEFECT_ALIASES.get(clean, clean)
+
+
+def get_label_font_color(hex_color):
+    """Calculate contrasting font color (white or black) based on background luminance."""
+    hex_color = hex_color.lstrip("#")
+    try:
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        brightness = (r * 299 + g * 587 + b * 114) / 1000
+        return "000000" if brightness >= 135 else "FFFFFF"
+    except Exception:
+        return "FFFFFF"
+
+
+def load_defect_color_map(color_file_path=COLOR_TEMPLATE):
+    """Load defect -> HEX color mapping from Color_template.xlsx."""
+    color_map = {}
+    if not os.path.exists(color_file_path):
+        print(f"[!] Warning: Color template file not found: {color_file_path}")
+        return color_map
+
+    try:
+        wb = openpyxl.load_workbook(color_file_path, data_only=True)
+        # Scan sheets
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            for r in range(1, ws.max_row + 1):
+                for c in range(1, ws.max_column - 1):
+                    val = ws.cell(r, c).value
+                    if val and "defect" in str(val).lower() and "type" in str(val).lower():
+                        header_r = r
+                        defect_col = c
+                        hex_col = None
+                        r_col = g_col = b_col = None
+                        for sc in range(c + 1, ws.max_column + 1):
+                            sval = str(ws.cell(r, sc).value or "").strip().lower()
+                            if sval == "hex":
+                                hex_col = sc
+                            elif sval in ("red", "r"):
+                                r_col = sc
+                            elif sval in ("green", "g"):
+                                g_col = sc
+                            elif sval in ("blue", "b"):
+                                b_col = sc
+
+                        for dr in range(header_r + 1, ws.max_row + 1):
+                            dname = ws.cell(dr, defect_col).value
+                            if not dname or not str(dname).strip():
+                                continue
+                            norm_name = normalize_defect_name(dname)
+                            hex_val = None
+                            if hex_col:
+                                raw_hex = str(ws.cell(dr, hex_col).value or "").strip().lstrip("#")
+                                if re.fullmatch(r"[0-9A-Fa-f]{6}", raw_hex):
+                                    hex_val = raw_hex.upper()
+                            if not hex_val and r_col and g_col and b_col:
+                                try:
+                                    rv = int(float(ws.cell(dr, r_col).value or 0))
+                                    gv = int(float(ws.cell(dr, g_col).value or 0))
+                                    bv = int(float(ws.cell(dr, b_col).value or 0))
+                                    hex_val = f"{rv:02X}{gv:02X}{bv:02X}"
+                                except Exception:
+                                    pass
+                            if hex_val:
+                                color_map[norm_name] = hex_val
+                        break
+        wb.close()
+    except Exception as e:
+        print(f"[!] Error reading color mapping: {e}")
+
+    print(f"   [+] Loaded {len(color_map)} defect color mappings from {os.path.basename(color_file_path)}")
+    return color_map
+
+
+def get_defect_color(defect_name, color_map, fallback_cache):
+    """Retrieve defect HEX color with normalized lookup and dynamic fallback."""
+    norm = normalize_defect_name(defect_name)
+    if norm in color_map:
+        return color_map[norm]
+    # Partial matching
+    for k, v in color_map.items():
+        if k in norm or norm in k:
+            return v
+    if norm in fallback_cache:
+        return fallback_cache[norm]
+    color = FALLBACK_PALETTE[len(fallback_cache) % len(FALLBACK_PALETTE)]
+    fallback_cache[norm] = color
+    return color
+
+
+# ======================================================================
+# 2. DATA EXTRACTION FROM OUTPUT/
+# ======================================================================
+def extract_pipeline_data(target_month=None, target_year=None, data_bus=None):
+    """
+    Extract all required data from Output/ workbooks.
+    """
+    if data_bus is not None:
+        target_month, target_year = data_bus.active_month, data_bus.active_year
+        excel_path = data_bus.output_excel_path
+        if not excel_path or not os.path.isfile(excel_path):
+            raise FileNotFoundError("Chưa có Excel tổng hợp HFPA của lần chạy này.")
+    else:
+        if target_month not in MONTH_NAMES or not str(target_year).isdigit():
+            raise ValueError("Cần chỉ định tháng và năm của Excel HFPA để tạo PowerPoint.")
+        stem = f"HFPA_Template_Updated_{target_month}_{target_year}"
+        candidates = [os.path.join(OUTPUT_DIR, stem + suffix + ".xlsx") for suffix in ("", "_New")]
+        available = [path for path in candidates if os.path.isfile(path)]
+        if not available:
+            raise FileNotFoundError(f"Thiếu Excel tổng hợp HFPA kỳ {target_month} {target_year}.")
+        excel_path = max(available, key=os.path.getmtime)
+
+    target_excel_name = os.path.basename(excel_path)
+    wb = openpyxl.load_workbook(excel_path, data_only=True)
+    if "HFPA" not in wb.sheetnames:
+        raise ValueError(f"Sheet 'HFPA' not found in {excel_path}")
+    ws = wb["HFPA"]
+
+    # Detect active months in row 1
+    month_cols = {}
+    for c in range(3, ws.max_column + 1):
+        val = str(ws.cell(1, c).value or "").strip()
+        for m in MONTH_NAMES:
+            if m.lower() == val.lower():
+                month_cols[m] = c
+                break
+
+    active_months = []
+    for m in MONTH_NAMES:
+        if m in month_cols:
+            col_idx = month_cols[m]
+            has_data = any((ws.cell(r, col_idx).value or 0) > 0 for r in [2, 3, 4, 5])
+            if has_data:
+                active_months.append(m)
+
+    if target_month not in month_cols:
+        raise ValueError(f"Excel HFPA thiếu cột tháng {target_month}.")
+    last = MONTH_NAMES.index(target_month)
+    first = min((MONTH_NAMES.index(m) for m in active_months if MONTH_NAMES.index(m) < last), default=last)
+    active_months = MONTH_NAMES[first:last + 1]
+    period_columns = [month_cols.get(m) for m in active_months]
+    if period_columns != list(range(month_cols[active_months[0]], month_cols[target_month] + 1)):
+        raise ValueError("Các cột tháng trong Excel HFPA phải liên tục và đúng thứ tự.")
+
+    print(f"   [+] Presentation Target Month: {target_month} {target_year} (Active range: {active_months[0]}..{active_months[-1]})")
+
+    # Monthly production & defect metrics for Chart 1
+    monthly_metrics = {}
+    for fty, cfg in SITE_CHART_MAP.items():
+        prod_row = cfg["excel_rows"]["prod"]
+        def_row = cfg["excel_rows"]["defect"]
+        prod_vals = []
+        def_vals = []
+        hfpa_vals = []
+
+        for m in active_months:
+            c = month_cols[m]
+            pv = float(ws.cell(prod_row, c).value or 0)
+            dv = float(ws.cell(def_row, c).value or 0)
+            prod_vals.append(pv)
+            def_vals.append(dv)
+            hfpa_vals.append(1.0 - (dv / pv) if pv > 0 else 0.0)
+
+        monthly_metrics[fty] = {
+            "prod": prod_vals,
+            "def": def_vals,
+            "hfpa": hfpa_vals,
+        }
+
+    # Target month summary numbers
+    target_col = month_cols[target_month]
+    site_summaries = {}
+    total_prod = 0.0
+    total_def = 0.0
+
+    for fty, cfg in SITE_CHART_MAP.items():
+        p_row = cfg["excel_rows"]["prod"]
+        d_row = cfg["excel_rows"]["defect"]
+        pv = float(ws.cell(p_row, target_col).value or 0)
+        dv = float(ws.cell(d_row, target_col).value or 0)
+        dr = dv / pv if pv > 0 else 0.0
+        site_summaries[fty] = {"prod": int(pv), "def": int(dv), "dr": dr}
+        total_prod += pv
+        total_def += dv
+
+    grand_total = {
+        "prod": int(total_prod),
+        "def": int(total_def),
+        "dr": (total_def / total_prod) if total_prod > 0 else 0.0,
+    }
+
+    # Top 5 Models & Top Defects Matrix for each factory
+    top5_data = {}
+    top_defects_matrix = {}
+
+    for fty, cfg in SITE_CHART_MAP.items():
+        hdr_row = cfg["excel_rows"]["top5_header"]
+        start_row = cfg["excel_rows"]["top5_start"]
+        end_row = cfg["excel_rows"]["top5_end"]
+
+        models = []
+        top5_list = []
+        for r in range(start_row, end_row + 1):
+            m_name = ws.cell(r, 4).value
+            if not m_name:
+                continue
+            m_name = str(m_name).strip()
+            models.append(m_name)
+            insp = float(ws.cell(r, 5).value or 0)
+            fail = float(ws.cell(r, 6).value or 0)
+            dr_val = ws.cell(r, 7).value
+            if isinstance(dr_val, (int, float)):
+                dr = float(dr_val)
+            else:
+                dr = (fail / insp) if insp > 0 else 0.0
+            top5_list.append({
+                "model": m_name,
+                "insp": int(insp),
+                "def": int(fail),
+                "dr": dr,
+            })
+        top5_data[fty] = top5_list
+
+        defect_cols = {}
+        for c in range(13, ws.max_column + 1):
+            val = ws.cell(hdr_row, c).value
+            if not val or not str(val).strip():
+                break  # Stop at first empty column (boundary between defect cols and site label cols)
+            col_name = str(val).strip()
+            # Skip non-defect headers that leak from adjacent sections
+            if col_name.startswith("Site") or col_name == "Model":
+                break  # Reached the next section boundary
+            defect_cols[col_name] = c
+
+        defect_values = {}
+        defects_in_order = list(defect_cols.keys())
+
+        for d_name in defects_in_order:
+            c = defect_cols[d_name]
+            vals = []
+            for r in range(start_row, start_row + len(models)):
+                v = ws.cell(r, c).value
+                if isinstance(v, (int, float)) and v > 0:
+                    vals.append(float(v))
+                else:
+                    vals.append(None)
+            defect_values[d_name] = vals
+
+        top_defects_matrix[fty] = {
+            "models": models,
+            "defects": defects_in_order,
+            "values": defect_values,
+            "start_row": start_row,
+            "end_row": end_row,
+            "defect_cols": defect_cols,
+            "hdr_row": hdr_row,
+            "fty": fty,
+        }
+
+    wb.close()
+
+    return {
+        "target_month": target_month,
+        "target_year": target_year,
+        "target_excel_name": target_excel_name,
+        "period_columns": period_columns,
+        "active_months": active_months,
+        "monthly_metrics": monthly_metrics,
+        "site_summaries": site_summaries,
+        "grand_total": grand_total,
+        "top5_data": top5_data,
+        "top_defects_matrix": top_defects_matrix,
+    }
+
+
+# ======================================================================
+# 3. TYPOGRAPHY & SHAPE TEXT UPDATERS
+# ======================================================================
+def set_run_font(run, name="Calibri", size_pt=10, bold=False, color_rgb=(0, 0, 0)):
+    """Apply font family, size in points, bold style, and RGB color to a text run."""
+    run.font.name = name
+    run.font.size = Pt(size_pt)
+    run.font.bold = bold
+    if color_rgb:
+        run.font.color.rgb = RGBColor(*color_rgb)
+
+
+def update_slide_metrics_and_links(slide, data):
+    """Update text frames, summary badges, site cards, and hyperlinks in Slide 1 with crisp typography."""
+    target_month = data["target_month"]
+    target_year = data["target_year"]
+    site_sums = data["site_summaries"]
+    g_total = data["grand_total"]
+
+    analysis_excel_name = f"QAStation_HFPA_Analysis_Report_{target_month}_{target_year}.xlsx"
+    master_excel_name = f"HFPA_FTT_Combined_Master_{target_month}_{target_year}.xlsx"
+    updated_excel_name = data.get("target_excel_name") or f"HFPA_Template_Updated_{target_month}_{target_year}.xlsx"
+
+    for s in slide.shapes:
+        # 1. Title: Rectangle 100
+        if s.name == "Rectangle 100":
+            tf = s.text_frame
+            tf.word_wrap = True
+            tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+            p = tf.paragraphs[0]
+            p.text = ""
+            r0 = p.add_run()
+            r0.text = "HFPA Performance "
+            set_run_font(r0, name="Calibri Light", size_pt=26, bold=True, color_rgb=(0, 32, 96))
+            r1 = p.add_run()
+            r1.text = f"{target_month}, {target_year}"
+            set_run_font(r1, name="Arial", size_pt=14, bold=True, color_rgb=(237, 125, 49))
+            print(f"   [+] Updated Title: HFPA Performance {target_month}, {target_year}")
+
+        # 2. Hyperlinks on navigation buttons
+        if s.name == "Rectangle 104":  # 'Analysis by Site'
+            s.click_action.hyperlink.address = rf"../Output/{analysis_excel_name}"
+            print(f"   [+] Set hyperlink: Rectangle 104 -> Output/{analysis_excel_name}")
+
+        if s.name in ("Rectangle 183", "Rectangle 184"):  # 'HFPA' / 'High Frequency Product Audit'
+            s.click_action.hyperlink.address = rf"../Output/{master_excel_name}"
+            print(f"   [+] Set hyperlink: {s.name} -> Output/{master_excel_name}")
+
+        # 3. Update Group 14 (Total pair produced)
+        if s.name == "组合 14":
+            for sub in s.shapes:
+                if sub.name == "Oval 109":
+                    tf = sub.text_frame
+                    tf.word_wrap = True
+                    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+                    tf.clear()
+                    p0 = tf.paragraphs[0]
+                    p0.alignment = PP_ALIGN.CENTER
+                    p0.space_before = Pt(0)
+                    p0.space_after = Pt(0)
+                    r0 = p0.add_run()
+                    r0.text = "Total pair"
+                    set_run_font(r0, name="Calibri", size_pt=8, bold=True, color_rgb=(255, 255, 255))
+
+                    p1 = tf.add_paragraph()
+                    p1.alignment = PP_ALIGN.CENTER
+                    p1.space_before = Pt(0)
+                    p1.space_after = Pt(1)
+                    r1 = p1.add_run()
+                    r1.text = "produced"
+                    set_run_font(r1, name="Calibri", size_pt=8, bold=True, color_rgb=(255, 255, 255))
+
+                    p2 = tf.add_paragraph()
+                    p2.alignment = PP_ALIGN.CENTER
+                    p2.space_before = Pt(0)
+                    p2.space_after = Pt(0)
+                    r2 = p2.add_run()
+                    r2.text = f"~{round(g_total['prod'] / 1000):,}K"
+                    set_run_font(r2, name="Calibri", size_pt=15, bold=True, color_rgb=(255, 255, 255))
+                    sub.click_action.hyperlink.address = rf"../Output/{updated_excel_name}"
+
+                if sub.shape_type == pptx.enum.shapes.MSO_SHAPE_TYPE.GROUP:
+                    factories_prod = {
+                        "Rectangle 116": f"VH: {site_sums['VH']['prod']:,} prs",
+                        "Rectangle 159": f"VH2: {site_sums['VH2']['prod']:,} prs",
+                        "Rectangle 160": f"JV: {site_sums['JV']['prod']:,} prs",
+                        "Rectangle 161": f"JV2: {site_sums['JV2']['prod']:,} prs",
+                    }
+                    for sub2 in sub.shapes:
+                        if sub2.name in factories_prod:
+                            tf = sub2.text_frame
+                            tf.word_wrap = False
+                            tf.margin_left = Pt(10)
+                            tf.margin_right = Pt(2)
+                            tf.margin_top = tf.margin_bottom = 0
+                            p = tf.paragraphs[0]
+                            p.text = factories_prod[sub2.name]
+                            if p.runs:
+                                set_run_font(p.runs[0], name="Calibri Light", size_pt=11.5, bold=False, color_rgb=(0, 0, 0))
+            print(f"   [+] Updated Group 14: Total pair produced (~{round(g_total['prod']/1000):,}K prs)")
+
+        # 4. Update Group 162 (Defective)
+        if s.name == "Group 162":
+            for sub in s.shapes:
+                if sub.name == "Oval 165":
+                    tf = sub.text_frame
+                    tf.word_wrap = False
+                    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+                    tf.clear()
+                    p0 = tf.paragraphs[0]
+                    p0.alignment = PP_ALIGN.CENTER
+                    r0 = p0.add_run()
+                    r0.text = "Defective"
+                    set_run_font(r0, name="Calibri", size_pt=8.5, bold=True, color_rgb=(255, 255, 255))
+
+                    p1 = tf.add_paragraph()
+                    p1.alignment = PP_ALIGN.CENTER
+                    r1 = p1.add_run()
+                    r1.text = f"~{round(g_total['def'] / 1000):,}K"
+                    set_run_font(r1, name="Calibri", size_pt=16, bold=True, color_rgb=(255, 255, 255))
+                    sub.click_action.hyperlink.address = rf"../Output/{updated_excel_name}"
+
+                if sub.shape_type == pptx.enum.shapes.MSO_SHAPE_TYPE.GROUP:
+                    factories_def = {
+                        "Rectangle 167": f"VH: {site_sums['VH']['def']:,} prs",
+                        "Rectangle 168": f"VH2: {site_sums['VH2']['def']:,} prs",
+                        "Rectangle 169": f"JV: {site_sums['JV']['def']:,} prs",
+                        "Rectangle 170": f"JV2: {site_sums['JV2']['def']:,} prs",
+                    }
+                    for sub2 in sub.shapes:
+                        if sub2.name in factories_def:
+                            tf = sub2.text_frame
+                            tf.word_wrap = False
+                            tf.margin_left = Pt(10)
+                            tf.margin_right = Pt(2)
+                            tf.margin_top = tf.margin_bottom = 0
+                            p = tf.paragraphs[0]
+                            p.text = factories_def[sub2.name]
+                            if p.runs:
+                                set_run_font(p.runs[0], name="Calibri Light", size_pt=11.5, bold=False, color_rgb=(0, 0, 0))
+            print(f"   [+] Updated Group 162: Defective (~{round(g_total['def']/1000):,}K prs)")
+
+        # 5. Site Pentagons & DR% Rectangles
+        for fty, cfg in SITE_CHART_MAP.items():
+            if s.name == cfg["pentagon"]:
+                tf = s.text_frame
+                tf.word_wrap = False
+                tf.clear()
+                p0 = tf.paragraphs[0]
+                p0.alignment = PP_ALIGN.CENTER
+                r0 = p0.add_run()
+                r0.text = fty
+                set_run_font(r0, name="Calibri", size_pt=12, bold=True, color_rgb=(0, 0, 0))
+                s.click_action.hyperlink.address = rf"../Output/{updated_excel_name}"
+
+            elif s.name == cfg["dr_rect"]:
+                dr_pct = site_sums[fty]["dr"]
+                tf = s.text_frame
+                tf.word_wrap = False
+                tf.margin_left = tf.margin_right = Pt(1)
+                tf.margin_top = tf.margin_bottom = Pt(1)
+                tf.clear()
+
+                p0 = tf.paragraphs[0]
+                p0.alignment = PP_ALIGN.CENTER
+                p0.space_after = Pt(1)
+                r0 = p0.add_run()
+                r0.text = "HFPA DR:"
+                set_run_font(r0, name="Calibri", size_pt=8.5, bold=True, color_rgb=(0, 0, 0))
+
+                p1 = tf.add_paragraph()
+                p1.alignment = PP_ALIGN.CENTER
+                p1.space_before = Pt(0)
+                r1 = p1.add_run()
+                r1.text = f"{dr_pct:.2%}"
+                set_run_font(r1, name="Calibri", size_pt=9.5, bold=True, color_rgb=(0, 0, 0))
+                s.click_action.hyperlink.address = rf"../Output/{analysis_excel_name}"
+
+        # 6. Side note: Rectangle 55 (instruction note for report author; remove from final presentation output)
+        if s.name == "Rectangle 55":
+            sp = s._element
+            sp.getparent().remove(sp)
+
+
+# ======================================================================
+# 4. DYNAMIC DEFECT COLOR LEGEND TABLE
+# ======================================================================
+def create_defect_color_legend_table(slide, data, color_map, fallback_cache):
+    """
+    Render Defect Color Legend as a high-resolution, fixed-height Picture shape.
+    Dynamically collects ALL unique defect types from chart data so no defect is missing.
+    Using a Picture shape ensures the legend NEVER expands downward in WPS Office or PowerPoint,
+    guaranteeing a clean 190,000 EMU safety gap above Chart 63.
+    """
+    # 1. Remove old Picture 2 or Table Defect Legend
+    for s in list(slide.shapes):
+        if s.name in ("Picture 2", "Table Defect Legend"):
+            sp = s._element
+            sp.getparent().remove(sp)
+
+    # 2. Dynamically collect ALL unique defects from the actual chart data
+    #    Validate each defect against color_map to ensure only real defects are included.
+    #    This is the safety net — even if data extraction lets something through,
+    #    the legend will only show defects that have a color in Color_template.xlsx.
+    all_defects_ordered = []
+    seen = set()
+    if "top_defects_matrix" in data:
+        for fty in data["top_defects_matrix"]:
+            matrix = data["top_defects_matrix"][fty]
+            for d_name in matrix.get("defects", []):
+                if d_name not in seen:
+                    # Validate: only include if it has a color mapping (is a real defect)
+                    norm = normalize_defect_name(d_name)
+                    is_real_defect = norm in color_map or any(k in norm or norm in k for k in color_map)
+                    if is_real_defect:
+                        all_defects_ordered.append(d_name)
+                    else:
+                        print(f"   [!] Legend: skipping non-defect entry '{d_name}' (no color mapping)")
+                    seen.add(d_name)
+
+    # Fallback if no data available
+    if not all_defects_ordered:
+        all_defects_ordered = [
+            "Rocking", "Cleanness", "Thread end", "Over buffing", "Over cement",
+            "Collar shape", "Bottom Cosmetic", "Components inconsistent",
+            "Midsole/Outsole to upper bond gap",
+        ]
+
+    # Sort defects by character length ascending (least to most characters), with alphabetical tie-breaker
+    all_defects_ordered = sorted(all_defects_ordered, key=lambda s: (len(str(s).strip()), str(s).strip().lower()))
+
+    # Arrange into 2-column grid (left column first, then right column)
+    total = len(all_defects_ordered)
+    rows = (total + 1) // 2  # ceil division
+    if rows < 5:
+        rows = 5  # minimum 5 rows for consistent layout
+
+    left_defects = all_defects_ordered[:rows]
+    right_defects = all_defects_ordered[rows:]
+
+    print(f"   [i] Legend defects ({total} total, sorted by character length): Left={left_defects}, Right={right_defects}")
+
+    left = 8588371
+    top = 580000
+    width = 2855916
+
+    # 3. Render high-resolution RGBA image (transparent background so empty cells have NO FILL)
+    row_h_px = 72  # fixed row height in pixels
+    w_px = 1400
+    h_px = rows * row_h_px
+    height = int(width * h_px / w_px)  # Maintain exact aspect ratio (~734,000 EMU, leaving ~215,000 EMU gap before Chart 63)
+
+    img = Image.new("RGBA", (w_px, h_px), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    font = None
+    for fp in ["C:/Windows/Fonts/calibri.ttf", "C:/Windows/Fonts/arial.ttf", "calibri.ttf", "arial.ttf"]:
+        if os.path.exists(fp):
+            try:
+                font = ImageFont.truetype(fp, 33)  # Increased font size for enhanced readability
+                break
+            except Exception:
+                pass
+    if font is None:
+        font = ImageFont.load_default()
+
+    # Balanced 2-column layout (equal text column width = 615px each)
+    col_xs = [0, 85, 700, 785, 1400]
+
+    for r in range(rows):
+        y0 = r * row_h_px
+        y1 = (r + 1) * row_h_px
+
+        # Left chip & text
+        if r < len(left_defects):
+            dname1 = left_defects[r]
+            hex1 = get_defect_color(dname1, color_map, fallback_cache)
+            c1 = (int(hex1[0:2], 16), int(hex1[2:4], 16), int(hex1[4:6], 16), 255)
+            draw.rectangle([col_xs[0], y0, col_xs[1], y1], fill=c1, outline=(0, 0, 0, 255), width=1)
+
+            # Left text (white background for readability)
+            draw.rectangle([col_xs[1], y0, col_xs[2], y1], fill=(255, 255, 255, 255), outline=(0, 0, 0, 255), width=1)
+            bbox1 = font.getbbox(dname1)
+            th1 = bbox1[3] - bbox1[1]
+            ty1 = y0 + (y1 - y0 - th1) // 2 - bbox1[1]
+            draw.text((col_xs[1] + 15, ty1), dname1, fill=(0, 0, 0, 255), font=font)
+
+        # Right chip & text
+        if r < len(right_defects):
+            dname2 = right_defects[r]
+            hex2 = get_defect_color(dname2, color_map, fallback_cache)
+            c2 = (int(hex2[0:2], 16), int(hex2[2:4], 16), int(hex2[4:6], 16), 255)
+            draw.rectangle([col_xs[2], y0, col_xs[3], y1], fill=c2, outline=(0, 0, 0, 255), width=1)
+
+            # Right text (white background for readability)
+            draw.rectangle([col_xs[3], y0, col_xs[4] - 1, y1], fill=(255, 255, 255, 255), outline=(0, 0, 0, 255), width=1)
+            bbox2 = font.getbbox(dname2)
+            th2 = bbox2[3] - bbox2[1]
+            ty2 = y0 + (y1 - y0 - th2) // 2 - bbox2[1]
+            draw.text((col_xs[3] + 15, ty2), dname2, fill=(0, 0, 0, 255), font=font)
+
+    rendered_img_path = os.path.join(OUTPUT_DIR, "defect_legend_rendered.png")
+    img.save(rendered_img_path, "PNG")
+
+    # 4. Insert as Picture shape
+    pic = slide.shapes.add_picture(rendered_img_path, left, top, width, height)
+    pic.name = "Picture 2"
+
+    print(f"   [+] Generated pixel-perfect Defect Color Legend Picture ({total} defects, {rows} rows) top={top}, height={height}, bottom={top+height}")
+
+
+# ======================================================================
+# 5. XML CHART BUILDERS & UPDATERS (WITH ACCURATE FONT CONTROLS)
+# ======================================================================
+def update_chart_relationships(chart_shape, target_excel_name="HFPA_Template_Updated.xlsx"):
+    """Link the chart to the summary workbook alongside the deck."""
+    chart = chart_shape.chart
+    for formula in chart._chartSpace.iter(qn("c:f")):
+        if formula.text and formula.text.startswith("'Current month'!"):
+            formula.text = formula.text.replace("'Current month'!", "'HFPA'!", 1)
+    external = chart._chartSpace.find(qn("c:externalData"))
+    rel_id = external.get(qn("r:id")) if external is not None else None
+    if rel_id in chart.part.rels and chart.part.rels[rel_id].is_external:
+        chart.part.rels[rel_id]._target = target_excel_name
+
+
+def update_hfpa_analysis_chart(chart_shape, active_months, metrics_dict, prod_row, def_row, hfpa_row,
+                               target_excel_name="HFPA_Template_Updated.xlsx", *, period_columns):
+    """
+    Update Column 1: 'HFPA Analysis' Combination Chart.
+    Plot 0: BarChart (Total pair produced & Defect)
+    Plot 1: LineChart (HFPA%)
+    """
+    chart_space = chart_shape.chart._chartSpace
+    plot_area = chart_space.find(qn('c:chart')).find(qn('c:plotArea'))
+
+    bar_chart = plot_area.find(qn('c:barChart'))
+    line_chart = plot_area.find(qn('c:lineChart'))
+
+    start_col_letter = get_column_letter(period_columns[0])
+    end_col_letter = get_column_letter(period_columns[-1])
+    cat_formula = f"'HFPA'!${start_col_letter}$1:${end_col_letter}$1"
+
+    cat_pts = "".join([f'<c:pt idx="{i}"><c:v>{m}</c:v></c:pt>' for i, m in enumerate(active_months)])
+    cat_xml = f"""
+    <c:cat xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart">
+      <c:strRef>
+        <c:f>{cat_formula}</c:f>
+        <c:strCache>
+          <c:ptCount val="{len(active_months)}"/>
+          {cat_pts}
+        </c:strCache>
+      </c:strRef>
+    </c:cat>
+    """
+
+    def update_series_vals(ser_elem, title, formula_cell, formula_range, values, num_fmt, dlbl_pos="ctr", dlbl_sz="700"):
+        tx = ser_elem.find(qn('c:tx'))
+        if tx is not None:
+            f = tx.find(qn('c:strRef')).find(qn('c:f'))
+            if f is not None:
+                f.text = formula_cell
+            v = tx.find(qn('c:strRef')).find(qn('c:strCache')).find(qn('c:pt')).find(qn('c:v'))
+            if v is not None:
+                v.text = title
+
+        old_cat = ser_elem.find(qn('c:cat'))
+        if old_cat is not None:
+            ser_elem.remove(old_cat)
+        ser_elem.append(parse_xml(cat_xml))
+
+        val_pts = "".join([f'<c:pt idx="{i}"><c:v>{v}</c:v></c:pt>' for i, v in enumerate(values)])
+        val_xml = f"""
+        <c:val xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart">
+          <c:numRef>
+            <c:f>{formula_range}</c:f>
+            <c:numCache>
+              <c:formatCode>{num_fmt}</c:formatCode>
+              <c:ptCount val="{len(values)}"/>
+              {val_pts}
+            </c:numCache>
+          </c:numRef>
+        </c:val>
+        """
+        old_val = ser_elem.find(qn('c:val'))
+        if old_val is not None:
+            ser_elem.remove(old_val)
+        ser_elem.append(parse_xml(val_xml))
+
+        # Ensure dLbls typography
+        dLbls = ser_elem.find(qn('c:dLbls'))
+        if dLbls is not None:
+            pos = dLbls.find(qn('c:dLblPos'))
+            if pos is not None:
+                pos.set('val', dlbl_pos)
+            txPr = dLbls.find(qn('c:txPr'))
+            if txPr is not None:
+                p = txPr.find(qn('a:p'))
+                if p is not None and p.find(qn('a:pPr')) is not None and p.find(qn('a:pPr')).find(qn('a:defRPr')) is not None:
+                    p.find(qn('a:pPr')).find(qn('a:defRPr')).set('sz', dlbl_sz)
+
+    bar_series = bar_chart.findall(qn('c:ser'))
+    if len(bar_series) >= 2:
+        update_series_vals(
+            bar_series[0],
+            "Total pair produced",
+            f"'HFPA'!$B${prod_row}",
+            f"'HFPA'!${start_col_letter}${prod_row}:${end_col_letter}${prod_row}",
+            metrics_dict["prod"],
+            "#,##0",
+            dlbl_pos="ctr",
+            dlbl_sz="700",
+        )
+        update_series_vals(
+            bar_series[1],
+            "Defect",
+            f"'HFPA'!$B${def_row}",
+            f"'HFPA'!${start_col_letter}${def_row}:${end_col_letter}${def_row}",
+            metrics_dict["def"],
+            "#,##0",
+            dlbl_pos="inBase",
+            dlbl_sz="700",
+        )
+
+    if line_chart is not None:
+        line_series = line_chart.findall(qn('c:ser'))
+        if line_series:
+            update_series_vals(
+                line_series[0],
+                "HFPA%",
+                f"'HFPA'!$B${hfpa_row}",
+                f"'HFPA'!${start_col_letter}${hfpa_row}:${end_col_letter}${hfpa_row}",
+                metrics_dict["hfpa"],
+                "0.00%",
+                dlbl_pos="t",
+                dlbl_sz="750",
+            )
+
+    update_chart_relationships(chart_shape, target_excel_name=target_excel_name)
+
+
+def update_top5_models_chart(chart_shape, top5_list, start_row, end_row, target_excel_name="HFPA_Template_Updated.xlsx"):
+    """
+    Update Column 2: 'Top 5 models' Clustered Column Chart.
+    Categories: Top 5 models (6pt font)
+    Series 0: HFPA DR% with 7.5pt bold labels outside end.
+    """
+    chart_space = chart_shape.chart._chartSpace
+    plot_area = chart_space.find(qn('c:chart')).find(qn('c:plotArea'))
+    bar_chart = plot_area.find(qn('c:barChart'))
+
+    models = [item["model"] for item in top5_list]
+    dr_vals = [item["dr"] for item in top5_list]
+
+    cat_pts = "".join(f'<c:pt idx="{i}"><c:v>{escape(m)}</c:v></c:pt>' for i, m in enumerate(models))
+    val_pts = "".join([f'<c:pt idx="{i}"><c:v>{v:.6f}</c:v></c:pt>' for i, v in enumerate(dr_vals)])
+
+    cat_f = f"'HFPA'!$D${start_row}:$D${end_row}"
+    val_f = f"'HFPA'!$G${start_row}:$G${end_row}"
+
+    cat_xml = f"""
+    <c:cat xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart">
+      <c:strRef>
+        <c:f>{cat_f}</c:f>
+        <c:strCache>
+          <c:ptCount val="{len(models)}"/>
+          {cat_pts}
+        </c:strCache>
+      </c:strRef>
+    </c:cat>
+    """
+
+    val_xml = f"""
+    <c:val xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart">
+      <c:numRef>
+        <c:f>{val_f}</c:f>
+        <c:numCache>
+          <c:formatCode>0.00%</c:formatCode>
+          <c:ptCount val="{len(dr_vals)}"/>
+          {val_pts}
+        </c:numCache>
+      </c:numRef>
+    </c:val>
+    """
+
+    series_list = bar_chart.findall(qn('c:ser'))
+    if series_list:
+        ser0 = series_list[0]
+        old_cat = ser0.find(qn('c:cat'))
+        if old_cat is not None:
+            ser0.remove(old_cat)
+        ser0.append(parse_xml(cat_xml))
+
+        old_val = ser0.find(qn('c:val'))
+        if old_val is not None:
+            ser0.remove(old_val)
+        ser0.append(parse_xml(val_xml))
+
+        # Typography on dLbls (7.5pt bold black)
+        old_dlbls = ser0.find(qn('c:dLbls'))
+        if old_dlbls is not None:
+            ser0.remove(old_dlbls)
+        dlbls_xml = """
+        <c:dLbls xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"
+                 xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+          <c:spPr><a:noFill/><a:ln><a:noFill/></a:ln></c:spPr>
+          <c:txPr>
+            <a:bodyPr rot="0" spcFirstLastPara="1" vertOverflow="ellipsis" vert="horz" wrap="square" lIns="19050" tIns="9525" rIns="19050" bIns="9525" anchor="ctr" anchorCtr="1"/>
+            <a:lstStyle/>
+            <a:p>
+              <a:pPr>
+                <a:defRPr lang="en-US" sz="750" b="1" i="0" baseline="0">
+                  <a:solidFill><a:srgbClr val="000000"/></a:solidFill>
+                  <a:latin typeface="Calibri"/>
+                </a:defRPr>
+              </a:pPr>
+            </a:p>
+          </c:txPr>
+          <c:numFmt formatCode="0.00%" sourceLinked="0"/>
+          <c:dLblPos val="outEnd"/>
+          <c:showVal val="1"/>
+          <c:showLegendKey val="0"/>
+          <c:showCatName val="0"/>
+          <c:showSerName val="0"/>
+          <c:showPercent val="0"/>
+          <c:showBubbleSize val="0"/>
+          <c:showLeaderLines val="0"/>
+        </c:dLbls>
+        """
+        ser0.append(parse_xml(dlbls_xml))
+
+    # Category axis font size = 6pt
+    catAx = plot_area.find(qn('c:catAx'))
+    if catAx is not None:
+        txPr = catAx.find(qn('c:txPr'))
+        if txPr is not None:
+            p = txPr.find(qn('a:p'))
+            if p is not None and p.find(qn('a:pPr')) is not None and p.find(qn('a:pPr')).find(qn('a:defRPr')) is not None:
+                p.find(qn('a:pPr')).find(qn('a:defRPr')).set('sz', '600')
+
+    # Dynamic valAx scaling: ensure highest DR% never hits the chart ceiling or clips outEnd labels
+    valAx = plot_area.find(qn('c:valAx'))
+    if valAx is not None:
+        scaling = valAx.find(qn('c:scaling'))
+        if scaling is not None:
+            max_val = max(dr_vals) if dr_vals else 0.0
+            target_max = 0.05 if max_val <= 0.038 else round(math.ceil(max_val * 1.35 * 100) / 100, 2)
+            max_elem = scaling.find(qn('c:max'))
+            if max_elem is not None:
+                max_elem.set('val', str(target_max))
+            else:
+                scaling.append(parse_xml(f'<c:max xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" val="{target_max}"/>'))
+            min_elem = scaling.find(qn('c:min'))
+            if min_elem is not None:
+                min_elem.set('val', '0')
+            else:
+                scaling.append(parse_xml('<c:min xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" val="0"/>'))
+
+    # Standardize plotArea layout across all factories for consistent top margin
+    layout = plot_area.find(qn('c:layout'))
+    if layout is not None:
+        ml = layout.find(qn('c:manualLayout'))
+        if ml is not None:
+            y_elem = ml.find(qn('c:y'))
+            if y_elem is not None:
+                y_elem.set('val', '0.285')
+            h_elem = ml.find(qn('c:h'))
+            if h_elem is not None:
+                h_elem.set('val', '0.442')
+
+    # Standardize legend position to top-left to avoid overlap with column bars or data labels
+    chart_elem = chart_space.find(qn('c:chart'))
+    if chart_elem is not None:
+        leg = chart_elem.find(qn('c:legend'))
+        if leg is not None:
+            l_layout = leg.find(qn('c:layout'))
+            if l_layout is not None:
+                l_ml = l_layout.find(qn('c:manualLayout'))
+                if l_ml is not None:
+                    lx_elem = l_ml.find(qn('c:x'))
+                    if lx_elem is not None:
+                        lx_elem.set('val', '0.0600645231846019')
+                    ly_elem = l_ml.find(qn('c:y'))
+                    if ly_elem is not None:
+                        ly_elem.set('val', '0.0259601924759405')
+
+    update_chart_relationships(chart_shape, target_excel_name=target_excel_name)
+
+
+def update_top_defects_chart(chart_shape, defect_matrix, color_map, fallback_cache, target_excel_name="HFPA_Template_Updated.xlsx"):
+    """
+    Update Column 3: 'Top defect of top models' Stacked Column Chart.
+    Strictly adheres to process_ftt.py ranking and Color_template.xlsx HEX styling.
+    Applies clean 7pt contrasting typography on stacked labels.
+    """
+    chart_space = chart_shape.chart._chartSpace
+    plot_area = chart_space.find(qn('c:chart')).find(qn('c:plotArea'))
+    bar_chart = plot_area.find(qn('c:barChart'))
+
+    models = defect_matrix["models"]
+    defects = defect_matrix["defects"]
+    values = defect_matrix["values"]
+    start_row = defect_matrix["start_row"]
+    end_row = defect_matrix["end_row"]
+    defect_cols = defect_matrix["defect_cols"]
+
+    # Remove all old series
+    for old_ser in bar_chart.findall(qn('c:ser')):
+        bar_chart.remove(old_ser)
+
+    insert_pos = 0
+    for idx, child in enumerate(bar_chart):
+        if child.tag.endswith('varyColors') or child.tag.endswith('grouping'):
+            insert_pos = idx + 1
+
+    hdr_row = defect_matrix.get("hdr_row", 21)
+    sheet_name = "HFPA"
+    cat_pts = "".join(f'<c:pt idx="{i}"><c:v>{escape(m)}</c:v></c:pt>' for i, m in enumerate(models))
+    cat_f = f"'{sheet_name}'!$L${start_row}:$L${end_row}"
+
+    for s_idx, d_name in enumerate(defects):
+        hex_color = get_defect_color(d_name, color_map, fallback_cache)
+        font_color = get_label_font_color(hex_color)
+        col_letter = get_column_letter(defect_cols[d_name])
+
+        vals = values.get(d_name, [None] * len(models))
+        val_pts = []
+        for i, v in enumerate(vals):
+            if v is not None and v > 0:
+                val_pts.append(f'<c:pt idx="{i}"><c:v>{v:.6f}</c:v></c:pt>')
+        val_pts_str = "".join(val_pts)
+
+        ser_xml = f"""
+        <c:ser xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"
+               xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+          <c:idx val="{s_idx}"/>
+          <c:order val="{s_idx}"/>
+          <c:tx>
+            <c:strRef>
+              <c:f>'{sheet_name}'!${col_letter}${hdr_row}</c:f>
+              <c:strCache>
+                <c:ptCount val="1"/>
+                <c:pt idx="0"><c:v>{escape(d_name)}</c:v></c:pt>
+              </c:strCache>
+            </c:strRef>
+          </c:tx>
+          <c:spPr>
+            <a:solidFill><a:srgbClr val="{hex_color}"/></a:solidFill>
+            <a:ln><a:noFill/></a:ln>
+          </c:spPr>
+          <c:invertIfNegative val="0"/>
+          <c:dLbls>
+            <c:spPr><a:noFill/><a:ln><a:noFill/></a:ln></c:spPr>
+            <c:txPr>
+              <a:bodyPr rot="0" spcFirstLastPara="1" vertOverflow="ellipsis" vert="horz" wrap="square" lIns="19050" tIns="9525" rIns="19050" bIns="9525" anchor="ctr" anchorCtr="1"><a:spAutoFit/></a:bodyPr>
+              <a:lstStyle/>
+              <a:p>
+                <a:pPr>
+                  <a:defRPr lang="en-US" sz="700" b="1" i="0" baseline="0">
+                    <a:solidFill><a:srgbClr val="{font_color}"/></a:solidFill>
+                    <a:latin typeface="Calibri"/>
+                  </a:defRPr>
+                </a:pPr>
+              </a:p>
+            </c:txPr>
+            <c:numFmt formatCode="0.00%" sourceLinked="0"/>
+            <c:dLblPos val="ctr"/>
+            <c:showLegendKey val="0"/>
+            <c:showVal val="1"/>
+            <c:showCatName val="0"/>
+            <c:showSerName val="0"/>
+            <c:showPercent val="0"/>
+            <c:showBubbleSize val="0"/>
+            <c:showLeaderLines val="0"/>
+          </c:dLbls>
+          <c:cat>
+            <c:strRef>
+              <c:f>{cat_f}</c:f>
+              <c:strCache>
+                <c:ptCount val="{len(models)}"/>
+                {cat_pts}
+              </c:strCache>
+            </c:strRef>
+          </c:cat>
+          <c:val>
+            <c:numRef>
+              <c:f>'{sheet_name}'!${col_letter}${start_row}:${col_letter}${end_row}</c:f>
+              <c:numCache>
+                <c:formatCode>0.00%</c:formatCode>
+                <c:ptCount val="{len(models)}"/>
+                {val_pts_str}
+              </c:numCache>
+            </c:numRef>
+          </c:val>
+        </c:ser>
+        """
+        bar_chart.insert(insert_pos + s_idx, parse_xml(ser_xml))
+
+    # Calculate 1st Priority defect according to business rule:
+    # Rule: "Ưu tiên lỗi đó có nhiều model nhất sau đó sẽ xét tỷ lệ phần trăm"
+    # (Prioritize the defect appearing in the most models; if tied, compare total percentage)
+    defect_model_count = {}
+    defect_pct_sum = {}
+    for d in defects:
+        defect_model_count[d] = 0
+        defect_pct_sum[d] = 0.0
+        vals = values.get(d, [])
+        for v in vals:
+            if v is not None and v > 0:
+                defect_model_count[d] += 1
+                defect_pct_sum[d] += float(v)
+
+    ranked_defects = sorted(defects, key=lambda d: (defect_model_count.get(d, 0), defect_pct_sum.get(d, 0.0)), reverse=True)
+    first_priority_defect = ranked_defects[0] if ranked_defects else ""
+
+    # Category axis font size = 6pt & Update 'First priority: ...' in catAx title
+    catAx = plot_area.find(qn('c:catAx'))
+    if catAx is not None:
+        txPr = catAx.find(qn('c:txPr'))
+        if txPr is not None:
+            p = txPr.find(qn('a:p'))
+            if p is not None and p.find(qn('a:pPr')) is not None and p.find(qn('a:pPr')).find(qn('a:defRPr')) is not None:
+                p.find(qn('a:pPr')).find(qn('a:defRPr')).set('sz', '600')
+
+        if first_priority_defect:
+            title = catAx.find(qn('c:title'))
+            if title is not None:
+                tx = title.find(qn('c:tx'))
+                if tx is not None:
+                    rich = tx.find(qn('c:rich'))
+                    if rich is not None:
+                        p = rich.find(qn('a:p'))
+                        if p is not None:
+                            # Clear old runs to eliminate typos (e.g. "Firsty prority")
+                            for r in p.findall(qn('a:r')):
+                                p.remove(r)
+                            new_r = parse_xml(
+                                f'<a:r xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'
+                                f'<a:rPr lang="en-US" sz="800" b="0" i="0" u="sng" baseline="0">'
+                                f'<a:solidFill><a:schemeClr val="tx1"/></a:solidFill>'
+                                f'<a:latin typeface="+mn-lt"/>'
+                                f'</a:rPr>'
+                                f'<a:t>First priority: {first_priority_defect}</a:t>'
+                                f'</a:r>'
+                            )
+                            end_para = p.find(qn('a:endParaRPr'))
+                            if end_para is not None:
+                                p.insert(list(p).index(end_para), new_r)
+                            else:
+                                p.append(new_r)
+
+    update_chart_relationships(chart_shape, target_excel_name=target_excel_name)
+
+
+# ======================================================================
+# 6. MAIN PRESENTATION GENERATION WORKFLOW
+# ======================================================================
+def generate_hfpa_presentation(target_month=None, target_year=None, template_path=TEMPLATE_PPTX, output_path=None, data_bus=None):
+    """
+    Main entry point: Read data from Output/, map into PPTX presentation,
+    re-render all 12 charts, generate native Defect Color Legend table,
+    set hyperlinks, and save both in Database/ and Output/.
+    """
+    print("\n" + "=" * 65)
+    print("   GENERATING HFPA POWERPOINT PRESENTATION (HFPA_Template.pptx)")
+    print("   [Typography & Color Palette Enhanced]")
+    print("=" * 65)
+
+    # Use pristine backup if available, otherwise template
+    source_pptx = BACKUP_PPTX if os.path.exists(BACKUP_PPTX) else template_path
+    if not os.path.exists(source_pptx):
+        print(f"[-] Error: Master template not found at {source_pptx}")
+        return False
+
+    # 1. Extract data from Output/
+    print("\n[1/6] Extracting quality & defect metrics from Output/...")
+    data = extract_pipeline_data(target_month=target_month, target_year=target_year, data_bus=data_bus)
+    month = data["target_month"]
+    year = data["target_year"]
+    target_excel_name = data.get("target_excel_name") or f"HFPA_Template_Updated_{month}_{year}.xlsx"
+
+    if not output_path:
+        output_path = os.path.join(OUTPUT_DIR, f"HFPA_Performance_Report_{month}_{year}.pptx")
+
+    # 2. Load defect colors
+    print("\n[2/6] Loading defect color palette from Color_template.xlsx...")
+    color_map = load_defect_color_map(COLOR_TEMPLATE)
+    fallback_cache = {}
+
+    # 3. Load presentation & backup
+    print("\n[3/6] Loading PPTX presentation and creating safe backup...")
+    if not os.path.exists(BACKUP_PPTX):
+        try:
+            shutil.copy2(template_path, BACKUP_PPTX)
+            print(f"   [+] Created permanent pristine backup: {os.path.basename(BACKUP_PPTX)}")
+        except Exception as e:
+            print(f"   [-] Backup notice: {e}")
+
+    prs = pptx.Presentation(source_pptx)
+    slide = prs.slides[0]
+
+    # 4. Update texts, metric summaries, and hyperlinks
+    print("\n[4/6] Updating Slide text summaries, KPI cards, and interactive hyperlinks...")
+    update_slide_metrics_and_links(slide, data)
+
+    # 5. Create Dynamic Defect Color Legend Table (Replacing Picture 2)
+    print("\n[5/6] Generating native Defect Color Legend Table (Color_template mapping)...")
+    create_defect_color_legend_table(slide, data, color_map, fallback_cache)
+
+    # 6. Update 12 Charts
+    print("\n[6/6] Rebuilding and restyling 12 charts with enhanced typography...")
+    shape_dict = {s.name: s for s in slide.shapes if s.has_chart}
+
+    for fty, cfg in SITE_CHART_MAP.items():
+        print(f"   ├─ Processing Site [{fty}]:")
+
+        # Column 1: HFPA Analysis
+        c_analysis_name = cfg["analysis"]
+        if c_analysis_name in shape_dict:
+            c_shape = shape_dict[c_analysis_name]
+            update_hfpa_analysis_chart(
+                c_shape,
+                data["active_months"],
+                data["monthly_metrics"][fty],
+                cfg["excel_rows"]["prod"],
+                cfg["excel_rows"]["defect"],
+                cfg["excel_rows"]["hfpa"],
+                target_excel_name=target_excel_name,
+                period_columns=data["period_columns"],
+            )
+            print(f"   │  ├─ Updated {c_analysis_name} ('HFPA Analysis' Combo Chart)")
+
+        # Column 2: Top 5 models
+        c_top5_name = cfg["top5"]
+        if c_top5_name in shape_dict:
+            c_shape = shape_dict[c_top5_name]
+            update_top5_models_chart(
+                c_shape,
+                data["top5_data"][fty],
+                cfg["excel_rows"]["top5_start"],
+                cfg["excel_rows"]["top5_end"],
+                target_excel_name=target_excel_name,
+            )
+            print(f"   │  ├─ Updated {c_top5_name} ('Top 5 models' Clustered Column)")
+
+        # Column 3: Top defect of top models
+        c_top_def_name = cfg["top_defect"]
+        if c_top_def_name in shape_dict:
+            c_shape = shape_dict[c_top_def_name]
+            update_top_defects_chart(
+                c_shape,
+                data["top_defects_matrix"][fty],
+                color_map,
+                fallback_cache,
+                target_excel_name=target_excel_name,
+            )
+            def_count = len(data["top_defects_matrix"][fty]["defects"])
+            print(f"   │  └─ Updated {c_top_def_name} ('Top defect of top models' {def_count} defect series)")
+
+    # 7. Save presentation to Database/ and Output/
+    target_output = ensure_file_writable(output_path, f"Báo cáo PowerPoint đầu ra ({os.path.basename(output_path)})")
+    prs.save(target_output)
+    print(f"\n[+] Successfully saved presentation to Output: {target_output}")
+
+    # Remove legacy un-suffixed presentation if present
+    legacy_pptx = os.path.join(OUTPUT_DIR, "HFPA_Performance_Report.pptx")
+    if os.path.exists(legacy_pptx) and legacy_pptx != target_output:
+        try:
+            os.remove(legacy_pptx)
+        except Exception:
+            pass
+
+    target_database = ensure_file_writable(template_path, "Template PowerPoint gốc (Database/HFPA_Template.pptx)", max_retries=3)
+    excel_output = os.path.join(OUTPUT_DIR, target_excel_name)
+    database_link = os.path.relpath(excel_output, os.path.dirname(os.path.abspath(target_database))).replace(os.sep, "/")
+    for shape in shape_dict.values():
+        if shape.has_chart and shape.name in {cfg[key] for cfg in SITE_CHART_MAP.values()
+                                             for key in ("analysis", "top5", "top_defect")}:
+            update_chart_relationships(shape, database_link)
+    prs.save(target_database)
+    print(f"[+] Master presentation template synchronized: {target_database}")
+
+    print("\n" + "=" * 65)
+    print(f"   COMPLETED! HFPA PowerPoint Report generated for Month: {month.upper()} {year}")
+    print("=" * 65 + "\n")
+    return True
+
+
+def main():
+    target_month = sys.argv[1] if len(sys.argv) > 1 else None
+    target_year = sys.argv[2] if len(sys.argv) > 2 else None
+    generate_hfpa_presentation(target_month=target_month, target_year=target_year)
+
+
+if __name__ == "__main__":
+    main()

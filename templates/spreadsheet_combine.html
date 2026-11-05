@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gộp file Excel · FATO</title><link rel="stylesheet" href="/static/workspace.css?v=nothing-1"><link rel="stylesheet" href="/static/spreadsheet-combine.css?v=3"><script src="/static/workspace.js?v=nothing-1" defer></script><script src="/static/spreadsheet-combine.js?v=3" defer></script></head>
+<body>{% include '_nothing_shell.html' %}
+<main id="main-content" class="combine-main">
+  <section class="combine-intro"><p class="eyebrow">FATO / COMBINE EXCEL</p><h1>Nhiều file Excel.<br><em>Một bảng dữ liệu.</em></h1><p>Gộp các bảng theo tên cột, kể cả khi thứ tự hoặc số cột khác nhau. Cột chỉ có ở một số file vẫn được giữ lại, ô thiếu để trống.</p><a href="/compare" class="combine-link">Đối chiếu Excel ↗</a></section>
+  <p id="combine-notice" role="status" aria-live="polite"></p>
+  <section class="combine-panel" aria-labelledby="upload-title"><div class="combine-heading"><div><p class="eyebrow">01 / FILE NGUỒN</p><h2 id="upload-title">Chọn file cần gộp.</h2></div><span id="combine-file-count">0 file</span></div>
+    <label class="combine-drop" id="combine-drop"><strong>Chọn file Excel hoặc kéo thả vào đây</strong><input id="combine-upload" type="file" accept=".xls,.xlsx,.xlsm" data-max-files="{{ max_files }}" multiple><span>.xls, .xlsx, .xlsm · Tối đa {{ max_files }} file · 40 MB/file · 500.000 ô/lượt</span></label>
+    <p class="combine-help">Dùng cho các bảng Excel có một dòng tiêu đề: bán hàng, tồn kho, sản xuất, chất lượng hoặc bảng dữ liệu khác. Hệ thống gợi ý dòng tiêu đề; bạn có thể đổi và giới hạn dòng cuối cho từng trang tính. Công thức dùng kết quả đã lưu trong Excel.</p>
+    <div id="combine-files"></div>
+    <details class="combine-options"><summary>Tùy chọn ghép dữ liệu</summary><div class="combine-option-grid">
+      <label>Cột giữa các bảng<select id="combine-schema-mode"><option value="union">Giữ tất cả cột · ô thiếu để trống</option><option value="strict">Chỉ gộp khi cùng bộ cột</option></select></label>
+      <label>Dòng tổng cuối bảng<select id="combine-footer-mode"><option value="auto">Chỉ bỏ dòng tổng thuộc mẫu đã nhận diện và đối chiếu</option><option value="keep">Giữ dòng tổng trong phạm vi đã chọn</option></select></label>
+    </div><p class="combine-help">Không tự xóa dòng tổng của mẫu chưa nhận diện. Dùng Dòng cuối ở từng bảng để bỏ phần tổng hoặc ghi chú. Hệ thống không tự đồng nhất các cột khác tên hoặc khác đơn vị.</p></details>
+    <div class="combine-actions"><button id="combine-preview" class="combine-primary" type="button" disabled>Xem trước bản gộp →</button><button id="combine-reset" type="button" disabled>Chọn lại file</button></div>
+  </section>
+  <section id="combine-result" class="combine-panel" aria-labelledby="result-title" hidden><div class="combine-heading"><div><p class="eyebrow">02 / BẢN GỘP</p><h2 id="result-title">Xem trước dữ liệu.</h2></div><span id="combine-stats"></span></div>
+    <p id="combine-method" class="combine-help"></p><div class="combine-scroll" id="combine-preview-table" tabindex="0" aria-label="Bảng xem trước bản gộp"></div><p class="combine-help">Hiển thị tối đa 12 dòng đầu. File tải về có đầy đủ dữ liệu, bộ lọc, tiêu đề cố định và sheet Sources để đối chiếu số dòng từng nguồn. Các dòng dữ liệu trùng nhau được giữ nguyên.</p>
+    <div id="combine-warnings" role="status" hidden></div>
+    <details><summary>Chi tiết từng nguồn</summary><div class="combine-scroll" id="combine-sources"></div></details>
+    <label class="combine-name" for="combine-output-name">Tên file xuất<input id="combine-output-name" type="text" maxlength="165" autocomplete="off" spellcheck="false" aria-describedby="combine-name-help"></label>
+    <p id="combine-name-help" class="combine-help">Bạn có thể sửa tên trước khi xuất; định dạng luôn là .xlsx.</p>
+    <p id="combine-naming-basis" class="combine-help"></p>
+    <div class="combine-actions"><button id="combine-run" class="combine-primary" type="button">Gộp &amp; tạo file Excel →</button><a id="combine-download" class="combine-primary" hidden>Tải file Excel đã gộp ↓</a></div>
+  </section>
+  <section id="combine-example" class="combine-panel combine-example" hidden><div><p class="eyebrow">VÍ DỤ FGWH / THÁNG 10.2026</p><h2>Bản gộp từ 10 file của bạn.</h2><p id="combine-example-detail"></p></div><a id="combine-example-download" class="combine-link">Tải bản mẫu ↓</a></section>
+</main></body></html>

@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SFC Ching Luh - Copilot & Control Cockpit</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>FATO Dashboard · Không gian điều khiển</title>
+    <!-- Locally hosted icons; shared fonts are defined in workspace.css. -->
+    <link rel="stylesheet" href="/static/vendor/fontawesome/css/all.min.css">
     
     <style>
         :root {
@@ -731,6 +728,20 @@
 
         .card-title i {
             color: var(--accent-blue);
+        }
+
+        .report-tools-description {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0 0 16px;
+        }
+
+        .report-tools-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
         }
 
         /* Quick Destination Tiles */
@@ -1614,17 +1625,31 @@
             background: rgba(0, 0, 0, 0.15);
         }
     </style>
+    <meta name="theme-color" content="#f3f2ee">
+    <link rel="stylesheet" href="/static/workspace.css?v=nothing-1">
+    <link rel="stylesheet" href="/static/dashboard-theme.css?v=qms-search-2">
+    <script src="/static/workspace.js?v=nothing-1" defer></script>
+    <script src="/static/qms-navigation.js?v=2"></script>
 </head>
-<body data-theme="dark">
+<body class="dashboard-page" data-theme="light">
+{% include '_nothing_shell.html' %}
 
+
+
+    <!-- Main Container -->
+    <div class="container" id="main-content">
+        <section class="workspace-intro reveal" aria-labelledby="workspace-heading">
+            <div><p class="eyebrow">FATO / Không gian điều khiển</p><h1 id="workspace-heading">Công việc rõ ràng.<br><em>Kết quả sẵn sàng.</em></h1><p>Kết nối SFC, xử lý dữ liệu và đưa báo cáo đến bước hoàn tất. Mọi công cụ, trong cùng một không gian làm việc.</p></div>
+            <a href="/reports" class="pill-link">Mở tool báo cáo <span aria-hidden="true">↗</span></a>
+        </section>
     <!-- Header -->
-    <header>
+    <header class="sfc-toolbar">
         <div class="brand">
             <div class="brand-logo">
                 <i class="fa-solid fa-bolt"></i>
             </div>
             <div class="brand-title">
-                <h1>SFC Ching Luh Copilot <span class="badge">PRO</span></h1>
+                <h1>SFC FATO Copilot <span class="badge">PRO</span></h1>
                 <p>Điều khiển 7 Cụm Nhà máy & 138 Chuyền sản xuất</p>
             </div>
         </div>
@@ -1654,7 +1679,7 @@
             </div>
             <div class="status-badge" id="cdp-status">
                 <div class="pulse-dot"></div>
-                <span id="cdp-text">Chrome 9222: Đã kết nối</span>
+                <span id="cdp-text">Đang kiểm tra kết nối SFC</span>
             </div>
             <button class="theme-btn" id="theme-toggle" title="Đổi giao diện Sáng / Tối">
                 <i class="fa-solid fa-moon"></i>
@@ -1662,16 +1687,13 @@
         </div>
     </header>
 
-    <!-- Main Container -->
-    <div class="container">
-
         <!-- Natural Language Prompt Hero -->
         <div class="ai-prompt-box">
             <div class="prompt-label">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> RA LỆNH TỰ NHIÊN CHO TRỢ LÝ SFC (AI COMMAND PROMPT)
+                <i class="fa-solid fa-wand-magic-sparkles"></i> LỆNH ĐIỀU KHIỂN SFC
             </div>
             <div class="prompt-input-row">
-                <input type="text" id="ai-prompt-input" class="prompt-input" value="{{ last_command_prompt }}" data-last-job="{{ last_command_job_id }}"
+                <input type="text" id="ai-prompt-input" class="prompt-input" value="" autocomplete="off" data-last-job="{{ last_command_job_id }}"
                        placeholder="Ví dụ: 'Đổi sang nhà máy VH3', 'Chọn chuyền VL - D3 ngày hôm nay rồi tìm kiếm', 'Vào mục MQAA'..." />
                 <button class="btn-prompt-send" id="btn-prompt-exec">
                     <i class="fa-solid fa-paper-plane"></i> Thực thi ngay
@@ -1705,10 +1727,11 @@
                 <div class="chip" onclick="applyPreset('Về Trang chủ SFC')">
                     <i class="fa-solid fa-house"></i> Trang chủ FlowChart
                 </div>
+                <button type="button" id="resume-command-progress" class="chip" hidden onclick="showExistingCommandProgress()">Mở tiến trình tác vụ</button>
             </div>
 
             {% if saved_command_results %}
-            <details id="saved-command-results" style="margin-top:16px;" open>
+            <details id="saved-command-results" style="margin-top:16px;">
                 <summary style="cursor:pointer; font-weight:600;">Kết quả đã lưu</summary>
                 <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
                 {% for result in saved_command_results %}
@@ -1729,8 +1752,8 @@
                         </span>
                         <span class="exec-prompt-echo" id="exec-prompt-echo">"..."</span>
                     </div>
-                    <button class="btn-close-console" onclick="closeExecConsole()" title="Đóng bảng chi tiết">
-                        <i class="fa-solid fa-xmark"></i>
+                    <button type="button" class="btn-close-console" onclick="closeExecConsole()" title="Thu gọn tiến trình" aria-label="Thu gọn tiến trình">
+                        <i class="fa-solid fa-minus"></i>
                     </button>
                 </div>
 
@@ -1800,10 +1823,10 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="card-title">
-                            <i class="fa-solid fa-compass"></i> Điều hướng nhanh Phân hệ SFC
+                            <i class="fa-solid fa-compass"></i> SFC Quick Navigation
                         </div>
-                        <button id="btn-customize-nav" class="btn-customize-nav" onclick="openNavCustomizerModal()" title="Tùy chỉnh danh sách nút điều hướng nhanh">
-                            <i class="fa-solid fa-sliders"></i> Tùy chỉnh
+                        <button id="btn-customize-nav" class="btn-customize-nav" onclick="openNavCustomizerModal()" title="Customize quick navigation">
+                            <i class="fa-solid fa-sliders"></i> Customize
                         </button>
                     </div>
                     <div class="nav-grid" id="nav-tiles-grid">
@@ -1834,18 +1857,25 @@
                         </div>
                     </div>
 
-                    <!-- Jump directly to QMS modules from QMSMain.aspx -->
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label><i class="fa-solid fa-list-ul"></i> Mở nhanh Tính năng QMS (QMSMain.aspx - <span id="qms-count-badge">51 Menu</span>):</label>
-                        <div style="display:flex; gap: 8px;">
-                            <select id="qms-jump-select" class="form-control" style="font-size: 13px;">
-                                <option value="">-- Đang nạp danh mục QMS từ bộ nhớ... --</option>
-                            </select>
-                            <button class="btn-action btn-excel" style="padding: 0 16px; border-radius: 10px;" onclick="jumpToQmsModule()">
-                                <i class="fa-solid fa-arrow-right"></i> Mở
-                            </button>
+                    <section class="qms-directory" aria-labelledby="qms-directory-title">
+                        <div class="qms-directory-heading">
+                            <h2 id="qms-directory-title">QMS Modules</h2>
+                            <span id="qms-count-badge">Loading…</span>
                         </div>
-                    </div>
+                        <div class="qms-search-tools">
+                            <div class="qms-search-field">
+                                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                                <input id="qms-search" class="form-control" type="search" aria-label="Search QMS modules" placeholder="Search by name, code or category…" oninput="QmsNavigation.render()" disabled>
+                                <button type="button" id="qms-search-clear" aria-label="Clear search" onclick="document.getElementById('qms-search').value = ''; QmsNavigation.render(); document.getElementById('qms-search').focus();" hidden>&times;</button>
+                            </div>
+                            <select id="qms-category" class="form-control" aria-label="Filter by category" onchange="QmsNavigation.render()" disabled>
+                                <option value="">All categories</option>
+                            </select>
+                        </div>
+                        <p id="qms-search-count" role="status" aria-live="polite">Loading QMS modules…</p>
+                        <div id="qms-module-groups" class="qms-menu-columns"></div>
+                        <p id="qms-empty" class="qms-empty" hidden>No modules found. Try another name or code, or select All categories.</p>
+                    </section>
                 </div>
 
                 <!-- Dynamic Adaptive Control Cockpit (Tự động nhận diện Button & Dropdown) -->
@@ -1888,32 +1918,10 @@
                     </div>
                 </div>
 
-                <!-- MQAA 21 Forms Master Audit Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="fa-solid fa-microchip"></i> Trung tâm Kiểm toán 21 Form MQAA
-                        </div>
-                    </div>
-                    <div class="mqaa-banner">
-                        <div class="mqaa-info">
-                            <h3>Tự động Quét & Đối chiếu</h3>
-                            <p id="mqaa-status-text">Sẵn sàng quét 7 Form Bottom & 14 Form Upper</p>
-                        </div>
-                        <div class="mqaa-actions">
-                            <button class="btn-mqaa-run" id="btn-start-mqaa" onclick="startMqaaScan()">
-                                <i class="fa-solid fa-play"></i> Bắt đầu Quét
-                            </button>
-                            <button class="btn-open-file" onclick="openMasterExcel()">
-                                <i class="fa-solid fa-folder-open"></i> Mở Master Excel
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
             </div>
 
-            <!-- RIGHT COLUMN: Live Mirror & Summary Table -->
+            <!-- RIGHT COLUMN: Live Mirror, Report Tools & Activity -->
             <div class="panel-column">
                 
                 <!-- Live SFC Mirror Screen -->
@@ -1928,45 +1936,29 @@
                     </div>
 
                     <div class="mirror-bar">
-                        <span class="mirror-url" id="mirror-url">Đang kết nối vào SFC Ching Luh...</span>
+                        <span class="mirror-url" id="mirror-url">Đang kết nối vào SFC FATO...</span>
                         <span id="mirror-title" style="color: var(--accent-cyan); font-weight: 600;">HFPA</span>
                     </div>
 
                     <div class="mirror-viewport">
                         <img id="mirror-img" class="mirror-img" src="" alt="Live SFC Viewport" />
+                        <div class="mirror-placeholder" role="status"><span aria-hidden="true">[ SFC ]</span><p>Chưa có ảnh trang SFC</p><small>Kết nối SFC rồi bấm Làm mới để xem.</small></div>
                     </div>
                 </div>
 
-                <!-- MQAA Scorecard Summary -->
-                <div class="card">
+                <!-- Report Tools -->
+                <div class="card" id="report-tools-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="fa-solid fa-chart-pie"></i> Bảng điểm Đối chiếu 21 Form Chuẩn
+                            <i class="fa-solid fa-chart-column"></i> Công cụ báo cáo
                         </div>
-                        <span id="scorecard-stat" style="font-size: 12px; font-weight: 600; color: var(--accent-green);">13/21 Đạt chuẩn 100%</span>
                     </div>
-
-                    <div class="table-wrapper">
-                        <table class="mqaa-table">
-                            <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Phân loại</th>
-                                    <th>Mẫu kiểm toán</th>
-                                    <th>Khớp câu hỏi</th>
-                                    <th>Khớp ghi chú</th>
-                                    <th>Đánh giá</th>
-                                </tr>
-                            </thead>
-                            <tbody id="mqaa-table-body">
-                                <tr>
-                                    <td colspan="6" style="text-align:center; padding: 20px; color: var(--text-muted);">
-                                        Đang tải dữ liệu từ Master Excel...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <p class="report-tools-description">Re-Inspection, combine_COPQ, HFPA và báo cáo quý HFPA &amp; FTT.</p>
+                    <a href="/compare" class="plant-btn report-tools-link" title="Check calculations and compare any Excel datasets">Spreadsheet Compare ↗</a>
+                    <a href="/combine" class="plant-btn report-tools-link" title="Gộp nhiều file Excel theo tên cột">Combine Excel ↗</a>
+                    <a href="/reports" class="plant-btn report-tools-link">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở công cụ báo cáo
+                    </a>
                 </div>
 
                 <!-- Activity Log -->
@@ -1992,18 +1984,18 @@
     <div id="nav-modal-backdrop" class="modal-backdrop" onclick="handleBackdropClick(event)">
         <div class="modal-dialog">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-sliders" style="color:var(--accent-blue);"></i> Tùy chỉnh Điều hướng nhanh Phân hệ SFC</h3>
-                <button class="modal-close-btn" onclick="closeNavCustomizerModal()" title="Đóng">&times;</button>
+                <h3><i class="fa-solid fa-sliders" style="color:var(--accent-blue);"></i> Customize SFC Quick Navigation</h3>
+                <button class="modal-close-btn" onclick="closeNavCustomizerModal()" title="Close">&times;</button>
             </div>
             <div class="modal-body">
                 <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
-                    Bạn có thể thay đổi thứ tự (▲/▼), xóa bỏ nút không dùng, hoặc thêm các phân hệ chất lượng QMS thường dùng vào thanh điều hướng nhanh.
+                    Reorder (▲/▼), remove unused shortcuts, or add frequently used QMS modules to quick navigation.
                 </div>
 
                 <!-- List of current tiles -->
                 <div>
                     <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; display: block;">
-                        <i class="fa-solid fa-layer-group"></i> Nút điều hướng đang hiển thị (<span id="modal-nav-count">5</span> nút):
+                        <i class="fa-solid fa-layer-group"></i> Current shortcuts (<span id="modal-nav-count">5</span> items):
                     </label>
                     <div class="nav-sort-list" id="nav-sort-list">
                         <!-- Populated by JS -->
@@ -2013,79 +2005,79 @@
                 <!-- Add new tile section -->
                 <div class="nav-add-box">
                     <label style="font-size: 12px; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
-                        <i class="fa-solid fa-plus-circle"></i> Thêm nút điều hướng mới
+                        <i class="fa-solid fa-plus-circle"></i> Add a shortcut
                     </label>
 
                     <!-- Quick pick from QMS Memory -->
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <span style="font-size: 11px; color: var(--text-muted);">Cách 1: Chọn nhanh từ 51 Menu QMS (QMSMain.aspx):</span>
+                        <span style="font-size: 11px; color: var(--text-muted);">Choose a QMS module by category:</span>
                         <select id="modal-qms-quickpick" class="form-control" style="font-size: 12px; margin-top: 4px;" onchange="onModalQmsSelect(this)">
-                            <option value="">-- Chọn tính năng để tự điền mẫu --</option>
+                            <option value="">-- Choose a QMS module --</option>
                         </select>
                     </div>
 
                     <!-- Custom input fields -->
-                    <span style="font-size: 11px; color: var(--text-muted);">Cách 2: Hoặc tùy chỉnh thủ công:</span>
+                    <span style="font-size: 11px; color: var(--text-muted);">Or enter a custom shortcut:</span>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
                         <div>
-                            <label style="font-size: 11px; color: var(--text-muted);">Tên nút hiển thị *</label>
-                            <input id="new-nav-title" class="form-control" placeholder="VD: COPQ Report, QA HFPA..." style="font-size: 12px;" />
+                            <label style="font-size: 11px; color: var(--text-muted);">Display name *</label>
+                            <input id="new-nav-title" class="form-control" placeholder="e.g. COPQ Report, QA HFPA…" style="font-size: 12px;" />
                         </div>
                         <div>
-                            <label style="font-size: 11px; color: var(--text-muted);">Phụ đề ngắn</label>
-                            <input id="new-nav-sub" class="form-control" placeholder="VD: 3 Dạng Xuất, Mã Q504..." style="font-size: 12px;" />
+                            <label style="font-size: 11px; color: var(--text-muted);">Subtitle</label>
+                            <input id="new-nav-sub" class="form-control" placeholder="e.g. 3 export options, Code Q504…" style="font-size: 12px;" />
                         </div>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 110px 110px; gap: 8px; margin-top: 8px;">
                         <div>
-                            <label style="font-size: 11px; color: var(--text-muted);">Đường dẫn / Mã trang *</label>
-                            <input id="new-nav-dest" class="form-control" placeholder="VD: hfpa, copq hoặc link SFC..." style="font-size: 12px;" />
+                            <label style="font-size: 11px; color: var(--text-muted);">URL / Page code *</label>
+                            <input id="new-nav-dest" class="form-control" placeholder="e.g. hfpa, copq or an SFC URL…" style="font-size: 12px;" />
                         </div>
                         <div>
-                            <label style="font-size: 11px; color: var(--text-muted);">Biểu tượng (Icon)</label>
+                            <label style="font-size: 11px; color: var(--text-muted);">Icon</label>
                             <select id="new-nav-icon" class="form-control" style="font-size: 12px;">
-                                <option value="fa-solid fa-clipboard-list">📋 Báo cáo</option>
+                                <option value="fa-solid fa-clipboard-list">📋 Report</option>
                                 <option value="fa-solid fa-file-excel">📊 Excel</option>
                                 <option value="fa-solid fa-shoe-prints">👟 MQAA</option>
                                 <option value="fa-solid fa-diagram-project">🌳 QMS Tree</option>
-                                <option value="fa-solid fa-house">🏠 Trang chủ</option>
-                                <option value="fa-solid fa-shield-halved">🛡️ Kiểm tra</option>
-                                <option value="fa-solid fa-chart-pie">📈 Phân tích</option>
-                                <option value="fa-solid fa-magnifying-glass">🔍 Tra cứu</option>
-                                <option value="fa-solid fa-box-open">📦 Đóng gói</option>
-                                <option value="fa-solid fa-triangle-exclamation">⚠️ Rủi ro</option>
-                                <option value="fa-solid fa-gear">⚙️ Cấu hình</option>
+                                <option value="fa-solid fa-house">🏠 Home</option>
+                                <option value="fa-solid fa-shield-halved">🛡️ Inspection</option>
+                                <option value="fa-solid fa-chart-pie">📈 Analysis</option>
+                                <option value="fa-solid fa-magnifying-glass">🔍 Search</option>
+                                <option value="fa-solid fa-box-open">📦 Packing</option>
+                                <option value="fa-solid fa-triangle-exclamation">⚠️ Risk</option>
+                                <option value="fa-solid fa-gear">⚙️ Settings</option>
                             </select>
                         </div>
                         <div>
-                            <label style="font-size: 11px; color: var(--text-muted);">Tông màu</label>
+                            <label style="font-size: 11px; color: var(--text-muted);">Color</label>
                             <select id="new-nav-color" class="form-control" style="font-size: 12px;">
-                                <option value="#38bdf8">Cyan (Xanh dương)</option>
-                                <option value="#34d399">Green (Xanh lục)</option>
-                                <option value="#fbbf24">Amber (Vàng hổ phách)</option>
-                                <option value="#a78bfa">Purple (Tím pastel)</option>
-                                <option value="#f87171">Rose (Đỏ cam)</option>
-                                <option value="#94a3b8">Slate (Xám bạc)</option>
+                                <option value="#38bdf8">Cyan</option>
+                                <option value="#34d399">Green</option>
+                                <option value="#fbbf24">Amber</option>
+                                <option value="#a78bfa">Purple</option>
+                                <option value="#f87171">Rose</option>
+                                <option value="#94a3b8">Slate</option>
                             </select>
                         </div>
                     </div>
                     <div style="display:flex; justify-content: flex-end; margin-top: 10px;">
                         <button class="btn-action btn-search" onclick="addNewNavTile()" style="font-size: 12px; padding: 6px 14px;">
-                            <i class="fa-solid fa-plus"></i> Thêm vào danh sách
+                            <i class="fa-solid fa-plus"></i> Add to list
                         </button>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-action" style="background: rgba(255,255,255,0.06); border-color: var(--border-color); color: var(--text-secondary); font-size: 12px;" onclick="resetNavDefault()">
-                    <i class="fa-solid fa-rotate-left"></i> Khôi phục mặc định
+                    <i class="fa-solid fa-rotate-left"></i> Restore defaults
                 </button>
                 <div style="display:flex; gap: 8px;">
                     <button class="btn-action" style="background: rgba(255,255,255,0.04); border-color: var(--border-color); color: var(--text-muted); font-size: 12px;" onclick="closeNavCustomizerModal()">
-                        Hủy
+                        Cancel
                     </button>
                     <button class="btn-action btn-excel" onclick="saveNavConfig()" style="font-size: 12px;">
-                        <i class="fa-solid fa-floppy-disk"></i> Lưu & Áp dụng
+                        <i class="fa-solid fa-floppy-disk"></i> Save & Apply
                     </button>
                 </div>
             </div>
@@ -2105,6 +2097,28 @@
         let currentInspectionData = null;
         let isScanning = false;
         let selectedDropdownOptions = {};
+        let inspectionRevision = 0;
+        let inspectionNeedsRefresh = false;
+
+        function resetAdaptiveControls() {
+            inspectionRevision++;
+            currentInspectionData = null;
+            selectedDropdownOptions = {};
+            inspectionNeedsRefresh = true;
+            document.getElementById('current-page-name').innerText = 'Đang nhận diện trang SFC…';
+            document.getElementById('detected-counts-text').innerText = '';
+            document.getElementById('adaptive-controls-body').innerHTML = '<p class="empty-state">Đang tự động cập nhật bộ điều khiển…</p>';
+        }
+
+        function setCurrentInspection(inspection) {
+            const previous = currentInspectionData?.page;
+            const page = inspection.page || {};
+            if (!previous || previous.url !== page.url || previous.title !== page.title) {
+                selectedDropdownOptions = {};
+            }
+            currentInspectionData = inspection;
+            inspectionNeedsRefresh = false;
+        }
 
         function updatePlantButtonsUI() {
             const countBadge = document.getElementById('plant-selected-badge');
@@ -2153,14 +2167,16 @@
         async function scanCurrentPage(showToastNotice = false) {
             if (isScanning) return;
             isScanning = true;
+            const revision = inspectionRevision;
             const scanBtn = document.getElementById('btn-scan-page');
             if (scanBtn) scanBtn.classList.add('scanning');
 
             try {
                 const res = await fetch('/api/page/inspect');
                 const data = await res.json();
+                if (revision !== inspectionRevision) return;
                 if (data.success && data.inspection) {
-                    currentInspectionData = data.inspection;
+                    setCurrentInspection(data.inspection);
 
                     const pageTitle = (data.inspection.page && (data.inspection.page.title || data.inspection.page.pathname)) || 'SFC';
                     const pageBadge = document.getElementById('current-page-name');
@@ -2213,6 +2229,7 @@
             } finally {
                 isScanning = false;
                 if (scanBtn) scanBtn.classList.remove('scanning');
+                if (revision !== inspectionRevision) await scanCurrentPage(false);
             }
         }
 
@@ -2255,7 +2272,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
                         <div style="display:flex; align-items:center; gap:10px; font-weight:700; color:var(--text-primary); font-size:15px;">
                             <i class="fa-solid fa-file-excel" style="color:var(--accent-green); font-size:20px;"></i>
-                            3 Tùy Chọn Xuất Báo Cáo COPQ (Excel):
+                            Báo cáo COPQ: chọn báo cáo hoặc mở dữ liệu
                         </div>
                         <span style="background:rgba(16,185,129,0.25); color:#34d399; font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px; border:1px solid rgba(52,211,153,0.3);">
                             <i class="fa-solid fa-check"></i> 3 Dạng Báo Cáo
@@ -2266,10 +2283,10 @@
                             <div class="option-chip ${(curr && (curr.value === opt.value || curr.id === opt.id)) ? 'active' : ''}"
                                  id="chip-${menuDropdown.id}-${oIdx}"
                                  style="padding: 14px 12px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; cursor:pointer;"
-                                 onclick="selectOptionChip('${menuDropdown.id}', ${oIdx})">
+                                 onclick="${opt.value === 'EXCEL2' ? 'triggerDynamicMenuExportByIndex' : 'selectOptionChip'}('${menuDropdown.id}', ${oIdx})">
                                 <i class="fa-solid ${oIdx === 0 ? 'fa-file-lines' : (oIdx === 1 ? 'fa-table-cells' : 'fa-chart-column')}" style="font-size:20px;"></i>
                                 <span style="font-weight:700; font-size:13px;">${opt.text}</span>
-                                <span style="font-size:11px; opacity:0.85;">Bấm để tải nhanh</span>
+                                <span style="font-size:11px; opacity:0.85;">${opt.value === 'EXCEL2' ? 'Mở trang để chọn Category / Type' : 'Xuất báo cáo'}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -2278,7 +2295,7 @@
                             <button class="dynamic-btn btn-export" style="flex:1; min-width:140px; font-size:13px; padding:10px 14px; font-weight:600;"
                                      id="btn-quick-export-${oIdx}"
                                      onclick="triggerDynamicMenuExportByIndex('${menuDropdown.id}', ${oIdx})">
-                                <i class="fa-solid fa-download"></i> Xuất: ${opt.text}
+                                <i class="fa-solid ${opt.value === 'EXCEL2' ? 'fa-arrow-right' : 'fa-download'}"></i> ${opt.value === 'EXCEL2' ? 'Mở:' : 'Xuất:'} ${opt.text}
                             </button>
                         `).join('')}
                     </div>
@@ -2289,6 +2306,9 @@
             // 2. Standard Dropdown & ComboBox (TẤT CẢ DROPDOWN / LỰA CHỌN ĐỀU CÓ OPTION ALL)
             const standardDropdowns = insp.dropdowns ? insp.dropdowns.filter(d => d.type !== 'menu_dropdown') : [];
             if (standardDropdowns.length > 0) {
+                if (standardDropdowns.some(d => d.supports_clear)) {
+                    html += `<button class="dynamic-btn" style="margin-bottom:12px;" onclick="clearCopqFilterSelections()"><i class="fa-solid fa-xmark"></i> Xóa tất cả lựa chọn</button>`;
+                }
                 standardDropdowns.forEach((d) => {
                     const isDept = (d.id ? d.id.toLowerCase() : '').includes('dept') || (d.id ? d.id.toLowerCase() : '').includes('chuyen') || (d.id ? d.id.toLowerCase() : '').includes('line');
                     if (!d.options) d.options = [];
@@ -2296,16 +2316,19 @@
                     // Luôn luôn đảm bảo CÓ 1 option ALL ở vị trí đầu tiên
                     const allText = isDept ? '-- Tất cả Chuyền / Xưởng (ALL - Mặc định) --' : '-- Tất cả (ALL - Mặc định) --';
                     const hasAll = d.options.some(o => o.value === '' || (o.text && (o.text.toLowerCase() === 'all' || o.text.toLowerCase().includes('tất cả'))));
-                    if (!hasAll) {
+                    if (d.supports_all !== false && !hasAll) {
                         d.options.unshift({ value: '', text: allText, is_all: true });
                     }
 
-                    // Mặc định chọn ALL nếu chưa có lựa chọn
-                    const allOpt = d.options.find(o => o.value === '' || (o.text && (o.text.toLowerCase() === 'all' || o.text.toLowerCase().includes('tất cả')))) || d.options[0];
-                    if (!selectedDropdownOptions[d.id]) {
-                        selectedDropdownOptions[d.id] = allOpt;
+                    const allOpt = d.options.find(o => o.value === '') || d.options[0];
+                    let scanned = d.options.find(o => o.value === d.selected_value) || d.options.find(o => o.text === d.selected);
+                    if (d.supports_clear && d.selected_value === '' && selectedDropdownOptions[d.id]?.value === 'ALL') {
+                        scanned = d.options.find(o => o.value === 'ALL');
                     }
-                    const currentSelected = selectedDropdownOptions[d.id] || allOpt;
+                    if (d.supports_all === false || !selectedDropdownOptions[d.id]) {
+                        selectedDropdownOptions[d.id] = d.supports_all === false ? (scanned || null) : (scanned || allOpt);
+                    }
+                    const currentSelected = d.supports_all === false ? selectedDropdownOptions[d.id] : (selectedDropdownOptions[d.id] || allOpt);
                     const hasOptions = d.options.length > 0;
 
                     html += `
@@ -2315,6 +2338,7 @@
                             <span style="font-size:11px; color:var(--accent-cyan); font-weight:600;">${d.options.length} options</span>
                         </label>
                         <select id="adaptive-select-${d.id}" class="form-control" onchange="onSelectDropdownChanged('${d.id}', this.value, this.options[this.selectedIndex].text)">
+                            ${!currentSelected && d.supports_all === false ? '<option value="" disabled selected>-- Chọn ' + (d.label || 'mục') + ' --</option>' : ''}
                             ${d.options.map(opt => {
                                 const val = (opt.value !== undefined) ? opt.value : (opt.id || '');
                                 const isSel = currentSelected ? (currentSelected.value === val || currentSelected.text === opt.text) : (val === '');
@@ -2325,14 +2349,14 @@
                         ${hasOptions && d.options.length <= 8 ? `
                         <div class="option-chips-row">
                             ${d.options.map((opt, oIdx) => {
-                                const isAllOpt = (opt.value === '' || (opt.text && (opt.text.toLowerCase() === 'all' || opt.text.toLowerCase().includes('tất cả'))));
-                                const chipLabel = isAllOpt ? (isDept ? 'All Lines (ALL)' : 'All (ALL)') : opt.text;
+                                const isAllOpt = !opt.is_clear && (opt.value === '' || (opt.text && (opt.text.toLowerCase() === 'all' || opt.text.toLowerCase().includes('tất cả'))));
+                                const chipLabel = opt.is_clear ? 'Không chọn' : (isAllOpt ? (isDept ? 'All Lines (ALL)' : 'All (ALL)') : opt.text);
                                 const isChipActive = currentSelected && (currentSelected.value === opt.value || currentSelected.text === opt.text || (isAllOpt && (!currentSelected || currentSelected.value === '')));
                                 return `
                                 <div class="option-chip ${isChipActive ? 'active' : ''}"
                                      id="chip-${d.id}-${oIdx}"
                                      onclick="selectOptionChip('${d.id}', ${oIdx})">
-                                    <i class="fa-solid ${isAllOpt ? 'fa-asterisk' : 'fa-tag'}"></i>
+                                    <i class="fa-solid ${opt.is_clear ? 'fa-xmark' : (isAllOpt ? 'fa-asterisk' : 'fa-tag')}"></i>
                                     ${chipLabel}
                                 </div>
                                 `;
@@ -2361,61 +2385,57 @@
                 });
             }
 
-            // 4. Date Inputs with Quick Date Preset Dropdown
+            // 4. Date inputs and shortcuts
             if (insp.date_inputs && insp.date_inputs.length > 0) {
-                const dtFrom = insp.date_inputs.find(d => d.name && d.name.toLowerCase().includes('from')) || insp.date_inputs[0];
-                const dtTo = insp.date_inputs.find(d => d.name && d.name.toLowerCase().includes('to')) || (insp.date_inputs.length > 1 ? insp.date_inputs[1] : insp.date_inputs[0]);
-                const valFrom = dtFrom ? (dtFrom.value || '2026-10-24') : '2026-10-24';
-                const valTo = dtTo ? (dtTo.value || '2026-10-24') : '2026-10-24';
+                const { from, to } = dashboardDateFields(insp);
+                const valFrom = from.value || '';
+                const valTo = to?.value || '';
 
                 html += `
                 <div class="date-preset-box">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <label style="font-size:13px; font-weight:700; color:var(--accent-cyan); display:flex; align-items:center; gap:6px; margin:0;">
-                            <i class="fa-solid fa-calendar-days"></i> Quick Date Range Dropdown:
+                            <i class="fa-solid fa-calendar-days"></i> ${to ? 'Date Range' : 'Date'}
                         </label>
                         <span id="date-range-summary-badge" style="font-size:12px; font-weight:700; color:var(--text-primary); background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); padding:3px 10px; border-radius:8px;">
-                            ${valFrom} → ${valTo}
+                            ${to ? `${valFrom} → ${valTo}` : valFrom}
                         </span>
                     </div>
 
-                    <!-- Date Dropdown Selector (This Month, Last Month, Custom) -->
-                    <select id="adaptive-date-preset-select" class="date-dropdown-select" onchange="onDatePresetChanged(this.value)">
-                        <option value="this_month">📅 This Month</option>
-                        <option value="last_month">📅 Last Month</option>
-                        <option value="custom">⚙️ Custom Range (Manual Selection)</option>
-                    </select>
-
                     <!-- Quick Date Chips -->
                     <div class="option-chips-row" style="margin-bottom:12px;">
-                        <div class="option-chip active" id="chip-date-this_month" onclick="onDatePresetChanged('this_month')">
+                        <div class="option-chip" id="chip-date-this_month" onclick="onDatePresetChanged('this_month')">
                             <i class="fa-solid fa-calendar"></i> This Month
                         </div>
                         <div class="option-chip" id="chip-date-last_month" onclick="onDatePresetChanged('last_month')">
                             <i class="fa-solid fa-calendar-days"></i> Last Month
                         </div>
-                        <div class="option-chip" id="chip-date-custom" onclick="onDatePresetChanged('custom')">
+                        <div class="option-chip" id="chip-date-last_week" onclick="onDatePresetChanged('last_week')" title="Monday to Saturday of the previous week">
+                            <i class="fa-solid fa-calendar-week"></i> Last Week
+                        </div>
+                        <div class="option-chip active" id="chip-date-custom" onclick="onDatePresetChanged('custom')">
                             <i class="fa-solid fa-pen-to-square"></i> Custom
                         </div>
                     </div>
 
                     <!-- Date inputs row -->
-                    <div class="form-row" style="margin:0;">
+                    <div class="form-row" style="margin:0; flex-wrap:wrap;">
                 `;
 
-                insp.date_inputs.forEach((dt, idx) => {
-                    const isTo = (dt.name ? dt.name.toLowerCase().includes('to') : false) || (dt.id ? dt.id.toLowerCase().includes('to') : false) || idx === 1;
+                [from, to].filter(Boolean).forEach((dt, idx) => {
+                    const label = to ? (idx === 0 ? 'Date From' : 'Date To') : dt.label;
                     html += `
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label style="font-size:12px;"><i class="fa-regular ${isTo ? 'fa-calendar-check' : 'fa-calendar'}"></i> ${dt.label}:</label>
-                        <input type="date" id="adaptive-date-${dt.id}" class="form-control" value="${dt.value || '2026-10-24'}"
-                               onchange="onDateChanged('${dt.id}', this.value); onManualDateChanged();" />
+                    <div class="form-group" style="margin-bottom:0; min-width:135px;">
+                        <label for="adaptive-date-${dt.id}" style="font-size:12px;"><i class="fa-regular ${idx === 1 ? 'fa-calendar-check' : 'fa-calendar'}"></i> ${label}</label>
+                        <input type="date" id="adaptive-date-${dt.id}" class="form-control" value="${dt.value || ''}"
+                               onchange="onManualDateChanged();" />
                     </div>
                     `;
                 });
 
                 html += `
                     </div>
+                    ${isMqaaCheck(insp) ? `<p style="margin:8px 0 0; font-size:12px; color:var(--text-secondary);">MQAA Check xử lý từng ngày. Để dùng cả khoảng đã chọn, <button type="button" class="dynamic-btn" onclick="openMqaaDateRange()">mở MQAA Report</button>.</p>` : ''}
                 </div>
                 `;
             }
@@ -2434,6 +2454,14 @@
                         <i class="fa-solid fa-${b.icon || 'bolt'}"></i> ${b.label}
                     </button>
                     `;
+                    if (isExport && !isFttExport) {
+                        html += `
+                        <button class="dynamic-btn btn-export" id="btn-dyn-combine-${b.id}"
+                                title="Xuất các nhà máy đã chọn và gộp thành một file Excel"
+                                onclick="triggerDynamicButtonClick('${b.id}', 'Xuất Excel + Gộp', true)">
+                            <i class="fa-solid fa-object-group"></i> Xuất Excel + Gộp
+                        </button>`;
+                    }
                 });
             }
             html += '</div>';
@@ -2441,7 +2469,10 @@
             container.innerHTML = html;
         }
 
+        let dynamicFilterBusy = false;
+        let dynamicActionBusy = false;
         async function selectOptionChip(dropdownId, optionIdx) {
+            if (dynamicFilterBusy || dynamicActionBusy) return;
             if (!currentInspectionData) return;
             const d = currentInspectionData.dropdowns.find(x => x.id === dropdownId);
             if (!d || !d.options || !d.options[optionIdx]) return;
@@ -2459,12 +2490,13 @@
                 }
             });
 
-            const isAll = (opt.value === '' || (opt.text && (opt.text.toLowerCase() === 'all' || opt.text.toLowerCase().includes('tất cả'))));
+            const isAll = !opt.is_clear && (opt.value === '' || (opt.text && (opt.text.toLowerCase() === 'all' || opt.text.toLowerCase().includes('tất cả'))));
 
             // Đồng bộ trực tiếp sang SFC
             if (d.type === 'combobox') {
+                dynamicFilterBusy = true;
                 try {
-                    await fetch('/api/page/execute', {
+                    const response = await fetch('/api/page/execute', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -2473,7 +2505,16 @@
                             params: { value: opt.value !== undefined ? opt.value : '', text: opt.text || '' }
                         })
                     });
-                } catch(e) {}
+                    const data = await response.json();
+                    if (!data.success) throw new Error(data.error || 'Không cập nhật được bộ lọc.');
+                    applyDynamicInspection(data);
+                } catch(e) {
+                    showToast(e.message, false);
+                    await scanCurrentPage(false);
+                    return;
+                } finally {
+                    dynamicFilterBusy = false;
+                }
             }
 
             const labelExport = document.getElementById('label-menu-export');
@@ -2481,7 +2522,7 @@
                 labelExport.innerText = `Export: ${opt.text}`;
             }
 
-            showToast(isAll ? 'Selected: All (ALL - Default)' : `Selected: ${opt.text}`);
+            showToast(opt.is_clear ? 'Đã xóa lựa chọn.' : (isAll ? 'Selected: All (ALL - Default)' : `Selected: ${opt.text}`));
         }
 
         async function onSelectDropdownChanged(dropdownId, selectedValue, selectedText) {
@@ -2494,27 +2535,66 @@
             }
         }
 
-        function dynamicExportParams(extra = {}) {
-            const inputs = currentInspectionData ? currentInspectionData.date_inputs || [] : [];
-            const dates = {};
-            for (const input of inputs) {
-                const el = document.getElementById(`adaptive-date-${input.id}`);
-                if (el && el.value) {
-                    if (input.id.toLowerCase().includes('from')) dates.date_from = el.value;
-                    if (input.id.toLowerCase().includes('to')) dates.date_to = el.value;
+        async function clearCopqFilterSelections() {
+            if (dynamicFilterBusy || dynamicActionBusy) return;
+            dynamicFilterBusy = true;
+            try {
+                const response = await fetch('/api/page/execute', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({action_type:'clear_copq_filters'})
+                });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || 'Không xóa được lựa chọn.');
+                for (const d of data.inspection?.dropdowns || []) {
+                    if (d.supports_clear) selectedDropdownOptions[d.id] = d.options.find(o => o.is_clear);
                 }
+                applyDynamicInspection(data);
+                showToast('Đã xóa Category và Type.');
+            } catch(error) {
+                showToast(error.message, false);
+                await scanCurrentPage(false);
+            } finally {
+                dynamicFilterBusy = false;
+            }
+        }
+
+        function applyDynamicInspection(data) {
+            if (data.screenshot) document.getElementById('mirror-img').src = data.screenshot;
+            if (!data.inspection) return;
+            setCurrentInspection(data.inspection);
+            renderAdaptiveControls(data.inspection);
+            const page = data.inspection.page || {};
+            for (const id of ['current-page-name', 'mirror-title']) {
+                const el = document.getElementById(id);
+                if (el) el.innerText = page.title || 'SFC';
+            }
+            document.getElementById('mirror-url').innerText = page.url || '';
+            document.getElementById('detected-counts-text').innerText =
+                `${(data.inspection.dropdowns || []).length} Dropdown · ${(data.inspection.buttons || []).length} Nút bấm · ${(data.inspection.date_inputs || []).length} Ô ngày`;
+        }
+
+        function dynamicExportParams(extra = {}) {
+            const fields = dashboardDateFields();
+            const dates = {};
+            for (const side of ['from', 'to']) {
+                const field = fields[side];
+                const value = field && document.getElementById(`adaptive-date-${field.id}`)?.value;
+                if (value) dates[`date_${side}`] = value;
             }
             return {...dates, ...extra};
         }
 
+        const automaticDownloads = new Set();
         function showDynamicExportFiles(data) {
             const files = data.downloaded_files || (data.downloaded_file ? [data.downloaded_file] : []);
-            for (const file of files) {
+            const links = new Map([...files, ...(data.source_files || [])].map(file => [file.url, file]));
+            for (const file of links.values()) {
                 addSavedFilePill(file.name, file.url);
                 addLog(`Đã lưu Excel: ${file.name}`, 'success');
             }
             // Multiple automatic downloads can be blocked; retain links for every file.
-            if (files.length === 1 && data.success) {
+            if (files.length === 1 && data.success && !automaticDownloads.has(files[0].url)) {
+                automaticDownloads.add(files[0].url);
                 const link = document.createElement('a');
                 link.href = files[0].url;
                 link.download = files[0].name;
@@ -2531,12 +2611,14 @@
         }
 
         async function triggerDynamicMenuExport(menuId) {
+            if (dynamicActionBusy || dynamicFilterBusy || commandBusy || nikeBusy) return;
             if (!currentInspectionData) return;
             const d = currentInspectionData.dropdowns.find(x => x.id === menuId);
             if (!d) return;
             const opt = selectedDropdownOptions[menuId] || (d.options ? d.options[0] : null);
             if (!opt) return;
 
+            dynamicActionBusy = true;
             const btn = document.getElementById('btn-dynamic-menu-export') || document.getElementById(`btn-quick-export-${opt.index || 0}`);
             const origHtml = btn ? btn.innerHTML : '';
             if (btn) {
@@ -2559,18 +2641,15 @@
                 const fileCount = showDynamicExportFiles(data);
                 if (data.success) {
                     if (fileCount) {
-                        showToast(`Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
+                        showToast(data.message || `Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
+                    } else if (data.requires_filter_selection) {
+                        showToast('Đã mở COPQ Data. Chọn Category, Type, khoảng ngày rồi bấm Export Excel.');
+                        addLog('Mắt thần đã quét các bộ lọc và nút xuất của trang COPQ Data.', 'success');
                     } else {
                         showToast('SFC chưa trả về file Excel.', false);
                         addLog('Chưa có file xuất để tải.', 'warn');
                     }
-                    if (data.screenshot) {
-                        document.getElementById('mirror-img').src = data.screenshot;
-                    }
-                    if (data.inspection) {
-                        currentInspectionData = data.inspection;
-                        renderAdaptiveControls(data.inspection);
-                    }
+                    applyDynamicInspection(data);
                 } else {
                     showToast(data.error || 'Failed to export report', false);
                     addLog(`Error: ${data.error}`, 'warn');
@@ -2578,6 +2657,7 @@
             } catch(e) {
                 showToast('Server connection error', false);
             } finally {
+                dynamicActionBusy = false;
                 if (btn) {
                     btn.innerHTML = origHtml;
                     btn.disabled = false;
@@ -2585,16 +2665,37 @@
             }
         }
 
-        async function triggerDynamicButtonClick(buttonId, label) {
+        async function triggerDynamicButtonClick(buttonId, label, combine = false) {
+            if (dynamicActionBusy || commandBusy || nikeBusy) return;
+            if (dynamicFilterBusy) {
+                showToast('Đang cập nhật bộ lọc COPQ, vui lòng chờ.', false);
+                return;
+            }
+            if (/btnsearch|btnexcel/i.test(buttonId) && currentInspectionData && (currentInspectionData.dropdowns || []).some(d => d.requires_selection)) {
+                showToast('Chọn lại Category / Type hoặc xóa lựa chọn trước khi xuất.', false);
+                return;
+            }
+            if (/search|excel|export/i.test(buttonId) && dashboardDateFields().to && !checkDashboardDates()) return;
             if (buttonId.toLowerCase().includes('btnexcelall')) {
                 openFttStationModal();
                 return;
             }
+            if (combine && selectedPlants.size === 0) {
+                showToast('Chọn ít nhất một nhà máy trước khi xuất và gộp.', false);
+                return;
+            }
 
-            const btn = document.getElementById(`btn-dyn-${buttonId}`);
+            dynamicActionBusy = true;
+            const btn = document.getElementById(`${combine ? 'btn-dyn-combine-' : 'btn-dyn-'}${buttonId}`);
+            const otherBtn = document.getElementById(`${combine ? 'btn-dyn-' : 'btn-dyn-combine-'}${buttonId}`);
+            if (otherBtn) otherBtn.disabled = true;
             const origHtml = btn ? btn.innerHTML : '';
             if (btn) {
-                btn.innerHTML = '<span class="spinner"></span> Processing...';
+                btn.innerHTML = combine
+                    ? `<span class="spinner"></span> Đang xuất + gộp ${selectedPlants.size} nhà máy…`
+                    : /excel|export/i.test(buttonId)
+                    ? `<span class="spinner"></span> Đang xuất ${selectedPlants.size} nhà máy...`
+                    : '<span class="spinner"></span> Processing...';
                 btn.disabled = true;
             }
 
@@ -2615,25 +2716,19 @@
                     body: JSON.stringify({
                         action_type: 'click_button',
                         target_id: buttonId,
-                        params: dynamicExportParams({ selections: currentSelections })
+                        params: dynamicExportParams({ selections: currentSelections, ...(combine ? {combine: true} : {}) })
                     })
                 });
                 const data = await res.json();
                 const fileCount = showDynamicExportFiles(data);
                 if (data.success) {
                     if (fileCount) {
-                        showToast(`Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
+                        showToast(data.message || `Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
                     } else {
                         showToast(`✅ Executed action: ${label || buttonId}`);
                         addLog(`Executed button "${label || buttonId}" successfully`, 'success');
                     }
-                    if (data.screenshot) {
-                        document.getElementById('mirror-img').src = data.screenshot;
-                    }
-                    if (data.inspection) {
-                        currentInspectionData = data.inspection;
-                        renderAdaptiveControls(data.inspection);
-                    }
+                    applyDynamicInspection(data);
                 } else {
                     showToast(data.error || 'Failed to click button', false);
                     addLog(`Error: ${data.error}`, 'warn');
@@ -2641,6 +2736,8 @@
             } catch(e) {
                 showToast('Lỗi kết nối máy chủ', false);
             } finally {
+                dynamicActionBusy = false;
+                if (otherBtn) otherBtn.disabled = false;
                 if (btn) {
                     btn.innerHTML = origHtml;
                     btn.disabled = false;
@@ -2648,14 +2745,9 @@
             }
         }
 
-        async function onDateChanged(dateId, newVal) {
-            const fromEl = document.querySelector('input[id*="DateFrom"], input[id*="date-from"], input[id*="dtDateFrom"]');
-            const toEl = document.querySelector('input[id*="DateTo"], input[id*="date-to"], input[id*="dtDateTo"]');
-            const dateFrom = fromEl ? fromEl.value : null;
-            const dateTo = toEl ? toEl.value : null;
-
+        async function syncDashboardDates(dateFrom, dateTo) {
             try {
-                await fetch('/api/page/execute', {
+                const response = await fetch('/api/page/execute', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2663,8 +2755,11 @@
                         params: { date_from: dateFrom, date_to: dateTo }
                     })
                 });
-                showToast(`Synchronized date: ${newVal}`);
-            } catch(e) {}
+                const result = await response.json();
+                if (!result.success) showToast(result.error || 'Không cập nhật được ngày trên SFC.', false);
+            } catch(e) {
+                showToast('Không cập nhật được ngày trên SFC.', false);
+            }
         }
 
         function calculateDateRange(preset) {
@@ -2706,6 +2801,12 @@
                     toDate = new Date();
                     break;
                 }
+                case 'last_week': {
+                    const daysSinceMonday = (now.getDay() + 6) % 7;
+                    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysSinceMonday - 7);
+                    toDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate() + 5);
+                    break;
+                }
                 case 'this_month':
                     fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
                     toDate = new Date();
@@ -2727,14 +2828,55 @@
             };
         }
 
+        function isMqaaCheck(inspection = currentInspectionData) {
+            return /\/MQAACheck\.aspx(?:[?#]|$)/i.test(inspection?.page?.pathname || inspection?.page?.url || '');
+        }
+
+        function dashboardDateFields(inspection = currentInspectionData) {
+            const inputs = inspection?.date_inputs || [];
+            const matches = side => inputs.find(item => (item.name || item.id || '').toLowerCase().includes(side));
+            const namedTo = matches('to');
+            const from = matches('from') || inputs.find(item => item !== namedTo) || inputs[0];
+            const to = (namedTo !== from && namedTo) || inputs.find(item => item !== from)
+                || (from && isMqaaCheck(inspection) ? { id: 'mqaa-date-to', value: from.value } : null);
+            return { from, to };
+        }
+
+        function adaptiveDateInput(side) {
+            const field = dashboardDateFields()[side];
+            return (field && document.getElementById(`adaptive-date-${field.id}`)) || document.getElementById(`date-${side}`);
+        }
+
+        function checkDashboardDates(allowMqaaRange = false) {
+            const { date_from: from, date_to: to } = dynamicExportParams();
+            if (!from || !to || from > to) {
+                showToast('Chọn đủ hai ngày. Date To phải từ Date From trở đi.', false);
+                return false;
+            }
+            if (!allowMqaaRange && isMqaaCheck() && from !== to) {
+                showToast('MQAA Check xử lý từng ngày. Mở MQAA Report để dùng cả khoảng đã chọn.', false);
+                return false;
+            }
+            return true;
+        }
+
+        async function openMqaaDateRange() {
+            if (!checkDashboardDates(true)) return;
+            const dates = dynamicExportParams();
+            await navTo('mqaa_report');
+            const { from, to } = dashboardDateFields();
+            const page = currentInspectionData?.page;
+            if (!/\/MQAAReport\.aspx(?:[?#]|$)/i.test(page?.pathname || page?.url || '') || !from || !to) return;
+            adaptiveDateInput('from').value = dates.date_from;
+            adaptiveDateInput('to').value = dates.date_to;
+            await onManualDateChanged();
+        }
+
         async function onDatePresetChanged(preset) {
-            ['this_month', 'last_month', 'custom'].forEach(p => {
+            ['this_month', 'last_month', 'last_week', 'custom'].forEach(p => {
                 const chip = document.getElementById(`chip-date-${p}`);
                 if (chip) chip.classList.toggle('active', p === preset);
             });
-
-            const sel = document.getElementById('adaptive-date-preset-select');
-            if (sel) sel.value = preset;
 
             const modalSel = document.getElementById('ftt-modal-date-preset-select');
             if (modalSel) modalSel.value = preset;
@@ -2746,61 +2888,32 @@
             const range = calculateDateRange(preset);
             if (!range) return;
 
-            let inputFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') ||
-                            document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateFrom') ||
-                            document.getElementById('date-from');
-            let inputTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') ||
-                          document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateTo') ||
-                          document.getElementById('date-to');
-
-            if (!inputFrom) {
-                const dateInputs = document.querySelectorAll('input[type="date"][id*="From"], input[type="date"][id*="from"]');
-                if (dateInputs.length > 0) inputFrom = dateInputs[0];
-            }
-            if (!inputTo) {
-                const dateInputs = document.querySelectorAll('input[type="date"][id*="To"], input[type="date"][id*="to"]');
-                if (dateInputs.length > 0) inputTo = dateInputs[0];
-            }
+            const inputFrom = adaptiveDateInput('from');
+            const inputTo = adaptiveDateInput('to');
 
             if (inputFrom) inputFrom.value = range.from;
             if (inputTo) inputTo.value = range.to;
 
             updateDateRangeSummary(range.from, range.to);
 
-            try {
-                await fetch('/api/page/execute', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action_type: 'set_dates',
-                        params: { date_from: range.from, date_to: range.to }
-                    })
-                });
-                showToast(`Selected date range: ${range.from} → ${range.to}`);
-            } catch(e) {}
+            if (!isMqaaCheck() || range.from === range.to) await syncDashboardDates(range.from, range.to);
         }
 
-        function onManualDateChanged() {
-            const sel = document.getElementById('adaptive-date-preset-select');
-            if (sel) sel.value = 'custom';
-            ['this_month', 'last_month', 'custom'].forEach(p => {
+        async function onManualDateChanged() {
+            const modalSel = document.getElementById('ftt-modal-date-preset-select');
+            if (modalSel) modalSel.value = 'custom';
+            ['this_month', 'last_month', 'last_week', 'custom'].forEach(p => {
                 const chip = document.getElementById(`chip-date-${p}`);
                 if (chip) chip.classList.toggle('active', p === 'custom');
             });
-            const inputFrom = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtFromDate') ||
-                              document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateFrom') ||
-                              document.getElementById('date-from');
-            const inputTo = document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtToDate') ||
-                            document.getElementById('adaptive-date-rpnlMain_ContentPlaceHolder1_dtDateTo') ||
-                            document.getElementById('date-to');
-            if (inputFrom && inputTo) {
-                updateDateRangeSummary(inputFrom.value, inputTo.value);
-            }
+            const { date_from: from, date_to: to } = dynamicExportParams();
+            updateDateRangeSummary(from || '', to || '');
+            if (from && to && from <= to && (!isMqaaCheck() || from === to)) await syncDashboardDates(from, to);
         }
 
         function updateDateRangeSummary(fromVal, toVal) {
             const badge = document.getElementById('date-range-summary-badge');
-            if (badge) badge.innerText = `${fromVal} → ${toVal}`;
+            if (badge) badge.innerText = dashboardDateFields().to ? `${fromVal} → ${toVal}` : fromVal;
 
             const modalRange = document.getElementById('ftt-modal-date-range');
             if (modalRange) modalRange.innerText = `${fromVal} → ${toVal}`;
@@ -2926,6 +3039,7 @@
                     updatePlantButtonsUI();
                     showToast(data.message || `Selected: ${label}`);
                     addLog(data.message || `Active factories: ${label}`, 'success');
+                    inspectionNeedsRefresh = true;
                     if (data.screenshot) {
                         const mirrorImg = document.getElementById('mirror-img');
                         if (mirrorImg) mirrorImg.src = data.screenshot;
@@ -2970,7 +3084,10 @@
                 const data = await res.json();
                 document.getElementById('cdp-text').innerText = data.command_running || data.processing
                     ? 'SFC: Đang xử lý' : (data.requires_login ? 'SFC: Cần đăng nhập' : (data.connected ? 'SFC: Đã kết nối' : 'SFC: Chưa kết nối'));
-                if (data.command_running || data.processing) return;
+                if (data.command_running || data.processing || commandBusy || dynamicFilterBusy || dynamicActionBusy) {
+                    inspectionNeedsRefresh = true;
+                    return;
+                }
                 if (data.connected) {
                     document.getElementById('mirror-url').innerText = data.url;
                     document.getElementById('mirror-title').innerText = data.title || 'SFC';
@@ -2997,11 +3114,13 @@
                             }
                         }
                     }
-                    if (data.mqaa_status && data.mqaa_status.progress) {
-                        document.getElementById('mqaa-status-text').innerText = data.mqaa_status.progress;
-                    }
+                    const page = currentInspectionData?.page;
+                    const pageChanged = page && ((data.url && data.url !== page.url) || (data.title && data.title !== page.title));
+                    if (pageChanged) resetAdaptiveControls();
+                    if (!currentInspectionData || inspectionNeedsRefresh) await scanCurrentPage(false);
                 } else {
                     document.getElementById('mirror-url').innerText = "Chưa kết nối được Chrome cổng 9222";
+                    if (currentInspectionData) resetAdaptiveControls();
                 }
             } catch(e) {
                 console.error(e);
@@ -3033,21 +3152,12 @@
             try {
                 const res = await fetch('/api/memory');
                 const data = await res.json();
-                const qmsList = data.qms_modules || [];
+                if (!res.ok || data.error) throw new Error(data.error || 'QMS request failed');
+                const qmsList = QmsNavigation.prepare(data.qms_modules || []);
                 window.cachedQmsModules = qmsList;
-                const qmsSel = document.getElementById('qms-jump-select');
-                if (qmsSel) {
-                    qmsSel.innerHTML = '<option value="">-- Chọn tính năng QMS muốn mở --</option>';
-                    qmsList.forEach(m => {
-                        const opt = document.createElement('option');
-                        opt.value = m.href;
-                        opt.innerText = m.name;
-                        qmsSel.appendChild(opt);
-                    });
-                }
-
+                QmsNavigation.initialize();
                 const badgeEl = document.getElementById('qms-count-badge');
-                if (badgeEl) badgeEl.innerText = `${qmsList.length} Menu`;
+                if (badgeEl) badgeEl.innerText = `${qmsList.length} modules`;
 
                 const memCountEl = document.getElementById('memory-count');
                 if (memCountEl) {
@@ -3058,21 +3168,26 @@
                     populateModalQmsDropdown();
                 }
             } catch(e) {
-                console.error("Lỗi nạp bộ nhớ QMS:", e);
+                console.error("Unable to load QMS modules:", e);
+                document.getElementById('qms-count-badge').textContent = 'Unavailable';
+                const status = document.getElementById('qms-search-count');
+                status.replaceChildren(document.createTextNode('Unable to load QMS modules. '));
+                const retry = document.createElement('button');
+                retry.type = 'button';
+                retry.className = 'qms-retry';
+                retry.textContent = 'Retry';
+                retry.onclick = loadMemory;
+                status.appendChild(retry);
             }
         }
 
 
-        async function jumpToQmsModule() {
-            const sel = document.getElementById('qms-jump-select');
-            const targetUrl = sel.value;
-            const targetName = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+        async function jumpToQmsModule(targetUrl, targetName) {
             if (!targetUrl) {
-                showToast("Vui lòng chọn tính năng QMS trong danh sách!", false);
+                showToast("Choose a QMS module to open.", false);
                 return;
             }
-
-            addLog(`Đang chuyển đến: "${targetName}"...`, 'info');
+            addLog(`Opening: "${targetName}"…`, 'info');
             try {
                 const res = await fetch('/api/navigate', {
                     method: 'POST',
@@ -3081,45 +3196,19 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(`Đã mở: ${targetName}`);
-                    addLog(`Đã chuyển đến: ${targetName}`, 'success');
+                    showToast(`Opened: ${targetName}`);
+                    addLog(`Navigated to: ${targetName}`, 'success');
                     if (data.screenshot) {
                         document.getElementById('mirror-img').src = data.screenshot;
                     }
                     setTimeout(refreshStatus, 1500);
+                    resetAdaptiveControls();
+                    await scanCurrentPage(false);
                 } else {
-                    showToast(data.error || 'Lỗi điều hướng', false);
+                    showToast(data.error || 'Navigation failed', false);
                 }
             } catch(e) {
-                showToast('Lỗi kết nối máy chủ', false);
-            }
-        }
-
-        // Load MQAA Summary
-        async function loadMqaaSummary() {
-            try {
-                const res = await fetch('/api/mqaa/summary');
-                const data = await res.json();
-                if (data.has_data && data.rows) {
-                    document.getElementById('scorecard-stat').innerText = `${data.perfect_count}/${data.total_models} Đạt chuẩn 100%`;
-                    const tbody = document.getElementById('mqaa-table-body');
-                    tbody.innerHTML = '';
-                    data.rows.forEach(r => {
-                        const tr = document.createElement('tr');
-                        const isOk = (r.status || '').includes('100%');
-                        tr.innerHTML = `
-                            <td>${r.stt}</td>
-                            <td><span style="font-weight:600; color: ${r.cat === 'Bottom' ? '#38bdf8' : '#c084fc'};">${r.cat}</span></td>
-                            <td><strong>${r.model}</strong></td>
-                            <td style="text-align:center;">${r.match_q}</td>
-                            <td style="text-align:center;">${r.match_rmk}</td>
-                            <td><span class="status-badge-sm ${isOk ? 'status-ok' : 'status-warn'}">${r.status}</span></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            } catch(e) {
-                console.error(e);
+                showToast('Unable to connect to the server', false);
             }
         }
 
@@ -3153,7 +3242,7 @@
 
         // Execute or reconnect to an existing job; reconnect never reruns exports.
         async function executeCommand(resumeJobId = null) {
-            if (commandBusy || nikeBusy) return;
+            if (commandBusy || nikeBusy || dynamicActionBusy) return;
             const resume = typeof resumeJobId === 'string' && resumeJobId.length > 0;
             const input = document.getElementById('ai-prompt-input');
             const prompt = input.value.trim();
@@ -3176,6 +3265,8 @@
             // Show and reset Exec Console
             const consoleEl = document.getElementById('ai-exec-console');
             consoleEl.style.display = 'block';
+            commandConsolePopulated = true;
+            document.getElementById('resume-command-progress').hidden = false;
             document.getElementById('exec-prompt-echo').innerText = `"${prompt}"`;
             const badge = document.getElementById('exec-status-badge');
             badge.className = 'live-pulse-badge';
@@ -3344,6 +3435,7 @@
                     badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> HOÀN THÀNH TOÀN BỘ';
                 }
                 showToast('🎉 Đã thực hiện xong lệnh của bạn!');
+                inspectionNeedsRefresh = true;
                 setTimeout(refreshStatus, 1500);
             }
         }
@@ -3351,6 +3443,45 @@
         function closeExecConsole() {
             const consoleEl = document.getElementById('ai-exec-console');
             if (consoleEl) consoleEl.style.display = 'none';
+        }
+
+        let resumableCommand = null;
+        let commandConsolePopulated = false;
+
+        async function initializeCommandPanel() {
+            const input = document.getElementById('ai-prompt-input');
+            const previousJob = input.getAttribute('data-last-job') || localStorage.getItem('sfc-last-job');
+            input.value = '';
+            localStorage.removeItem('sfc-last-prompt');
+            closeExecConsole();
+            commandConsolePopulated = false;
+            const saved = document.getElementById('saved-command-results');
+            if (saved) saved.open = false;
+            const resumeButton = document.getElementById('resume-command-progress');
+            resumeButton.hidden = true;
+            resumableCommand = null;
+            if (!previousJob) return;
+            try {
+                // Read status only. Opening the page never replays a command or its stream.
+                const response = await fetch(`/api/command/jobs/${encodeURIComponent(previousJob)}`);
+                const job = await response.json();
+                if (job.status === 'running' && job.prompt) {
+                    resumableCommand = job;
+                    resumeButton.hidden = false;
+                }
+            } catch (error) {
+                // Saved downloads stay available even when the old job is unavailable.
+            }
+        }
+
+        async function showExistingCommandProgress() {
+            if (commandBusy || commandConsolePopulated) {
+                document.getElementById('ai-exec-console').style.display = 'block';
+                return;
+            }
+            if (!resumableCommand) return;
+            document.getElementById('ai-prompt-input').value = resumableCommand.prompt;
+            await executeCommand(resumableCommand.id);
         }
 
         document.getElementById('btn-prompt-exec').addEventListener('click', executeCommand);
@@ -3453,12 +3584,13 @@
             const grid = document.getElementById('nav-tiles-grid');
             if (!grid) return;
             grid.innerHTML = '';
-            tiles.forEach(t => {
+            tiles.forEach(config => {
+                const t = QmsNavigation.englishTile(config);
                 const tile = document.createElement('div');
                 tile.className = 'nav-tile';
                 if (t.borderColor) tile.style.borderColor = t.borderColor;
                 if (t.bg) tile.style.background = t.bg;
-                tile.title = `Mở ${t.title}${t.sub ? ' (' + t.sub + ')' : ''}`;
+                tile.title = `Open ${t.title}${t.sub ? ' (' + t.sub + ')' : ''}`;
                 tile.onclick = () => navTo(t.dest);
                 tile.innerHTML = `
                     <i class="${t.icon || 'fa-solid fa-compass'}" style="color: ${t.color || 'var(--accent-cyan)'};"></i>
@@ -3500,17 +3632,18 @@
             listEl.innerHTML = '';
 
             if (editingNavTiles.length === 0) {
-                listEl.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 13px;">Chưa có nút điều hướng nào. Vui lòng bấm "Khôi phục mặc định" hoặc thêm nút mới!</div>';
+                listEl.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 13px;">No shortcuts yet. Restore defaults or add a new shortcut.</div>';
                 return;
             }
 
-            editingNavTiles.forEach((t, idx) => {
+            editingNavTiles.forEach((config, idx) => {
+                const t = QmsNavigation.englishTile(config);
                 const item = document.createElement('div');
                 item.className = 'nav-sort-item';
                 item.innerHTML = `
                     <div class="nav-sort-arrows">
-                        <button class="btn-arrow" ${idx === 0 ? 'disabled' : ''} onclick="moveNavTile(${idx}, -1)" title="Lên trên"><i class="fa-solid fa-chevron-up"></i></button>
-                        <button class="btn-arrow" ${idx === editingNavTiles.length - 1 ? 'disabled' : ''} onclick="moveNavTile(${idx}, 1)" title="Xuống dưới"><i class="fa-solid fa-chevron-down"></i></button>
+                        <button class="btn-arrow" ${idx === 0 ? 'disabled' : ''} onclick="moveNavTile(${idx}, -1)" title="Move up"><i class="fa-solid fa-chevron-up"></i></button>
+                        <button class="btn-arrow" ${idx === editingNavTiles.length - 1 ? 'disabled' : ''} onclick="moveNavTile(${idx}, 1)" title="Move down"><i class="fa-solid fa-chevron-down"></i></button>
                     </div>
                     <div class="nav-sort-preview" style="color: ${t.color || 'var(--accent-cyan)'}; background: ${t.bg || 'rgba(255,255,255,0.05)'}; border: 1px solid ${t.borderColor || 'rgba(255,255,255,0.1)'};">
                         <i class="${t.icon || 'fa-solid fa-compass'}"></i>
@@ -3520,7 +3653,7 @@
                         <div class="nav-sort-sub">${escapeHtml(t.sub || '')} &bull; <span class="nav-sort-url">${escapeHtml(t.dest)}</span></div>
                     </div>
                     <div class="nav-sort-actions">
-                        <button class="btn-remove-nav" onclick="removeNavTile(${idx})" title="Xóa nút này"><i class="fa-solid fa-trash-can"></i></button>
+                        <button class="btn-remove-nav" onclick="removeNavTile(${idx})" title="Remove shortcut"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `;
                 listEl.appendChild(item);
@@ -3546,21 +3679,13 @@
             const opt = sel.options[sel.selectedIndex];
             const name = opt.getAttribute('data-name') || opt.text;
             document.getElementById('new-nav-title').value = name.split('(')[0].trim();
-            document.getElementById('new-nav-sub').value = name.includes('(') ? name.substring(name.indexOf('(')+1, name.lastIndexOf(')')).trim() : 'QMS Phân Hệ';
+            document.getElementById('new-nav-sub').value = name.includes('(') ? name.substring(name.indexOf('(')+1, name.lastIndexOf(')')).trim() : 'QMS Module';
             document.getElementById('new-nav-dest').value = sel.value;
         }
 
         function populateModalQmsDropdown() {
             const qmsSel = document.getElementById('modal-qms-quickpick');
-            if (!qmsSel || qmsSel.options.length > 1) return;
-            const list = window.cachedQmsModules || [];
-            list.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.href;
-                opt.innerText = m.name;
-                opt.setAttribute('data-name', m.name);
-                qmsSel.appendChild(opt);
-            });
+            if (qmsSel) QmsNavigation.populateSelect(qmsSel, window.cachedQmsModules || []);
         }
 
         function hexToRgba(hex, alpha) {
@@ -3578,11 +3703,11 @@
             const color = document.getElementById('new-nav-color').value;
 
             if (!title) {
-                showToast("Vui lòng nhập Tên nút điều hướng!", false);
+                showToast("Enter a shortcut name.", false);
                 return;
             }
             if (!dest) {
-                showToast("Vui lòng nhập Đường dẫn hoặc Mã trang!", false);
+                showToast("Enter a URL or page code.", false);
                 return;
             }
 
@@ -3605,18 +3730,18 @@
             document.getElementById('new-nav-sub').value = '';
             document.getElementById('new-nav-dest').value = '';
             document.getElementById('modal-qms-quickpick').value = '';
-            showToast(`Đã thêm nút "${title}"`);
+            showToast(`Added shortcut "${title}"`);
         }
 
         function resetNavDefault() {
             editingNavTiles = JSON.parse(JSON.stringify(DEFAULT_NAV_TILES));
             renderNavSortList();
-            showToast("Đã khôi phục 5 nút chuẩn mặc định!");
+            showToast("Default shortcuts restored.");
         }
 
         async function saveNavConfig() {
             if (editingNavTiles.length === 0) {
-                showToast("Vui lòng để lại ít nhất 1 nút điều hướng!", false);
+                showToast("Keep at least one navigation shortcut.", false);
                 return;
             }
 
@@ -3632,18 +3757,18 @@
                     localStorage.setItem('sfc-custom-nav-tiles', JSON.stringify(currentNavTiles));
                     renderNavGrid(currentNavTiles);
                     closeNavCustomizerModal();
-                    showToast("🎉 Đã lưu & cập nhật điều hướng thành công!");
+                    showToast("Navigation shortcuts saved.");
                 } else {
-                    showToast(data.error || "Lỗi lưu cấu hình", false);
+                    showToast(data.error || "Unable to save navigation settings", false);
                 }
             } catch(e) {
-                showToast("Lỗi kết nối máy chủ", false);
+                showToast("Unable to connect to the server", false);
             }
         }
 
         // Navigate Quick
         async function navTo(dest) {
-            addLog(`Đang chuyển hướng sang: ${dest.toUpperCase()}...`, 'info');
+            addLog(`Navigating to: ${dest.toUpperCase()}...`, 'info');
             try {
                 const res = await fetch('/api/navigate', {
                     method: 'POST',
@@ -3652,18 +3777,19 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(`Đã chuyển đến: ${data.title}`);
-                    addLog(`Đã chuyển đến trang: ${data.title}`, 'success');
+                    showToast(`Navigated to: ${data.title}`);
+                    addLog(`Opened page: ${data.title}`, 'success');
                     if (data.screenshot) {
                         document.getElementById('mirror-img').src = data.screenshot;
                     }
                     setTimeout(refreshStatus, 1000);
-                    setTimeout(() => scanCurrentPage(true), 1200);
+                    resetAdaptiveControls();
+                    await scanCurrentPage(false);
                 } else {
-                    showToast(data.error || 'Lỗi điều hướng', false);
+                    showToast(data.error || 'Navigation failed', false);
                 }
             } catch(e) {
-                showToast('Lỗi điều hướng', false);
+                showToast('Navigation failed', false);
             }
         }
 
@@ -3712,34 +3838,6 @@
             } finally {
                 btn.innerHTML = orig;
                 btn.disabled = false;
-            }
-        }
-
-        // MQAA Actions
-        async function startMqaaScan() {
-            addLog("Đang kích hoạt quy trình quét 21 Form MQAA...", 'info');
-            try {
-                const res = await fetch('/api/mqaa/scan', { method: 'POST' });
-                const data = await res.json();
-                showToast(data.message);
-                addLog(data.message, 'success');
-            } catch(e) {
-                showToast("Lỗi khi bắt đầu quét MQAA", false);
-            }
-        }
-
-        async function openMasterExcel() {
-            try {
-                const res = await fetch('/api/mqaa/open_excel', { method: 'POST' });
-                const data = await res.json();
-                if (data.success) {
-                    showToast(`Đã mở file: ${data.file}`);
-                    addLog(`Đã mở file: ${data.file}`, 'success');
-                } else {
-                    showToast(data.error, false);
-                }
-            } catch(e) {
-                showToast("Lỗi mở file", false);
             }
         }
 
@@ -3876,8 +3974,9 @@
         }
 
         async function executeFttStationExport(reportType) {
+            if (dynamicActionBusy || commandBusy || nikeBusy) return;
             const stationsArray = Array.from(selectedFttStations);
-            if (stationsArray.length === 0) {
+            if (stationsArray.length === 0 && reportType !== 'internal') {
                 showToast("Please select at least 1 Station to export!", false);
                 return;
             }
@@ -3898,6 +3997,7 @@
             const btnNike = document.getElementById('btn-ftt-export-nike');
             const btnInternal = document.getElementById('btn-ftt-export-internal');
 
+            dynamicActionBusy = true;
             const targetBtn = (reportType === 'nike') ? btnNike : ((reportType === 'internal') ? btnInternal : btnExport);
             const origHtml = targetBtn ? targetBtn.innerHTML : '';
             if (targetBtn) {
@@ -3917,6 +4017,7 @@
                         target_id: 'rpnlMain_ContentPlaceHolder1_btnExcelALL',
                         params: {
                             stations: stationsArray,
+                            station_selection: reportType === 'internal' && stationsArray.length === 0 ? 'none' : undefined,
                             report_type: reportType,
                             file_name: fileName,
                             date_from: dateFrom,
@@ -3928,7 +4029,7 @@
                 const data = await res.json();
                 const fileCount = showDynamicExportFiles(data);
                 if (data.success && fileCount) {
-                    showToast(`Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
+                    showToast(data.message || `Đã lưu ${fileCount} file Excel. Tải file tại danh sách kết quả.`);
                     closeFttStationModal();
                 } else {
                     showToast(data.error || "Failed to export FTT report", false);
@@ -3938,6 +4039,7 @@
                 console.error("FTT export error:", err);
                 showToast("Connection error while exporting FTT", false);
             } finally {
+                dynamicActionBusy = false;
                 if (targetBtn) {
                     targetBtn.disabled = false;
                     targetBtn.innerHTML = origHtml;
@@ -3952,7 +4054,7 @@
                 if (parent) {
                     const det = document.createElement('details');
                     det.id = 'saved-command-results';
-                    det.open = true;
+                    det.open = false;
                     det.style.marginTop = '16px';
                     det.innerHTML = `
                         <summary style="cursor:pointer; font-weight:600;">Saved Results</summary>
@@ -3964,6 +4066,7 @@
             }
             const row = document.getElementById('saved-pills-row') || (container ? container.querySelector('div') : null);
             if (row) {
+                if (Array.from(row.querySelectorAll('a')).some(a => a.getAttribute('href') === url)) return;
                 const a = document.createElement('a');
                 a.className = 'intent-pill';
                 a.href = url;
@@ -3978,18 +4081,11 @@
             updatePlantButtonsUI();
             confirmedNike = localStorage.getItem('sfc-nike-mode') === 'true';
             updateNikeMode(confirmedNike);
-            const promptInput = document.getElementById('ai-prompt-input');
-            const serverJob = promptInput.getAttribute('data-last-job');
-            const savedPrompt = serverJob ? promptInput.value : (localStorage.getItem('sfc-last-prompt') || promptInput.value);
-            const savedJob = serverJob || localStorage.getItem('sfc-last-job');
-            if (savedPrompt) document.getElementById('ai-prompt-input').value = savedPrompt;
-            if (savedJob && savedPrompt) executeCommand(savedJob);
+            initializeCommandPanel();
             refreshStatus();
-            scanCurrentPage(false);
             loadFactories();
             loadMemory();
             loadNavConfig();
-            loadMqaaSummary();
             setInterval(refreshStatus, 4000);
         });
     </script>
@@ -4018,6 +4114,7 @@
                     <select id="ftt-modal-date-preset-select" class="date-dropdown-select" onchange="onDatePresetChanged(this.value)" style="margin-bottom:0;">
                         <option value="this_month">📅 This Month</option>
                         <option value="last_month">📅 Last Month</option>
+                        <option value="last_week">📅 Last Week (Mon–Sat)</option>
                         <option value="custom">⚙️ Custom Range</option>
                     </select>
                 </div>
@@ -4062,5 +4159,6 @@
             </div>
         </div>
     </div>
+<footer class="workspace-footer"><span>FATO © 2026 · Nội bộ</span><a href="/reports">Tool báo cáo ↗</a></footer>
 </body>
 </html>

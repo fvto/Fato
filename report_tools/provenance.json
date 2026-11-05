@@ -1,0 +1,229 @@
+{
+  "reinspection": {
+    "source": "C:\\Users\\User\\Desktop\\Re-Inspection",
+    "files": [
+      {
+        "path": "reinspection_suite.py",
+        "sha256": "3464ac86ca98d3f5910d7ebe10ede1cd1c19dba5fc653f0e2f4bb91f85977fa5"
+      },
+      {
+        "path": "pptx_generator.py",
+        "sha256": "c26808e6230b09c343ba0888d0fa3432a7a30ec122027228e6bc5dc0ad7868e2"
+      },
+      {
+        "path": "pptx_annotator.py",
+        "sha256": "5324f8dcc36c918654e29e4427df7ab12246f562ebccbe995322dc43d0c8f72e"
+      },
+      {
+        "path": "Color_Template.xlsx",
+        "sha256": "97a148435bce782df37ecd3098df27954cf3417ccea606ad7a5080bbbfb2d40e"
+      },
+      {
+        "path": "RE-INS REPORT.APR.2026.pptx",
+        "sha256": "e4922a0be8799f39e3c7cde90446b22dccf9b7bd53b7f5f83109fdd0f31d88f8"
+      }
+    ]
+  },
+  "copq": {
+    "source": "C:\\Users\\User\\Desktop\\combine_COPQ",
+    "files": [
+      {
+        "path": "combine_files.py",
+        "sha256": "f1163318aa7b72df07704ebecea153226d9e97afb20b77a0e4b0283c2243e77d"
+      },
+      {
+        "path": "process_ftt.py",
+        "sha256": "d6b655bf4813a1d41c9e66eb2f5e386fb9c9284221a9aa464fc51c1a80168b86"
+      },
+      {
+        "path": "monthly_reporting.py",
+        "sha256": "72461a9aad519468c2d9e7210713db689037bb2f3f99d605eee44b53d0317231"
+      },
+      {
+        "path": "pipeline_common.py",
+        "sha256": "06f682b78de867e2515929eac7e29d5976550b89d8f01c65e96f86d16b2f9257"
+      },
+      {
+        "path": "Source/Combined_COPQ.py",
+        "sha256": "eaf9d5188559f857c8aa08143cf49a37ac0c3c20688bf41e00728572f3f99df8"
+      },
+      {
+        "path": "Source/COPQ_Database.py",
+        "sha256": "6180ebcd7ac3b77b75bdc9d3b7c723a9cc08dc79000593fdfc75d8405de8b4c6"
+      },
+      {
+        "path": "Source/COPQ_Pivot_table.py",
+        "sha256": "fdce14fda2b6ab24fc0c96803985b4b3ad842d2c5026b12265238cd5f98e3be8"
+      },
+      {
+        "path": "Source/COPQ_Type_Detail.py",
+        "sha256": "d74b6d54a4842941778547a726e1e8eb024bb61b1d6f63db8252879f60c8c864"
+      },
+      {
+        "path": "Source/generate_pptx.py",
+        "sha256": "a1906371279d1a5c18a64d3ce68e36b582405cb00e5d7433cdcc8d25a4669fbb"
+      },
+      {
+        "path": "Source/monthly_reporting.py",
+        "sha256": "72461a9aad519468c2d9e7210713db689037bb2f3f99d605eee44b53d0317231"
+      },
+      {
+        "path": "Source/update_copq_pptx.py",
+        "sha256": "37ba215a18f9355979a671584a605d9aed28ac79eda7b39f11c9939de1d1d4a7"
+      },
+      {
+        "path": "Source/write_db_month.py",
+        "sha256": "beda1219d5598973ccaf097ae72d5c3bebccc91b39cf30af0ae7465a7d7f6547"
+      },
+      {
+        "path": "agents/pipeline_orchestrator.py",
+        "sha256": "b451db2917cc9c077cb406679132931639e0a8984c75cb944d66f46f48b1e6dd"
+      },
+      {
+        "path": "agents/quality_sentinel.py",
+        "sha256": "4544bd7bf8d6ba4944d683a0ae696cc762e3764022abf80a0eca614a44fef362"
+      },
+      {
+        "path": "agents/run_agent.py",
+        "sha256": "9799429c66852e5fd1eacd443fd6b995d13c4a081b1a9ce19a8196290bf97d71"
+      },
+      {
+        "path": "agents/watchdog_delivery.py",
+        "sha256": "8b3b3fdba1290ee5597f337001307649e9abd5ba29834f6b886a27c23e07e4a9"
+      },
+      {
+        "path": "agents/__init__.py",
+        "sha256": "af5a03467e44c79b6bfda1b1ee778b98a88f51c0d6238d7f51b2749f46b32c73"
+      },
+      {
+        "path": "Database/CoPQ database 25.xlsx",
+        "sha256": "dbba13ed99fe9b7103131e0bd5079ff0d2d0669f4aba7b820a8f2dfdef7f223d"
+      },
+      {
+        "path": "Database/CoPQ_type_analysis.xlsx",
+        "sha256": "86f69ee0d202921e6da1bc1ec0b96996698f182019558e1b090657684bc70db0"
+      },
+      {
+        "path": "Database/.backup/CoPQ database 25_20261006_114629.xlsx",
+        "sha256": "6a8de44d3dcfae7bdc796bba508acc45a979ed6f95156190a49bdf7dd41d045f"
+      },
+      {
+        "path": "Database/.backup/CoPQ database 25_20261006_151102.xlsx",
+        "sha256": "d30087d0c3ec7aa6c7a72e9a8e51e518b82b30038cab8320ab9b60f6538bd408"
+      },
+      {
+        "path": "Database/.backup/CoPQ database 25_20261006_151735.xlsx",
+        "sha256": "82e602aea38b52d9ac72e30f3a1f903b8e898864e906cbe39396f6152af227ab"
+      },
+      {
+        "path": "Database/.backup/CoPQ database 25_20261006_151905.xlsx",
+        "sha256": "0ffdbc12621dceec7134ddcc0717b9a3578ebd624503c10ee7beb58e2dfc6edd"
+      },
+      {
+        "path": "Database/.backup/CoPQ_type_analysis_20261006_114629.xlsx",
+        "sha256": "5fb24814bfecfc5be26f134c968605ee2881285ded5b950ef440de1ebe22520a"
+      },
+      {
+        "path": "Database/.backup/CoPQ_type_analysis_20261006_151102.xlsx",
+        "sha256": "1cf853f12889748c37277a489c3852816d87bfa6511b722a263b4c2a882d4300"
+      },
+      {
+        "path": "Database/.backup/CoPQ_type_analysis_20261006_151735.xlsx",
+        "sha256": "aabe4b3c21eb3e4fbc64f9edf8e33b1210abfe1b6734490874a4882f03a6a8d4"
+      },
+      {
+        "path": "Database/.backup/CoPQ_type_analysis_20261006_151905.xlsx",
+        "sha256": "7cf929fafd13387d89222212250f57620692367e6185a2b16ef51ce3b04efc79"
+      },
+      {
+        "path": "BC_Color/Color_Defect.xlsx",
+        "sha256": "b70212a17b44ef811067a8244e063b5f85a3772223eaa60a94553c545f01793b"
+      },
+      {
+        "path": "Template_COPQ/FTT_Combined_Template.xlsx",
+        "sha256": "1d39bea0f644d483f2032410f6a39af0f3e9e6e6c44381dcfe9b8ec1eabda33a"
+      },
+      {
+        "path": "Template_COPQ/Template_COPQ.pptx",
+        "sha256": "8a04793dcb1f1b5f24836243e154d8c278d2b5e2701e76548992225af8072282"
+      },
+      {
+        "path": ".agents/rules/copq-pipeline-rules.md",
+        "sha256": "6e568b249d06dd0941ad2789a070f00b1db9d16d16b980182b197423b21ed34b"
+      }
+    ]
+  },
+  "hfpa": {
+    "source": "C:\\Users\\User\\Desktop\\HFPA",
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "5d3a4a348e35a5bdded83ba63181583feee1b408d42b3fd0f3b555ad8b6ab2d3"
+      },
+      {
+        "path": "process_qastation.py",
+        "sha256": "5ad3d8f001b3744a9d7fae9cae2b8f814e2ff7a8c8c194ee5711a8a023d39971"
+      },
+      {
+        "path": "populate_database.py",
+        "sha256": "34e6167db9f2bfc55def40a25bdda3aaf7ea56f12d00346bef54dc4bd0475081"
+      },
+      {
+        "path": "process_pptx.py",
+        "sha256": "84075189758f3699170d1fcc4755fddcf1dc867beb30ddd1b0308eb3027fa896"
+      },
+      {
+        "path": "process_ftt.py",
+        "sha256": "803dff285856e4d7674bb8788654995bba481694af276475800a60463515037c"
+      },
+      {
+        "path": "file_utils.py",
+        "sha256": "77caf739fd1050e721e287173136f742518bb737dc01cdc50f93bdf297e52b0a"
+      },
+      {
+        "path": "pptx_annotator.py",
+        "sha256": "8727a897a13adf1bc985881adf3363b9314bf204db8872ce9ec6ccf23ddccd54"
+      },
+      {
+        "path": "Color_template.xlsx",
+        "sha256": "14f70219e4783a95865fd5f1a9ec8308002ff8836f0fcf213cccf301a41cef89"
+      },
+      {
+        "path": "agents/color_manager.py",
+        "sha256": "1e8562bfc040e24a2dff5b906afced169cd0056053187e30eb84910275cd2f19"
+      },
+      {
+        "path": "agents/hfpa_agent_orchestrator.py",
+        "sha256": "3c7c2820f75746809766095db13161eb1666f53f7582bfb80b639733cd7707fd"
+      },
+      {
+        "path": "agents/ingestion_watcher_agent.py",
+        "sha256": "9de91ddea4ac4ac688519357303b0c54a8e31cf16d087ff952a59c0486b13e53"
+      },
+      {
+        "path": "agents/quality_audit_pptx_agent.py",
+        "sha256": "794d54a90f417ee9ea0c8d015e3408acbda661937457f6e8a43902893348407c"
+      },
+      {
+        "path": "agents/reconciliation_engine_agent.py",
+        "sha256": "27211a9b9219e77adb1ee63b59c20cc4bebf3c88a3a2ece6e70362155270443f"
+      },
+      {
+        "path": "agents/__init__.py",
+        "sha256": "3d15fdd734233291a46038b4cf00d2627b67c65fab8f220096f262aa8eb5028b"
+      },
+      {
+        "path": "Database/HFPA_Template.pptx",
+        "sha256": "314fe776fa29137d8395d3d69aaca2adb8ada7c325c9eedf10dfab5baf6d0574"
+      },
+      {
+        "path": "Database/HFPA_Template.xlsx",
+        "sha256": "cf04b8ead8a96c96b4804b9562c239403e2e4c917fccafde9d932f0a939c0325"
+      },
+      {
+        "path": "Database/HFPA_Template_Backup.pptx",
+        "sha256": "ddf65907de9a4166282d5c1c98ffdedb6280f54fa3d1e454e4be6353f9bd2ad1"
+      }
+    ]
+  }
+}

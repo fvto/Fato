@@ -138,9 +138,8 @@ def run(controller, date_from=None, date_to=None, factory=None, action=None, nik
                         for key, value in [('dateFrom', date_from), ('dateTo', date_to), ('nike', nike)]:
                             if value is not None and current[key] != value:
                                 raise ValueError(f'Bộ lọc {key} chưa đúng: {current[key]} (yêu cầu {value})')
-                        if factory in ('', 'ALL', None) and current['factory'] and current['factory'] not in ('', 'ALL'):
-                            # cboDeptFrom was cleared, but in case SFC still displays text
-                            pass
+                        if factory in ('', 'ALL') and current['factory'] not in ('', 'ALL'):
+                            raise ValueError('SFC chưa xóa lọc chuyền; dừng xuất để tránh thiếu dữ liệu.')
                         return current
 
                     current = verify()
@@ -197,7 +196,7 @@ def run(controller, date_from=None, date_to=None, factory=None, action=None, nik
             controller.LAST_STATUS_TIME = 0
             if 'connect_over_cdp' in str(error):
                 return dict(success=False, error='Chưa kết nối điều khiển được Chrome SFC. Hãy kiểm tra trang đã tải xong và đã đăng nhập, rồi thử lại.')
-            return dict(success=False, error='SFC vẫn đang xử lý sau 15 phút. Trang được giữ nguyên; chưa tự gửi lại lệnh và chưa xác nhận hoàn tất file.')
+            return dict(success=False, timed_out=True, error='SFC vẫn đang xử lý sau 15 phút. Trang được giữ nguyên; chưa tự gửi lại lệnh và chưa xác nhận hoàn tất file.')
         except Exception as error:
             controller.LAST_STATUS_TIME = 0
             return dict(success=False, error=str(error))

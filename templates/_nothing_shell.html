@@ -1,0 +1,22 @@
+<a class="skip-link" href="#main-content">Đến nội dung chính</a>
+<nav class="nothing-topbar" aria-label="Điều hướng chính">
+    <button type="button" class="shell-icon menu-trigger" id="site-menu-open" aria-label="Mở menu" aria-controls="workspace-menu" aria-expanded="false"><span></span><span></span></button>
+    <a href="/" class="shell-wordmark" aria-label="FATO — Trang chính"><img src="/static/fato-wordmark.svg" alt="FATO" width="90" height="27"></a>
+    <a class="shell-destination" href="{{ '/' if request.path == '/reports' else '/reports' }}">{{ 'SFC' if request.path == '/reports' else 'Báo cáo' }} <span aria-hidden="true">↗</span></a>
+</nav>
+<dialog id="workspace-menu" class="workspace-menu" aria-labelledby="workspace-menu-title">
+    <div class="menu-topline"><button type="button" id="site-menu-close" class="shell-icon" aria-label="Đóng menu">×</button><span id="workspace-menu-title">FATO / WORKSPACE</span><span aria-hidden="true">( ☷ )</span></div>
+    <div class="menu-body">
+        <p class="eyebrow">Không gian làm việc</p>
+        <a class="menu-primary" href="/">Điều khiển SFC <span aria-hidden="true">↗</span></a>
+        <a class="menu-primary" href="/reports">Tool báo cáo <span aria-hidden="true">↗</span></a>
+        <a class="menu-primary" href="/compare">Spreadsheet Compare <span aria-hidden="true">↗</span></a>
+        <a class="menu-primary" href="/combine">Gộp file Excel <span aria-hidden="true">↗</span></a>
+        <div class="menu-tool-links">
+            <a href="/reports?tool=reinspection"><span>(01)</span> Re-Inspection <span aria-hidden="true">↗</span></a>
+            <a href="/reports?tool=copq"><span>(02)</span> COPQ <span aria-hidden="true">↗</span></a>
+            <a href="/reports?tool=hfpa"><span>(03)</span> HFPA <span aria-hidden="true">↗</span></a>
+        </div>
+    </div>
+    <div class="menu-bottomline"><span>Công cụ nội bộ</span><span>VI / EN</span></div>
+</dialog>

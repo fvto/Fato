@@ -65,17 +65,52 @@ function response(events) {
     const requests=[];
     context.fetch=async(url,options)=>{
         requests.push({url,options});
+        if(url==='/api/action')return {json:async()=>({success:true,action_result:'Completed fixture export'})};
         return response([{step:1,status:'success',intent:{target_plant:'VH',nike:true}},
                          {step:5,status:'done',files:[output]}]);
     };
     await vm.runInContext("triggerAction('excel')",context);
-    assert.equal(requests[0].url,'/api/command/stream');
-    assert.match(JSON.parse(requests[0].options.body).prompt,/HFPA VH.*2026-10-24.*NIKE/);
+    // The existing filter form exports its current page directly; the command panel uses SSE.
+    assert.equal(requests[0].url,'/api/action');
+    assert.deepEqual(JSON.parse(requests[0].options.body),
+        {dateFrom:'2026-10-24',dateTo:'2026-10-24',factory:'',action:'excel',nike:true});
+    context.document.getElementById('ai-prompt-input').value='Saved fixture command';
     await vm.runInContext("executeCommand('existing-job')",context);
     assert.equal(requests[1].url,'/api/command/jobs/existing-job/stream');
     assert.equal(requests[1].options,undefined,'Reconnect must not submit another export');
     context.fetch=async()=>({json:async()=>({connected:false,form:{nike:false}})});
     await vm.runInContext('refreshStatus()',context);
     assert.equal(elements.get('nike-toggle').checked,true,'An old browser filter must not overwrite dashboard export mode');
+    const input=context.document.getElementById('ai-prompt-input');
+    input.setAttribute('data-last-job','previous-job');
+    input.value='Previous command';
+    storage.set('sfc-last-prompt','Previous command');
+    storage.set('sfc-last-job','previous-job');
+    context.document.getElementById('saved-command-results').open=true;
+    const startupRequests=[];
+    context.fetch=async(url,options)=>{
+        startupRequests.push({url,options});
+        return {json:async()=>({id:'previous-job',status:'done',prompt:'Previous command'})};
+    };
+    await vm.runInContext('initializeCommandPanel()',context);
+    assert.equal(input.value,'','Default command input must be blank');
+    assert.equal(storage.get('sfc-last-prompt'),undefined);
+    assert.equal(elements.get('saved-command-results').open,false);
+    assert.equal(elements.get('ai-exec-console').style.display,'none');
+    assert.equal(elements.get('resume-command-progress').hidden,true);
+    assert.deepEqual(startupRequests,[{url:'/api/command/jobs/previous-job',options:undefined}]);
+    startupRequests.length=0;
+    context.fetch=async(url,options)=>{
+        startupRequests.push({url,options});
+        if(url.endsWith('/stream'))return response([{step:5,status:'done',files:[output]}]);
+        return {json:async()=>({id:'previous-job',status:'running',prompt:'Previous command'})};
+    };
+    await vm.runInContext('initializeCommandPanel()',context);
+    assert.equal(input.value,'','An active task must not fill the default input');
+    assert.equal(elements.get('resume-command-progress').hidden,false);
+    assert.equal(startupRequests.length,1,'Opening the page must not reconnect automatically');
+    await vm.runInContext('showExistingCommandProgress()',context);
+    assert.equal(startupRequests[1].url,'/api/command/jobs/previous-job/stream');
+    assert.ok(startupRequests.every(request=>request.options===undefined),'Explicit progress reopening must only GET the existing job');
     console.log('Dashboard: stream decoding, result links, NIKE mode, Excel button, reconnect and stale browser state passed');
 })().catch(error=>{console.error(error);process.exitCode=1;});

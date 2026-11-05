@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {buildPrompt}=require('../static/spreadsheet-chatgpt.js');
+const books=[{id:'private-id',name:'Audit A.xlsx',path:'C:/private/source.xlsx'},{name:'Audit B.xlsx'}];
+const prompt=buildPrompt('  So sánh hai file  ',books);
+assert.ok(prompt.includes('YÊU CẦU CỦA TÔI:\nSo sánh hai file'));
+assert.ok(prompt.includes('1. Audit A.xlsx\n2. Audit B.xlsx'));
+assert.ok(prompt.includes('Tổng hợp / Chi tiết'));
+assert.ok(prompt.includes('giữ số 0'));
+assert.ok(!prompt.includes('private-id')&&!prompt.includes('C:/private'));
+assert.ok(!prompt.includes('KẾT QUẢ TRƯỚC'));
+assert.ok(prompt.includes('dashboard-result.json'));
+const previous={content:'Previous summary',comparisons:[{section:'Storage',item:'Score'}],checked_scope:['Only two sheets']};
+const followup=buildPrompt('Giải thích',books,previous);
+assert.ok(followup.includes('Previous summary')&&followup.includes('Storage')&&followup.includes('Only two sheets'));
+console.log('ChatGPT handoff: local prompt, filenames, optional context and import format passed.');
