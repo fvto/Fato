@@ -17,18 +17,9 @@ from openpyxl import load_workbook
 from openpyxl.formula.translate import Translator
 from openpyxl.utils.cell import column_index_from_string, get_column_letter
 from PIL import Image, ImageDraw, ImageFont
+from pptx import Presentation
 from openpyxl.chart import BarChart, LineChart, Reference, Series
 from openpyxl.chart.label import DataLabelList
-from pptx import Presentation
-from pptx.chart.data import CategoryChartData
-from pptx.dml.color import RGBColor
-from pptx.enum.chart import (
-    XL_CHART_TYPE,
-    XL_LABEL_POSITION,
-    XL_LEGEND_POSITION,
-)
-from pptx.enum.shapes import MSO_SHAPE
-from pptx.util import Inches, Pt
 
 from dashboard_paths import APP_ROOT
 from report_tools.hfpa.agents.color_manager import ColorManager
@@ -797,241 +788,96 @@ def update_consumer_promise(slide, quarter):
                            table.cell(row, column + 1))
 
 
-def hex_to_rgb(hex_str):
-    hex_str = hex_str.lstrip("#")
-    return RGBColor(int(hex_str[0:2], 16), int(hex_str[2:4], 16), int(hex_str[4:6], 16))
-
-
-def hide_val_axis(c):
-    val_ax = c._element.xpath(".//c:valAx")
-    if val_ax:
-        delete = val_ax[0].find("{http://schemas.openxmlformats.org/drawingml/2006/chart}delete")
-        if delete is not None:
-            delete.set("val", "1")
-        else:
-            etree.SubElement(val_ax[0], "{http://schemas.openxmlformats.org/drawingml/2006/chart}delete", val="1")
-
-
-def hide_gridlines(c):
-    for gl in c._element.xpath(".//c:majorGridlines"):
-        gl.getparent().remove(gl)
-
-
 def write_powerpoint(template, output, quarter):
     deck = Presentation(template)
     slides = quality_slides(deck)
+    parts = {}
     defect_colors = defect_chart_colors(quarter.rankings)
     period_label = quarter.period.replace("-", " ")
-    excel_filename = f"HFPA-FTT-{quarter.period}.xlsx"
-
     if quarter.date_to:
         start, end = (date.fromisoformat(day) for day in (quarter.date_from, quarter.date_to))
         date_label = f"Data from {start:%b} {start.day} to {end:%b} {end.day}"
     else:
         start, end = (date.fromisoformat(month + "-01") for month in (quarter.covered[0], quarter.covered[-1]))
         date_label = f"Data from {start:%B} to {end:%B}"
-
+    with ZipFile(template) as package:
+        package_names = set(package.namelist())
+        relationships = {str(slide.part.partname).lstrip("/"): package.read(
+            f"ppt/slides/_rels/{Path(str(slide.part.partname)).name}.rels") for slide, _ in slides.values()}
     for metric, (slide, title_shape) in slides.items():
         spec = SHAPES[metric]
-        shapes_dict = {shape.shape_id: shape for shape in slide.shapes}
+        shapes = {shape.shape_id: shape for shape in slide.shapes}
+        title = title_shape.text_frame.paragraphs[0].runs[0]
+        title.text = f"{period_label} QMS {metric} ANALYSIS"
+        slide_name = str(slide.part.partname).lstrip("/")
+        rels = etree.fromstring(relationships[slide_name])
 
-        # Update Slide Title
-        if title_shape.has_text_frame and title_shape.text_frame.paragraphs:
-            p = title_shape.text_frame.paragraphs[0]
-            if p.runs:
-                p.runs[0].text = f"{period_label} QMS {metric} ANALYSIS"
+        def replace_image(shape_id, make_image):
+            shape = shapes[shape_id]
+            with Image.open(BytesIO(shape.image.blob)) as original:
+                data = make_image(original.convert("RGBA"))
+            # Period pictures are shared with non-QMS slides in the full QBR.
+            # Give each replacement its own relationship and media part.
+            index = 1
+            stem = f"quarterly_{Path(slide_name).stem}_{shape_id}"
+            while f"ppt/media/{stem}_{index}.png" in package_names:
+                index += 1
+            media_name = f"ppt/media/{stem}_{index}.png"
+            package_names.add(media_name)
+            parts[media_name] = data
+            relationship_id = f"rIdQuarterly{shape_id}"
+            while any(item.get("Id") == relationship_id for item in rels):
+                relationship_id += "x"
+            etree.SubElement(rels, "{http://schemas.openxmlformats.org/package/2006/relationships}Relationship",
+                             Id=relationship_id,
+                             Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+                             Target="../media/" + Path(media_name).name)
+            shape._pic.blipFill.blip.rEmbed = relationship_id
 
-        # Update / replace Period subtitle shape
-        if spec["period"] in shapes_dict:
-            period_shape = shapes_dict[spec["period"]]
-            tx_box = slide.shapes.add_textbox(
-                period_shape.left, period_shape.top, period_shape.width, period_shape.height
-            )
-            tf = tx_box.text_frame
-            tf.word_wrap = False
-            p = tf.paragraphs[0]
-            p.text = date_label
-            p.font.size = Pt(13)
-            p.font.italic = True
-            p.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
-            sp = period_shape._element
-            sp.getparent().remove(sp)
+        def period_image(image):
+            bounds = image.getbbox()
+            image.paste((0, 0, 0, 0), bounds)
+            draw = ImageDraw.Draw(image)
+            points = 23
+            while draw.textlength(date_label, font=font(points, italic=True)) > image.width - 2 * bounds[0]:
+                points -= 1
+            draw.text((bounds[0], (bounds[1] + bounds[3]) / 2), date_label,
+                      font=font(points, italic=True), fill="#333333", anchor="lm")
+            return png(image)
 
-        # Add a sleek Excel hyperlink badge at the top-right
-        btn = slide.shapes.add_shape(
-            MSO_SHAPE.ROUNDED_RECTANGLE,
-            Inches(9.8), Inches(0.12), Inches(3.2), Inches(0.42)
-        )
-        btn.fill.solid()
-        btn.fill.fore_color.rgb = hex_to_rgb("#F2F4F8")
-        btn.line.color.rgb = hex_to_rgb("#D0D7DE")
-        btn.line.width = Pt(1)
-        btn_tf = btn.text_frame
-        btn_tf.word_wrap = False
-        btn_p = btn_tf.paragraphs[0]
-        btn_p.text = f"📊 Mở file Excel: {excel_filename}"
-        btn_p.font.size = Pt(10)
-        btn_p.font.bold = True
-        btn_p.font.color.rgb = hex_to_rgb("#0969DA")
-        btn.click_action.hyperlink.address = excel_filename
+        excel_filename = f"HFPA-FTT-{quarter.period}.xlsx"
+        def add_hyperlink(shape):
+            hlink_id = f"rIdHlink{shape.shape_id}"
+            while any(item.get("Id") == hlink_id for item in rels):
+                hlink_id += "x"
+            etree.SubElement(rels, "{http://schemas.openxmlformats.org/package/2006/relationships}Relationship",
+                             Id=hlink_id,
+                             Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+                             Target=excel_filename)
+            A_NS = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+            R_NS = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
+            c_nv_pr = shape._element.xpath(".//p:cNvPr")[0]
+            for h in c_nv_pr.findall(A_NS + "hlinkClick"):
+                c_nv_pr.remove(h)
+            etree.SubElement(c_nv_pr, A_NS + "hlinkClick", attrib={R_NS + "id": hlink_id})
 
+        replace_image(spec["period"], period_image)
         for region in ("VN", "Indo"):
-            trend_id, top_model_id, top_defect_id = spec[region]
-            trend_pic = shapes_dict[trend_id]
-            model_pic = shapes_dict[top_model_id]
-            defect_pic = shapes_dict[top_defect_id]
-
+            trend, top_model, top_defect = spec[region]
             models, defects = quarter.rankings.get((metric, region), ([], []))
-
-            # --- 1. TREND LINE CHART ---
-            scopes = (region, *REGIONS[region])
-            month_names = [month_abbr[int(m[5:])] for m in quarter.months]
-            trend_data = CategoryChartData()
-            trend_data.categories = month_names
-
-            all_rates = []
-            for scope in scopes:
-                line_rates = []
-                for m in quarter.months:
-                    rec = quarter.values.get((metric, m, scope)) if m in quarter.covered else None
-                    val = rec.rate if rec else None
-                    line_rates.append(val)
-                    if val is not None:
-                        all_rates.append(val)
-                label = "VietNam" if scope == "VN" else scope
-                trend_data.add_series(label, tuple(line_rates))
-
-            t_left, t_top, t_w, t_h = trend_pic.left, trend_pic.top, trend_pic.width, trend_pic.height
-            t_shape = slide.shapes.add_chart(
-                XL_CHART_TYPE.LINE_MARKERS, t_left, t_top, t_w, t_h, trend_data
-            )
-            t_chart = t_shape.chart
-            t_chart.has_title = True
-            t_chart.chart_title.text_frame.text = f"{'VN' if region == 'VN' else 'INDO'} {metric}% TREND TRACKING"
-            t_chart.chart_title.text_frame.paragraphs[0].font.size = Pt(13)
-            t_chart.chart_title.text_frame.paragraphs[0].font.bold = True
-            t_chart.has_legend = True
-            t_chart.legend.position = XL_LEGEND_POSITION.TOP
-            t_chart.legend.include_in_layout = False
-            t_chart.legend.font.size = Pt(9)
-
-            _, _, _, _, _, _, _, colors_hex, _ = TREND_FORMAT[metric, region]
-            for idx, s in enumerate(t_chart.series):
-                s.format.line.color.rgb = hex_to_rgb(colors_hex[idx])
-                s.format.line.width = Pt(3.0 if idx == 0 else 2.0)
-                s.has_data_labels = True
-                s.data_labels.number_format = "0.00%"
-                s.data_labels.font.size = Pt(8.5)
-                s.data_labels.font.bold = True
-                if idx == 0:
-                    s.data_labels.position = XL_LABEL_POSITION.CENTER
-                elif idx == 1:
-                    s.data_labels.position = XL_LABEL_POSITION.ABOVE
-                else:
-                    s.data_labels.position = XL_LABEL_POSITION.BELOW
-
-            if all_rates:
-                span = max(all_rates) - min(all_rates)
-                if span <= 0.08:
-                    step = 0.02
-                    min_v = math.floor(min(all_rates) * 50) / 50 - 0.02
-                    max_v = math.ceil(max(all_rates) * 50) / 50 + 0.02
-                else:
-                    step = 0.05
-                    min_v = math.floor(min(all_rates) * 20) / 20 - 0.05
-                    max_v = math.ceil(max(all_rates) * 20) / 20 + 0.05
-                t_chart.value_axis.minimum_scale = max(0.0, min_v)
-                t_chart.value_axis.maximum_scale = min(1.0, max_v)
-                t_chart.value_axis.major_unit = step
-            t_chart.value_axis.has_major_gridlines = True
-            t_chart.value_axis.tick_labels.number_format = "0%"
-            t_chart.value_axis.tick_labels.font.size = Pt(8.5)
-            t_shape.click_action.hyperlink.address = excel_filename
-
-            sp = trend_pic._element
-            sp.getparent().remove(sp)
-
-            # --- 2. TOP MODELS COLUMN CHART ---
-            m_left, m_top, m_w, m_h = model_pic.left, model_pic.top, model_pic.width, model_pic.height
-            if models:
-                mod_data = CategoryChartData()
-                mod_data.categories = ["\n".join(textwrap.wrap(lbl, width=16)[:3]) for lbl, _, _ in models]
-                m_rates = [num / den if den else (num or 0.0) for _, num, den in models]
-                mod_data.add_series(f"TOP {metric} MODELS", tuple(m_rates))
-
-                m_shape = slide.shapes.add_chart(
-                    XL_CHART_TYPE.COLUMN_CLUSTERED, m_left, m_top, m_w, m_h, mod_data
-                )
-                m_chart = m_shape.chart
-                m_chart.has_title = True
-                m_chart.chart_title.text_frame.text = f"TOP {metric} MODELS"
-                m_chart.chart_title.text_frame.paragraphs[0].font.size = Pt(11)
-                m_chart.chart_title.text_frame.paragraphs[0].font.bold = True
-                m_chart.has_legend = False
-
-                m_plot = m_chart.plots[0]
-                m_plot.gap_width = 80
-                m_plot.has_data_labels = True
-                m_plot.data_labels.number_format = "0.00%"
-                m_plot.data_labels.font.size = Pt(8.5)
-                m_plot.data_labels.font.bold = True
-                m_plot.data_labels.position = XL_LABEL_POSITION.OUTSIDE_END
-
-                mod_color = "#5B9BD5" if region == "VN" else ("#9C7BC7" if metric == "FTT" else "#8C7CA2")
-                m_chart.series[0].format.fill.solid()
-                m_chart.series[0].format.fill.fore_color.rgb = hex_to_rgb(mod_color)
-
-                m_chart.category_axis.tick_labels.font.size = Pt(7.5)
-                hide_val_axis(m_chart)
-                hide_gridlines(m_chart)
-                m_shape.click_action.hyperlink.address = excel_filename
-
-            sp = model_pic._element
-            sp.getparent().remove(sp)
-
-            # --- 3. TOP DEFECTS COLUMN CHART ---
-            d_left, d_top, d_w, d_h = defect_pic.left, defect_pic.top, defect_pic.width, defect_pic.height
-            if defects:
-                def_data = CategoryChartData()
-                def_data.categories = ["\n".join(textwrap.wrap(lbl, width=16)[:3]) for lbl, _, _ in defects]
-                d_rates = [num / den if den else (num or 0.0) for _, num, den in defects]
-                def_data.add_series("TOP DEFECTS", tuple(d_rates))
-
-                d_shape = slide.shapes.add_chart(
-                    XL_CHART_TYPE.COLUMN_CLUSTERED, d_left, d_top, d_w, d_h, def_data
-                )
-                d_chart = d_shape.chart
-                d_chart.has_title = True
-                d_chart.chart_title.text_frame.text = "TOP DEFECTS OF @TOP1 MODEL"
-                d_chart.chart_title.text_frame.paragraphs[0].font.size = Pt(11)
-                d_chart.chart_title.text_frame.paragraphs[0].font.bold = True
-                d_chart.has_legend = False
-
-                d_plot = d_chart.plots[0]
-                d_plot.gap_width = 80
-                d_plot.has_data_labels = True
-                d_plot.data_labels.number_format = "0.00%"
-                d_plot.data_labels.font.size = Pt(8.5)
-                d_plot.data_labels.font.bold = True
-                d_plot.data_labels.position = XL_LABEL_POSITION.OUTSIDE_END
-
-                palette = [defect_colors[ColorManager.normalize_name(label)] for label, _, _ in defects]
-                for p_idx, pt in enumerate(d_chart.series[0].points):
-                    if p_idx < len(palette):
-                        pt.format.fill.solid()
-                        pt.format.fill.fore_color.rgb = hex_to_rgb(palette[p_idx])
-
-                d_chart.category_axis.tick_labels.font.size = Pt(7.5)
-                hide_val_axis(d_chart)
-                hide_gridlines(d_chart)
-                d_shape.click_action.hyperlink.address = excel_filename
-
-            sp = defect_pic._element
-            sp.getparent().remove(sp)
-
+            replace_image(trend, lambda image: trend_image(image, quarter, metric, region))
+            add_hyperlink(shapes[trend])
+            replace_image(top_model, lambda image: rank_image(image, metric, region, models))
+            add_hyperlink(shapes[top_model])
+            palette = [defect_colors[ColorManager.normalize_name(label)] for label, _, _ in defects]
+            replace_image(top_defect, lambda image: rank_image(image, metric, region, defects, palette))
+            add_hyperlink(shapes[top_defect])
+        parts[slide_name] = slide.part.blob
+        parts[f"ppt/slides/_rels/{Path(slide_name).name}.rels"] = etree.tostring(rels)
     for slide in deck.slides:
         if any(shape.has_text_frame and "CONSUMER PROMISE REVIEW" in shape.text.upper() for shape in slide.shapes):
             update_consumer_promise(slide, quarter)
+            parts[str(slide.part.partname).lstrip("/")] = slide.part.blob
             if slide.has_notes_slide:
                 notes = slide.notes_slide.notes_text_frame
                 prior_note = (f"Prior comparison through {quarter.prior_date_to}. " if quarter.prior_date_to else
@@ -1042,5 +888,5 @@ def write_powerpoint(template, output, quarter):
                         "HFPA = 1 - total failed pairs / total inspected pairs. The vs PQ column shows the prior-period rate.")
                 notes.text = "\n".join(line for line in notes.text.splitlines()
                                        if not line.startswith("Quarterly HFPA summary ")) + "\n" + note
-
-    deck.save(output)
+                parts[str(slide.notes_slide.part.partname).lstrip("/")] = slide.notes_slide.part.blob
+    copy_package(template, output, parts)
