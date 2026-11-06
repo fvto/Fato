@@ -300,8 +300,9 @@ def add_excel_charts(output, quarter, mappings):
     wb = load_workbook(output)
     
     # 1. Sheet: FTT month-quarter
-    if "FTT month-quarter" in wb.sheetnames and quarter.months:
-        ws = wb["FTT month-quarter"]
+    ftt_sheet = next((s for s in wb.sheetnames if s.strip() == "FTT month-quarter"), None)
+    if ftt_sheet and quarter.months:
+        ws = wb[ftt_sheet]
         ftt_cols = mappings.get("FTT", {})
         covered_months = [m for m in quarter.months if m in ftt_cols]
         if covered_months:
@@ -409,9 +410,11 @@ def add_excel_charts(output, quarter, mappings):
                 ws.add_chart(c_def_id, "J125")
 
     # 2. Sheet: Quarter HFPA 
-    if "Quarter HFPA " in wb.sheetnames and "Month HFPA" in wb.sheetnames and quarter.months:
-        ws_q = wb["Quarter HFPA "]
-        ws_m = wb["Month HFPA"]
+    hfpa_q_sheet = next((s for s in wb.sheetnames if s.strip() == "Quarter HFPA"), None)
+    hfpa_m_sheet = next((s for s in wb.sheetnames if s.strip() == "Month HFPA"), None)
+    if hfpa_q_sheet and hfpa_m_sheet and quarter.months:
+        ws_q = wb[hfpa_q_sheet]
+        ws_m = wb[hfpa_m_sheet]
         hfpa_cols = mappings.get("HFPA", {})
         covered_months = [m for m in quarter.months if m in hfpa_cols]
         if covered_months:
@@ -845,7 +848,7 @@ def write_powerpoint(template, output, quarter):
                       font=font(points, italic=True), fill="#333333", anchor="lm")
             return png(image)
 
-        excel_filename = f"HFPA-FTT-{quarter.period}.xlsx"
+        excel_filename = Path(output).with_suffix(".xlsx").name if output else f"HFPA-FTT-{quarter.period}.xlsx"
         def add_hyperlink(shape):
             hlink_id = f"rIdHlink{shape.shape_id}"
             while any(item.get("Id") == hlink_id for item in rels):

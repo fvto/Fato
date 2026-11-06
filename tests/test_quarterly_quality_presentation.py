@@ -6,6 +6,8 @@ import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
 
+from lxml import etree
+from openpyxl import Workbook, load_workbook
 from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches, Pt
@@ -133,6 +135,55 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
                 configured.touch()
                 (root / "report_tools_config.json").write_text(json.dumps({"quarterly_templates": {"powerpoint": "custom.pptx"}}))
                 self.assertEqual(template_output.template_paths()[1], configured)
+
+    def test_powerpoint_charts_have_hyperlinks_to_excel(self):
+        image = BytesIO()
+        Image.new("RGB", (1300, 500), "white").save(image, "PNG")
+        deck = Presentation()
+        deck.slides.add_slide(deck.slide_layouts[6])
+        self.qms_slide(deck, "FTT", image.getvalue())
+        self.qms_slide(deck, "HFPA", image.getvalue())
+
+        with TemporaryDirectory() as folder:
+            source = Path(folder) / "template.pptx"
+            output = Path(folder) / "result.pptx"
+            deck.save(source)
+            template_output.write_powerpoint(source, output, self.quarter)
+
+            with ZipFile(output) as package:
+                rels_xml = package.read("ppt/slides/_rels/slide2.xml.rels")
+                rels = etree.fromstring(rels_xml)
+                hlink_targets = [rel.get("Target") for rel in rels if "hyperlink" in rel.get("Type", "")]
+                self.assertIn("result.xlsx", hlink_targets)
+
+    def test_excel_charts_style_b(self):
+        wb = Workbook()
+        ws_ftt = wb.active
+        ws_ftt.title = "FTT month-quarter"
+        ws_ftt.cell(1, 3, "Sep")
+        ws_ftt.cell(41, 4, "TopModelVN")
+        ws_ftt.cell(41, 7, 0.05)
+        ws_ftt.cell(38, 4, "TopModelIndo")
+        ws_ftt.cell(38, 7, 0.04)
+
+        ws_hfpa_q = wb.create_sheet("Quarter HFPA ")
+        ws_hfpa_q.cell(7, 14, "TopHFPAVN")
+        ws_hfpa_q.cell(7, 17, 0.02)
+        ws_hfpa_q.cell(4, 14, "TopHFPAIndo")
+        ws_hfpa_q.cell(4, 17, 0.03)
+
+        ws_hfpa_m = wb.create_sheet("Month HFPA")
+        ws_hfpa_m.cell(4, 3, "Sep")
+
+        with TemporaryDirectory() as folder:
+            path = Path(folder) / "output.xlsx"
+            wb.save(path)
+            mappings = {"FTT": {"2026-09": 3}, "HFPA": {"2026-09": 3}}
+            template_output.add_excel_charts(path, self.quarter, mappings)
+
+            reloaded = load_workbook(path)
+            self.assertGreaterEqual(len(reloaded["FTT month-quarter"]._charts), 2)
+            self.assertGreaterEqual(len(reloaded["Quarter HFPA "]._charts), 2)
 
 
 if __name__ == "__main__":
