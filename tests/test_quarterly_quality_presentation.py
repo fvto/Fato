@@ -184,6 +184,49 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
             reloaded = load_workbook(path)
             self.assertGreaterEqual(len(reloaded["FTT month-quarter"]._charts), 2)
             self.assertGreaterEqual(len(reloaded["Quarter HFPA "]._charts), 2)
+            self.assertEqual(reloaded["FTT month-quarter"]._charts[0].y_axis.numFmt.formatCode, "0.0%")
+            self.assertIn('C9+C10-C17-C18', reloaded['FTT month-quarter']['C36'].value)
+            self.assertIn('C11+C12-C19-C20', reloaded['FTT month-quarter']['C37'].value)
+            reloaded.close()
+
+    def test_powerpoint_export_automatically_converts_charts_using_peer_excel(self):
+        from report_tools.quarterly_quality import editable_charts
+
+        with TemporaryDirectory() as folder:
+            root=Path(folder)
+            source,output=root/'template.pptx',root/'report.pptx'
+            self.make_deck(full=True).save(source)
+            excel=output.with_suffix('.xlsx')
+            excel.write_bytes(b'peer workbook fixture; converter is mocked')
+            with patch.object(editable_charts,'convert') as convert:
+                template_output.write_powerpoint(source,output,self.quarter)
+                convert.assert_called_once()
+                deck,workbook,target,styled_workbook=convert.call_args.args
+                self.assertEqual((workbook,target,styled_workbook),(excel,output,excel))
+                with ZipFile(deck) as package:
+                    self.assertIn('ppt/slides/slide8.xml',package.namelist())
+
+
+    def test_consumer_summary_table_image_generates_crisp_excel_style_screenshot(self):
+        png_bytes = template_output.consumer_summary_table_image(self.quarter)
+        im = Image.open(BytesIO(png_bytes))
+        self.assertEqual(im.size, (547, 486))
+
+    def test_consumer_corner_sticker_updates_date_box_and_table_image(self):
+        template = "Report/Quarterly/Partner QBR Format Q2 FY27-CLG.pptx"
+        if not Path(template).is_file():
+            return
+        with TemporaryDirectory() as folder:
+            output = Path(folder) / "result.pptx"
+            template_output.write_powerpoint(template, output, self.quarter)
+            prs = Presentation(output)
+            slide = prs.slides[0]
+            s5 = next((s for s in slide.shapes if s.shape_id == 5), None)
+            s6 = next((s for s in slide.shapes if s.shape_id == 6), None)
+            self.assertIsNotNone(s5)
+            self.assertIsNotNone(s6)
+            self.assertIn("Sep to", s5.text_frame.text)
+            self.assertEqual(s6.image.size, (547, 486))
 
 
 if __name__ == "__main__":

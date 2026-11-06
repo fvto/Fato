@@ -297,6 +297,9 @@ def write_excel(template, output, quarter):
 
 def add_excel_charts(output, quarter, mappings):
     """Add neatly arranged native Excel charts below the data tables (Style B)."""
+    with ZipFile(output) as package:
+        cached_sheets = {name: package.read(name) for name in package.namelist()
+                         if re.fullmatch(r"xl/worksheets/sheet\d+\.xml", name)}
     wb = load_workbook(output)
     
     # 1. Sheet: FTT month-quarter
@@ -308,6 +311,15 @@ def add_excel_charts(output, quarter, mappings):
         if covered_months:
             start_col = ftt_cols[covered_months[0]]
             end_col = ftt_cols[covered_months[-1]]
+            # The region series need real source cells for every selected
+            # quarter, rather than references to empty rows 36 and 37.
+            for col in range(start_col, end_col + 1):
+                letter = get_column_letter(col)
+                for row, offset in ((36, 0), (37, 2)):
+                    ws.cell(row, col, (
+                        f'=IFERROR(({letter}{9+offset}+{letter}{10+offset}'
+                        f'-{letter}{17+offset}-{letter}{18+offset})/'
+                        f'({letter}{2+offset}+{letter}{3+offset}),"")'))
             cats = Reference(ws, min_col=start_col, min_row=1, max_col=end_col, max_row=1)
             
             # Row 85: Line charts (Trend tracking)
@@ -318,7 +330,7 @@ def add_excel_charts(output, quarter, mappings):
             c_vn.width = 15
             c_vn.height = 9.5
             c_vn.legend.legendPos = "t"
-            c_vn.y_axis.number_format = "0.00%"
+            c_vn.y_axis.number_format = "0.0%"
             for r in (36, 31, 32):
                 lbl = ws.cell(r, 1).value or ("VN" if r == 36 else "VH" if r == 31 else "VH2")
                 c_vn.series.append(Series(Reference(ws, min_col=start_col, min_row=r, max_col=end_col, max_row=r), title=lbl))
@@ -332,7 +344,7 @@ def add_excel_charts(output, quarter, mappings):
             c_indo.width = 15
             c_indo.height = 9.5
             c_indo.legend.legendPos = "t"
-            c_indo.y_axis.number_format = "0.00%"
+            c_indo.y_axis.number_format = "0.0%"
             for r in (37, 33, 34):
                 lbl = ws.cell(r, 1).value or ("Indo" if r == 37 else "JV" if r == 33 else "JV2")
                 c_indo.series.append(Series(Reference(ws, min_col=start_col, min_row=r, max_col=end_col, max_row=r), title=lbl))
@@ -348,7 +360,7 @@ def add_excel_charts(output, quarter, mappings):
                 c_mod_vn.width = 15
                 c_mod_vn.height = 9.5
                 c_mod_vn.legend = None
-                c_mod_vn.y_axis.number_format = "0.00%"
+                c_mod_vn.y_axis.number_format = "0.0%"
                 c_mod_vn.dataLabels = DataLabelList()
                 c_mod_vn.dataLabels.showVal = True
                 c_mod_vn.dataLabels.showSerName = False
@@ -365,7 +377,7 @@ def add_excel_charts(output, quarter, mappings):
                 c_mod_id.width = 15
                 c_mod_id.height = 9.5
                 c_mod_id.legend = None
-                c_mod_id.y_axis.number_format = "0.00%"
+                c_mod_id.y_axis.number_format = "0.0%"
                 c_mod_id.dataLabels = DataLabelList()
                 c_mod_id.dataLabels.showVal = True
                 c_mod_id.dataLabels.showSerName = False
@@ -383,7 +395,7 @@ def add_excel_charts(output, quarter, mappings):
                 c_def_vn.width = 15
                 c_def_vn.height = 9.5
                 c_def_vn.legend = None
-                c_def_vn.y_axis.number_format = "0.00%"
+                c_def_vn.y_axis.number_format = "0.0%"
                 c_def_vn.dataLabels = DataLabelList()
                 c_def_vn.dataLabels.showVal = True
                 c_def_vn.dataLabels.showSerName = False
@@ -400,7 +412,7 @@ def add_excel_charts(output, quarter, mappings):
                 c_def_id.width = 15
                 c_def_id.height = 9.5
                 c_def_id.legend = None
-                c_def_id.y_axis.number_format = "0.00%"
+                c_def_id.y_axis.number_format = "0.0%"
                 c_def_id.dataLabels = DataLabelList()
                 c_def_id.dataLabels.showVal = True
                 c_def_id.dataLabels.showSerName = False
@@ -430,7 +442,7 @@ def add_excel_charts(output, quarter, mappings):
             c_vn_h.width = 15
             c_vn_h.height = 9.5
             c_vn_h.legend.legendPos = "t"
-            c_vn_h.y_axis.number_format = "0.00%"
+            c_vn_h.y_axis.number_format = "0.0%"
             for r in (28, 23, 24):
                 lbl = ws_m.cell(r, 1).value or ("VN" if r == 28 else "VH" if r == 23 else "VH2")
                 c_vn_h.series.append(Series(Reference(ws_m, min_col=start_col, min_row=r, max_col=end_col, max_row=r), title=lbl))
@@ -444,7 +456,7 @@ def add_excel_charts(output, quarter, mappings):
             c_id_h.width = 15
             c_id_h.height = 9.5
             c_id_h.legend.legendPos = "t"
-            c_id_h.y_axis.number_format = "0.00%"
+            c_id_h.y_axis.number_format = "0.0%"
             for r in (29, 25, 26):
                 lbl = ws_m.cell(r, 1).value or ("Indo" if r == 29 else "JV" if r == 25 else "JV2")
                 c_id_h.series.append(Series(Reference(ws_m, min_col=start_col, min_row=r, max_col=end_col, max_row=r), title=lbl))
@@ -460,7 +472,7 @@ def add_excel_charts(output, quarter, mappings):
                 c_mod_vn_h.width = 15
                 c_mod_vn_h.height = 9.5
                 c_mod_vn_h.legend = None
-                c_mod_vn_h.y_axis.number_format = "0.00%"
+                c_mod_vn_h.y_axis.number_format = "0.0%"
                 c_mod_vn_h.dataLabels = DataLabelList()
                 c_mod_vn_h.dataLabels.showVal = True
                 c_mod_vn_h.dataLabels.showSerName = False
@@ -477,7 +489,7 @@ def add_excel_charts(output, quarter, mappings):
                 c_mod_id_h.width = 15
                 c_mod_id_h.height = 9.5
                 c_mod_id_h.legend = None
-                c_mod_id_h.y_axis.number_format = "0.00%"
+                c_mod_id_h.y_axis.number_format = "0.0%"
                 c_mod_id_h.dataLabels = DataLabelList()
                 c_mod_id_h.dataLabels.showVal = True
                 c_mod_id_h.dataLabels.showSerName = False
@@ -495,7 +507,7 @@ def add_excel_charts(output, quarter, mappings):
                 c_def_vn_h.width = 15
                 c_def_vn_h.height = 9.5
                 c_def_vn_h.legend = None
-                c_def_vn_h.y_axis.number_format = "0.00%"
+                c_def_vn_h.y_axis.number_format = "0.0%"
                 c_def_vn_h.dataLabels = DataLabelList()
                 c_def_vn_h.dataLabels.showVal = True
                 c_def_vn_h.dataLabels.showSerName = False
@@ -512,7 +524,7 @@ def add_excel_charts(output, quarter, mappings):
                 c_def_id_h.width = 15
                 c_def_id_h.height = 9.5
                 c_def_id_h.legend = None
-                c_def_id_h.y_axis.number_format = "0.00%"
+                c_def_id_h.y_axis.number_format = "0.0%"
                 c_def_id_h.dataLabels = DataLabelList()
                 c_def_id_h.dataLabels.showVal = True
                 c_def_id_h.dataLabels.showSerName = False
@@ -522,6 +534,64 @@ def add_excel_charts(output, quarter, mappings):
                 ws_q.add_chart(c_def_id_h, "J105")
 
     wb.save(output)
+    wb.close()
+    repair_excel_chart_references(output, cached_sheets=cached_sheets)
+
+
+def repair_excel_chart_references(output, *, cached_sheets=None):
+    """Keep multilevel chart labels readable by WPS and preserve formula caches.
+
+    openpyxl serializes multiLvlStrRef with the cache before its formula and
+    omits ptCount. WPS rejects that category source and displays an empty plot.
+    Patch only the affected OOXML nodes; keep all series, styles and anchors.
+    """
+    original = Path(output).read_bytes()
+    updated = {}
+    with ZipFile(BytesIO(original)) as package:
+        for name in package.namelist():
+            if not re.fullmatch(r"xl/charts/chart\d+\.xml", name):
+                continue
+            root = etree.fromstring(package.read(name))
+            changed = False
+            for reference in root.iter(C + "multiLvlStrRef"):
+                formula = reference.find(C + "f")
+                cache = reference.find(C + "multiLvlStrCache")
+                if formula is None or cache is None:
+                    continue
+                if reference.index(formula) != 0:
+                    reference.remove(formula)
+                    reference.insert(0, formula)
+                    changed = True
+                count = cache.find(C + "ptCount")
+                if count is None:
+                    # All levels share the same category positions. Quarter/year
+                    # levels are sparse, so use the highest point index.
+                    points = [int(point.get("idx")) for point in cache.iter(C + "pt")]
+                    count = etree.Element(C + "ptCount", val=str(max(points, default=-1) + 1))
+                    cache.insert(0, count)
+                    changed = True
+            if changed:
+                updated[name] = etree.tostring(root)
+        for name, xml in (cached_sheets or {}).items():
+            source = etree.fromstring(xml)
+            cached = {cell.get("r"): cell for cell in source.iter(X + "c")
+                      if cell.find(X + "f") is not None and cell.find(X + "v") is not None}
+            if not cached:
+                continue
+            target = etree.fromstring(package.read(name))
+            for cell in target.iter(X + "c"):
+                saved = cached.get(cell.get("r"))
+                if saved is None or cell.find(X + "f") is None:
+                    continue
+                value = cell.find(X + "v")
+                if value is not None:
+                    cell.remove(value)
+                cell.insert(cell.index(cell.find(X + "f")) + 1, deepcopy(saved.find(X + "v")))
+                if saved.get("t") in ("str", "b", "e"):
+                    cell.set("t", saved.get("t"))
+            updated[name] = etree.tostring(target)
+    if updated:
+        copy_package(BytesIO(original), output, updated)
 
 
 def extend_hfpa_chart(chart, quarter, columns):
@@ -668,10 +738,10 @@ def trend_image(image, quarter, metric, region):
         plant_marks = [(y(line[i]), line[i]) for line in series[1:] if line[i] is not None]
         for j, (level, value) in enumerate(sorted(plant_marks)):
             position = level - 22 if j == 0 else level + 22
-            draw.text((x, position), f"{value:.2%}", font=font(17, bold=metric == "FTT", italic=metric == "HFPA"),
+            draw.text((x, position), f"{value:.1%}", font=font(17, bold=metric == "FTT", italic=metric == "HFPA"),
                       fill="black", anchor="mm")
         if regional is not None:
-            label = f"{regional:.2%}"
+            label = f"{regional:.1%}"
             level = y(regional)
             center = x if metric == "FTT" else x + (44 if i < 2 else -50)
             f = font(18, bold=True)
@@ -695,7 +765,7 @@ def rank_image(image, metric, region, ranks, defect_colors=None):
         color = model_color if defect_colors is None else defect_colors[i]
         if rate > 0:
             draw.rectangle((left, top, right, baseline - 1), fill=color)
-        draw.text((center, top - 19), f"{rate:.2%}", font=font(17, bold=True), fill="black", anchor="mm")
+        draw.text((center, top - 19), f"{rate:.1%}", font=font(17, bold=True), fill="black", anchor="mm")
         lines = textwrap.wrap(" ".join(label.split()), width=max(16, w // 29))[:3]
         label_height = 16 if len(lines) < 3 else 13
         for j, line in enumerate(lines):
@@ -756,6 +826,167 @@ def set_table_text(cell, value, style_cell):
         run.text = ""
 
 
+def consumer_summary_table_image(quarter):
+    """Render a crisp, Excel-styled screenshot of the current quarter HFPA summary table."""
+    w, h = 547, 486
+    image = Image.new("RGB", (w, h), color=(255, 255, 255))
+    draw = ImageDraw.Draw(image)
+
+    def get_font(size, bold=False):
+        for family in ("calibri.ttf", "arial.ttf"):
+            path = Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts" / family
+            try:
+                return ImageFont.truetype(str(path), size)
+            except OSError:
+                continue
+        return ImageFont.load_default()
+
+    font_regular = get_font(14)
+
+    col_widths = [85, 80, 80, 80, 80, 80, 62]
+    cols = [0]
+    for cw in col_widths:
+        cols.append(cols[-1] + cw)
+    cols[-1] = w - 1
+
+    row_h = 24
+    start_y = 27
+    num_rows = 19
+    grid_color = (212, 212, 212)
+    yellow_color = (255, 255, 0)
+
+    if getattr(quarter, "date_to", None):
+        start = date.fromisoformat(quarter.date_from)
+        end = date.fromisoformat(quarter.date_to)
+        date_hdr = f"{start:%b}-{end:%b}{end.day}"
+    elif getattr(quarter, "covered", None):
+        start = date.fromisoformat(quarter.covered[0] + "-01")
+        end = date.fromisoformat(quarter.covered[-1] + "-01")
+        date_hdr = f"{start:%b}-{end:%b}"
+    else:
+        date_hdr = getattr(quarter, "period", "")
+
+    headers = ["FTY", "Insp", "Def", "HFPA%", date_hdr]
+
+    def get_counts(plant):
+        if hasattr(quarter, "totals"):
+            tot = quarter.totals("HFPA", plant)
+            if tot is not None:
+                return float(tot.inspected), float(tot.defects)
+        return 0.0, 0.0
+
+    vh_insp, vh_def = get_counts("VH")
+    vh2_insp, vh2_def = get_counts("VH2")
+    vn_insp, vn_def = vh_insp + vh2_insp, vh_def + vh2_def
+    jv_insp, jv_def = get_counts("JV")
+    jv2_insp, jv2_def = get_counts("JV2")
+    indo_insp, indo_def = jv_insp + jv2_insp, jv_def + jv2_def
+    clg_insp, clg_def = vn_insp + indo_insp, vn_def + indo_def
+
+    def fmt_num(val):
+        return f"{int(round(val)):,d}" if val > 0 else "0"
+
+    def fmt_rate(insp, defs):
+        return f"{(1.0 - defs / insp):.1%}" if insp > 0 else "—"
+
+    rows_data = [
+        ("VH", fmt_num(vh_insp), fmt_num(vh_def), fmt_rate(vh_insp, vh_def)),
+        ("VH2", fmt_num(vh2_insp), fmt_num(vh2_def), fmt_rate(vh2_insp, vh2_def)),
+        ("VN", fmt_num(vn_insp), fmt_num(vn_def), fmt_rate(vn_insp, vn_def)),
+        ("JV", fmt_num(jv_insp), fmt_num(jv_def), fmt_rate(jv_insp, jv_def)),
+        ("JV2", fmt_num(jv2_insp), fmt_num(jv2_def), fmt_rate(jv2_insp, jv2_def)),
+        ("Indo", fmt_num(indo_insp), fmt_num(indo_def), fmt_rate(indo_insp, indo_def)),
+        ("CLG", fmt_num(clg_insp), fmt_num(clg_def), fmt_rate(clg_insp, clg_def)),
+    ]
+    yellow_row_indices = {3, 6, 7}
+
+    for r_idx in yellow_row_indices:
+        y1 = start_y + r_idx * row_h
+        y2 = y1 + row_h
+        draw.rectangle((0, y1, cols[4], y2), fill=yellow_color)
+
+    for r in range(num_rows + 1):
+        y = start_y + r * row_h
+        if y < h:
+            draw.line([(0, y), (w, y)], fill=grid_color, width=1)
+
+    for x in cols:
+        draw.line([(x, start_y), (x, min(h, start_y + num_rows * row_h))], fill=grid_color, width=1)
+
+    y_hdr = start_y + row_h / 2
+    for c_idx, text in enumerate(headers):
+        x1, x2 = cols[c_idx], cols[c_idx + 1]
+        if c_idx == 0 or c_idx == 4:
+            draw.text((x1 + 8, y_hdr), text, font=font_regular, fill=(0, 0, 0), anchor="lm")
+        else:
+            draw.text((x2 - 8, y_hdr), text, font=font_regular, fill=(0, 0, 0), anchor="rm")
+
+    for r_idx, row in enumerate(rows_data, start=1):
+        y_mid = start_y + r_idx * row_h + row_h / 2
+        for c_idx, val in enumerate(row):
+            x1, x2 = cols[c_idx], cols[c_idx + 1]
+            if c_idx == 0:
+                draw.text((x1 + 8, y_mid), val, font=font_regular, fill=(0, 0, 0), anchor="lm")
+            else:
+                draw.text((x2 - 8, y_mid), val, font=font_regular, fill=(0, 0, 0), anchor="rm")
+
+    out = BytesIO()
+    image.save(out, format="PNG")
+    return out.getvalue()
+
+
+def update_consumer_corner(slide, quarter, parts, package_names, relationships):
+    """Update executive corner sticky notes on Slide 1: date box and HFPA summary table picture."""
+    slide_name = str(slide.part.partname).lstrip("/")
+    rels_name = f"ppt/slides/_rels/{Path(slide_name).name}.rels"
+    rels = etree.fromstring(relationships[slide_name]) if slide_name in relationships else None
+
+    for shape in slide.shapes:
+        if shape.shape_id == 5 or (shape.has_text_frame and shape.name == "Rectangle 4"):
+            if getattr(quarter, "date_to", None):
+                start = date.fromisoformat(quarter.date_from)
+                end = date.fromisoformat(quarter.date_to)
+                box_text = f"{start:%b} to\n{end:%b} {end.day}"
+            elif getattr(quarter, "covered", None):
+                start = date.fromisoformat(quarter.covered[0] + "-01")
+                end = date.fromisoformat(quarter.covered[-1] + "-01")
+                box_text = f"{start:%b} to\n{end:%b}"
+            else:
+                box_text = getattr(quarter, "period", "").replace("-", " ")
+            if shape.has_text_frame and shape.text_frame.paragraphs:
+                p = shape.text_frame.paragraphs[0]
+                if p.runs:
+                    p.runs[0].text = box_text
+                    for r in p.runs[1:]:
+                        r.text = ""
+                else:
+                    p.text = box_text
+                for p_extra in shape.text_frame.paragraphs[1:]:
+                    for r in p_extra.runs:
+                        r.text = ""
+
+        if (shape.shape_id == 6 or (hasattr(shape, "image") and shape.name == "Picture 5")) and rels is not None:
+            table_png = consumer_summary_table_image(quarter)
+            index = 1
+            stem = f"quarterly_{Path(slide_name).stem}_corner_summary"
+            while f"ppt/media/{stem}_{index}.png" in package_names:
+                index += 1
+            media_name = f"ppt/media/{stem}_{index}.png"
+            package_names.add(media_name)
+            parts[media_name] = table_png
+            relationship_id = f"rIdQuarterlyCorner{shape.shape_id}"
+            while any(item.get("Id") == relationship_id for item in rels):
+                relationship_id += "x"
+            etree.SubElement(rels, "{http://schemas.openxmlformats.org/package/2006/relationships}Relationship",
+                             Id=relationship_id,
+                             Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+                             Target="../media/" + Path(media_name).name)
+            shape._pic.blipFill.blip.rEmbed = relationship_id
+
+    if rels is not None:
+        parts[rels_name] = etree.tostring(rels)
+
+
 def update_consumer_promise(slide, quarter):
     """The QBR labels VH and JV represent their respective two-factory groups."""
     tables = [(shape.table, row, col) for shape in slide.shapes if shape.has_table
@@ -803,10 +1034,17 @@ def write_powerpoint(template, output, quarter):
     else:
         start, end = (date.fromisoformat(month + "-01") for month in (quarter.covered[0], quarter.covered[-1]))
         date_label = f"Data from {start:%B} to {end:%B}"
+    consumer_slides = [slide for slide in deck.slides
+                       if any(shape.has_text_frame and "CONSUMER PROMISE REVIEW" in shape.text.upper() for shape in slide.shapes)]
     with ZipFile(template) as package:
         package_names = set(package.namelist())
-        relationships = {str(slide.part.partname).lstrip("/"): package.read(
-            f"ppt/slides/_rels/{Path(str(slide.part.partname)).name}.rels") for slide, _ in slides.values()}
+        relevant_slides = [*slides.values(), *((s, None) for s in consumer_slides)]
+        relationships = {}
+        for s, _ in relevant_slides:
+            partname = str(s.part.partname).lstrip("/")
+            rel_path = f"ppt/slides/_rels/{Path(partname).name}.rels"
+            if rel_path in package_names:
+                relationships[partname] = package.read(rel_path)
     for metric, (slide, title_shape) in slides.items():
         spec = SHAPES[metric]
         shapes = {shape.shape_id: shape for shape in slide.shapes}
@@ -877,19 +1115,23 @@ def write_powerpoint(template, output, quarter):
             add_hyperlink(shapes[top_defect])
         parts[slide_name] = slide.part.blob
         parts[f"ppt/slides/_rels/{Path(slide_name).name}.rels"] = etree.tostring(rels)
-    for slide in deck.slides:
-        if any(shape.has_text_frame and "CONSUMER PROMISE REVIEW" in shape.text.upper() for shape in slide.shapes):
-            update_consumer_promise(slide, quarter)
-            parts[str(slide.part.partname).lstrip("/")] = slide.part.blob
-            if slide.has_notes_slide:
-                notes = slide.notes_slide.notes_text_frame
-                prior_note = (f"Prior comparison through {quarter.prior_date_to}. " if quarter.prior_date_to else
-                              "Prior-period figures use the saved template. ")
-                note = (f"Quarterly HFPA summary {quarter.period}, through {quarter.date_to or quarter.covered[-1]}. "
-                        f"{prior_note}"
-                        "VH = VH + VH2. JV = JV + JV2. CLG = VH + VH2 + JV + JV2. "
-                        "HFPA = 1 - total failed pairs / total inspected pairs. The vs PQ column shows the prior-period rate.")
-                notes.text = "\n".join(line for line in notes.text.splitlines()
-                                       if not line.startswith("Quarterly HFPA summary ")) + "\n" + note
-                parts[str(slide.notes_slide.part.partname).lstrip("/")] = slide.notes_slide.part.blob
+    for slide in consumer_slides:
+        update_consumer_promise(slide, quarter)
+        update_consumer_corner(slide, quarter, parts, package_names, relationships)
+        parts[str(slide.part.partname).lstrip("/")] = slide.part.blob
+        if slide.has_notes_slide:
+            notes = slide.notes_slide.notes_text_frame
+            prior_note = (f"Prior comparison through {quarter.prior_date_to}. " if quarter.prior_date_to else
+                          "Prior-period figures use the saved template. ")
+            note = (f"Quarterly HFPA summary {quarter.period}, through {quarter.date_to or quarter.covered[-1]}. "
+                    f"{prior_note}"
+                    "VH = VH + VH2. JV = JV + JV2. CLG = VH + VH2 + JV + JV2. "
+                    "HFPA = 1 - total failed pairs / total inspected pairs. The vs PQ column shows the prior-period rate.")
+            notes.text = "\n".join(line for line in notes.text.splitlines()
+                                   if not line.startswith("Quarterly HFPA summary ")) + "\n" + note
+            parts[str(slide.notes_slide.part.partname).lstrip("/")] = slide.notes_slide.part.blob
     copy_package(template, output, parts)
+    excel = Path(output).with_suffix('.xlsx')
+    if excel.is_file():
+        from .editable_charts import convert
+        convert(BytesIO(Path(output).read_bytes()), excel, output, excel)
