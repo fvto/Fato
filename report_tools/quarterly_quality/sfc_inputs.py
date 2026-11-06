@@ -24,11 +24,14 @@ class SourceRowError(ValueError):
 
 
 def add_details(target, source):
-    target[0].update(source[0])
+    for model, qty in source[0].items():
+        target[0][model] = float(target[0][model]) + float(qty)
     for model, issues in source[1].items():
-        target[1][model].update(issues)
+        for issue, qty in issues.items():
+            target[1][model][issue] = float(target[1][model][issue]) + float(qty)
     if len(source) > 2:
-        target[2].update(source[2])
+        for model, qty in source[2].items():
+            target[2][model] = float(target[2][model]) + float(qty)
 
 
 def source_counts(path, item, details=None, *, approved=None, matched=None, export=None):
@@ -87,10 +90,10 @@ def source_counts(path, item, details=None, *, approved=None, matched=None, expo
                     model = str(raw[model_col] or "").strip()
                     if model:
                         target = daily_details[day] if approved is not None else details
-                        target[0][model] += bad
+                        target[0][model] += float(bad)
                         for i, label in issue_cols:
                             if raw[i]:
-                                target[1][model][label] += number(raw[i])
+                                target[1][model][label] += float(number(raw[i]))
             else:
                 produced, station, metric, quantity = row[len(FTT_LOT):]
                 if str(station).strip().casefold() != "assembly":
@@ -106,7 +109,7 @@ def source_counts(path, item, details=None, *, approved=None, matched=None, expo
                     label, quantity = (raw[i] for i in issue_cols)
                     model = str(lot[6] or lot[5] or "").strip()
                     if model and label and quantity:
-                        details[1][model][str(label).strip()] += number(quantity)
+                        details[1][model][str(label).strip()] += float(number(quantity))
         except InvalidOperation as error:
             raise SourceRowError("Số lượng cần là số hợp lệ, không âm.", row_number) from error
         except ValueError as error:
@@ -124,7 +127,7 @@ def source_counts(path, item, details=None, *, approved=None, matched=None, expo
             for (lot, metric), count in pairs.items():
                 model = str(lot[6] or lot[5] or "").strip()
                 if model and metric != "AGrade":
-                    details[0][model] += count
+                    details[0][model] += float(count)
         rejects = grades["B/Reject"] + grades["C/Reject"]
         if abs(inspected - grades["AGrade"] - rejects) > Decimal("0.000001"):
             raise SourceRowError("Tổng đôi sản xuất không khớp AGrade + B/Reject + C/Reject.")
