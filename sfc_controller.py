@@ -1060,7 +1060,9 @@ def _execute_dynamic_action(action_type, target_id=None, params=None):
                                     return !it || !(stations.includes(it.value) || stations.includes(it.text));
                                 })) throw new Error('SFC chưa chọn đúng các trạm yêu cầu; dừng xuất.');
                             }
-                        } else throw new Error('Không tìm thấy danh sách trạm SFC; dừng xuất.');
+                        } else if (selection !== 'none') {
+                            throw new Error('Không tìm thấy danh sách trạm SFC; dừng xuất.');
+                        }
                     }""", {"stations": stations, "selection": params.get('station_selection')})
                     time.sleep(0.4)
 

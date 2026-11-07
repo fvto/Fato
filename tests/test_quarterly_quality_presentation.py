@@ -198,14 +198,113 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
             self.make_deck(full=True).save(source)
             excel=output.with_suffix('.xlsx')
             excel.write_bytes(b'peer workbook fixture; converter is mocked')
-            with patch.object(editable_charts,'convert') as convert:
+            with patch.object(editable_charts,'convert') as convert, \
+                    patch.object(template_output, 'trend_image') as trend_image, \
+                    patch.object(template_output, 'rank_image') as rank_image:
                 template_output.write_powerpoint(source,output,self.quarter)
                 convert.assert_called_once()
+                trend_image.assert_not_called()
+                rank_image.assert_not_called()
                 deck,workbook,target,styled_workbook=convert.call_args.args
                 self.assertEqual((workbook,target,styled_workbook),(excel,output,excel))
                 with ZipFile(deck) as package:
                     self.assertIn('ppt/slides/slide8.xml',package.namelist())
 
+    def test_excel_charts_own_complete_design_and_small_readable_labels(self):
+        from report_tools.quarterly_quality.editable_charts import (
+            NS, CHART_SPECS, excel_chart_sources, prepare_excel_charts)
+
+        for empty_rankings in (False, True):
+            with self.subTest(empty_rankings=empty_rankings), TemporaryDirectory() as folder:
+                root = Path(folder)
+                book = Workbook()
+                ftt = book.active
+                ftt.title = 'FTT month-quarter'
+                hfpa = book.create_sheet('Month HFPA')
+                ranks = book.create_sheet('Quarter HFPA ')
+                for col, month in enumerate(('Sep', 'Oct', 'Nov'), 3):
+                    ftt.cell(1, col, month)
+                    hfpa.cell(4, col, month)
+                    for row in range(2, 21):
+                        ftt.cell(row, col, 100 if row < 17 else 1)
+                    for row in range(23, 30):
+                        hfpa.cell(row, col, .9012345)
+                    for row in range(31, 35):
+                        ftt.cell(row, col, .7812345)
+                long_name = 'WMNS NIKE EBERNON LOW PREMIUM MODEL NAME'
+                if not empty_rankings:
+                    for sheet, starts, column in ((ftt, (38, 41, 48, 51), 4),
+                                                  (ranks, (4, 7, 14, 17), 14)):
+                        for start in starts:
+                            for i in range(3):
+                                defect_names = (('Cleanness', 'Midsole/Outsole to upper bond gap', 'Over cement')
+                                                if start % 2 == 0 else ('Thread end', 'Over cement', 'Cleanness'))
+                                is_model = start in (38, 41, 4, 7)
+                                sheet.cell(start+i, column, long_name if is_model else defect_names[i])
+                                sheet.cell(start+i, column+3, .04123456789)
+                excel = root/'report.xlsx'
+                book.save(excel)
+                book.close()
+                columns = {metric: dict(zip(('2026-09', '2026-10', '2026-11'), (3, 4, 5)))
+                           for metric in ('FTT', 'HFPA')}
+                template_output.add_excel_charts(excel, self.quarter, columns)
+                prepare_excel_charts(excel)
+                calculated = load_workbook(excel, data_only=False)
+                self.assertEqual(calculated['FTT month-quarter']['C36'].number_format, '0.0%')
+                calculated.close()
+                with ZipFile(excel) as workbook:
+                    sources = excel_chart_sources(workbook)
+                    self.assertEqual(len(sources), 12)
+                    for metric, region, kind, *_ in CHART_SPECS:
+                        source = etree.fromstring(workbook.read(sources[metric, region, kind]))
+                        formats = source.findall('.//c:dLbls/c:numFmt', NS)
+                        self.assertTrue(formats)
+                        self.assertTrue(all(fmt.get('formatCode') == '0.0%' and fmt.get('sourceLinked') == '0'
+                                            for fmt in formats))
+                        sizes = source.xpath('.//a:rPr/@sz | .//a:defRPr/@sz', namespaces=NS)
+                        self.assertLessEqual(max(map(int, sizes)), 1050)
+                        if kind != 'trend':
+                            self.assertEqual(source.find('c:chart/c:title/c:tx/c:rich/a:p/a:pPr', NS).get('algn'), 'ctr')
+                            self.assertIsNone(source.find('c:chart/c:title/c:layout/c:manualLayout', NS))
+                            self.assertEqual(source.find('c:chart/c:title/c:overlay', NS).get('val'), '0')
+                            plot_top = float(source.find('.//c:plotArea/c:layout/c:manualLayout/c:y', NS).get('val'))
+                            self.assertGreaterEqual(plot_top, .36)
+                        if kind != 'trend' and not empty_rankings:
+                            self.assertIsNotNone(source.find('.//c:ser/c:cat/c:strLit', NS))
+                            self.assertIsNone(source.find('.//c:ser/c:cat/c:strRef', NS))
+                            labels = source.xpath('.//c:ser/c:cat//c:pt/c:v/text()', namespaces=NS)
+                            fills = {int(point.find('c:idx', NS).get('val')):
+                                     point.find('c:spPr/a:solidFill/a:srgbClr', NS).get('val')
+                                     for point in source.findall('.//c:ser/c:dPt', NS)}
+                            if kind == 'model':
+                                self.assertEqual(labels[0].replace('\n', ' '), long_name)
+                                self.assertIn('\n', labels[0])
+                                expected = template_output.RANK_FORMAT[metric, region, False][-1].lstrip('#')
+                                self.assertEqual(list(fills.values()), [expected] * 3)
+                            else:
+                                from report_tools.hfpa.agents.color_manager import ColorManager
+                                _, expected, _, _ = ColorManager(str(Path(__file__).resolve().parents[1] /
+                                    'report_tools/reinspection/Color_Template.xlsx')).load_existing_template()
+                                for index, label in enumerate(labels):
+                                    self.assertEqual(fills[index], expected[ColorManager.normalize_name(label)])
+                            self.assertIn('0.04123456789', source.xpath('.//c:val//c:pt/c:v/text()', namespaces=NS))
+                            self.assertEqual(source.xpath('.//c:dLbl/c:tx/c:rich//a:t/text()', namespaces=NS), ['4.1%'] * 3)
+                            self.assertEqual(source.xpath('.//c:catAx/c:tickLblSkip/@val', namespaces=NS), ['1'])
+                        if kind == 'trend':
+                            line_colors = source.xpath('.//c:ser/c:spPr/a:ln/a:solidFill/a:srgbClr/@val', namespaces=NS)
+                            self.assertEqual(line_colors, [colour.lstrip('#') for colour in template_output.TREND_FORMAT[metric, region][-2]])
+                            self.assertEqual(source.xpath('.//c:ser/c:marker/c:symbol/@val', namespaces=NS), ['none'] * 3)
+                            legend = source.find('.//c:legend', NS)
+                            self.assertEqual(legend.find('c:overlay', NS).get('val'), '0')
+                            self.assertIsNone(legend.find('c:layout/c:manualLayout', NS))
+                            self.assertTrue(all(fmt.get('formatCode') == '0.0%' for fmt in
+                                                source.findall('.//c:dLbl/c:numFmt', NS)))
+                            primary = source.find('.//c:ser', NS)
+                            colour = template_output.TREND_FORMAT[metric, region][-1].lstrip('#')
+                            self.assertEqual(primary.xpath('c:dLbls/c:dLbl/c:spPr/a:solidFill/a:srgbClr/@val', namespaces=NS), [colour] * 3)
+                            self.assertEqual(primary.xpath('c:dLbls/c:dLbl/c:tx/c:rich//a:highlight/a:srgbClr/@val', namespaces=NS), [colour] * 3)
+                            if metric == 'HFPA':
+                                self.assertEqual(primary.xpath('c:dLbls/c:dLbl/c:dLblPos/@val', namespaces=NS), ['ctr'] * 3)
 
     def test_consumer_summary_table_image_generates_crisp_excel_style_screenshot(self):
         png_bytes = template_output.consumer_summary_table_image(self.quarter)
@@ -227,6 +326,39 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
             self.assertIsNotNone(s6)
             self.assertIn("Sep to", s5.text_frame.text)
             self.assertEqual(s6.image.size, (547, 486))
+
+    def test_sanitize_chart_links_normalizes_external_targets_to_peer_excel(self):
+        from report_tools.quarterly_quality.office_charts import _sanitize_chart_links, _check_links, OfficeChartCopyError
+        with TemporaryDirectory() as folder:
+            folder = Path(folder)
+            temp_source = folder / "office-qbr-12345" / "source.xlsx"
+            pptx_path = folder / "test.pptx"
+            with ZipFile(pptx_path, "w") as z:
+                z.writestr("ppt/slides/slide1.xml", "<p:sld/>")
+                rel_xml = (
+                    f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                    f'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                    f'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject" '
+                    f'Target="{temp_source.as_uri()}" TargetMode="External"/>'
+                    f'</Relationships>'
+                ).encode("utf-8")
+                z.writestr("ppt/charts/_rels/chart1.xml.rels", rel_xml)
+
+            # Before sanitize: _check_links must raise error because of temp folder
+            with self.assertRaises(OfficeChartCopyError):
+                _check_links(pptx_path, temp_source)
+
+            # Sanitize to peer file name
+            _sanitize_chart_links(pptx_path, "HFPA-FTT-FY27-Q2.xlsx")
+
+            # After sanitize: _check_links must succeed
+            _check_links(pptx_path, temp_source)
+
+            # Verify target content inside zip
+            with ZipFile(pptx_path) as z:
+                rels_content = z.read("ppt/charts/_rels/chart1.xml.rels").decode("utf-8")
+                self.assertIn('Target="HFPA-FTT-FY27-Q2.xlsx"', rels_content)
+                self.assertNotIn("office-qbr", rels_content)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 from collections import Counter, defaultdict
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -10,6 +11,98 @@ from report_tools.quarterly_quality.template_output import WorksheetPatch, X
 
 
 class QuarterlyQualitySourcesTests(unittest.TestCase):
+    def test_unavailable_qastation_uses_mes_counts_and_keeps_other_factories(self):
+        inputs = []
+        for plant in PLANTS:
+            for group in ('hfpa', 'ftt', 'qastation'):
+                if (plant, group) != ('JV', 'qastation'):
+                    inputs.append(dict(group=group, plant=plant, date_from='2026-09-01',
+                                       date_to='2026-09-30', name=f'{group}-{plant}.xlsx'))
+        missing = dict(group='qastation', plant='JV', date_from='2026-09-01', date_to='2026-09-30')
+        run = dict(period='FY27-Q2', inputs=inputs, acquisition=dict(
+            date_from='2026-09-01', date_to='2026-09-30', unavailable=[missing]))
+        with patch.object(sfc_inputs, 'source_counts', return_value=(Counts(100, 10), 1)), \
+                patch.object(sfc_inputs, 'corrected_hfpa_counts', return_value=(Counts(80, 8), 1, 1, [])) as reconcile:
+            quarter = sfc_inputs.load_sfc_quarter(Path('.'), run, lambda *_: None)
+        self.assertEqual(reconcile.call_count, 3)
+        self.assertEqual(quarter.values['HFPA', '2026-09', 'JV'], Counts(100, 10))
+        self.assertEqual(quarter.totals('HFPA', 'CLG'), Counts(340, 34))
+        # An unexplained missing file must still fail rather than silently bypass validation.
+        run['acquisition']['unavailable'] = []
+        with self.assertRaises(sfc_inputs.SourceRowError):
+            sfc_inputs.load_sfc_quarter(Path('.'), run, lambda *_: None)
+        run['inputs'].append(dict(missing, name='empty-qa-JV.xlsx'))
+        def reconcile_empty(path, item, *args, **kwargs):
+            if item['plant'] == 'JV':
+                raise sfc_inputs.EmptyQAStation('QAStation trống')
+            return Counts(80, 8), 1, 1, []
+        with patch.object(sfc_inputs, 'source_counts', return_value=(Counts(100, 10), 1)), \
+                patch.object(sfc_inputs, 'corrected_hfpa_counts', side_effect=reconcile_empty):
+            quarter = sfc_inputs.load_sfc_quarter(Path('.'), run, lambda *_: None)
+        self.assertEqual(quarter.totals('HFPA', 'CLG'), Counts(340, 34))
+        self.assertEqual(run['acquisition']['unavailable'][0]['plant'], 'JV')
+
+    def test_cached_ftt_refresh_replaces_ranking_and_totals_without_touching_hfpa(self):
+        from openpyxl import Workbook
+        from report_tools.quarterly_quality import tableau_source
+        with TemporaryDirectory() as temporary:
+            path = Path(temporary)/'tableau.xlsx'
+            book = Workbook()
+            sheet = book.active
+            sheet.title = tableau_source.SHEET
+            sheet.append(tableau_source.HEADER)
+            for plant in PLANTS:
+                sheet.append(['2026-09-01', plant, 'A Line 1', 'Old FTT Model 2', 100, 10, 'Assembly', 'Cleanness', 10])
+                sheet.append(['2026-09-01', plant, 'A Line 1', 'HFPA Model 2 keep', 50, 5, 'HFPA', 'Rocking', 5])
+            book.save(path)
+            book.close()
+            original = path.read_bytes()
+            inputs = [dict(group='ftt', plant=plant, date_from='2026-09-01', date_to='2026-09-30',
+                           replace_ftt=True, name=f'{plant}.xlsx') for plant in PLANTS]
+            run = dict(period='FY27-Q2', inputs=inputs, acquisition=dict(date_from='2026-09-01', date_to='2026-09-30',
+                       tableau=dict(path=str(path), sha256=tableau_source.fingerprint(path))))
+            header = (*sfc_inputs.FTT_LOT, 'Total Pair Produced', 'Station', 'Metric', 'Number of pairs',
+                      'Defect Issues', "Issues Q'ty")
+            def export(source):
+                lot = ('2026-09-01', 'CLG', source.stem, 'A', '1', 'Correct Model', 'Wrong Model 2',
+                       'SO', 'SP', 'M', 'S', 'C')
+                return header, [(*lot, 100, 'Assembly', 'AGrade', 100, '', 0),
+                                (*lot, 100, 'Assembly', 'Rework1', 10, 'Cleanness', 10)]
+            with patch.object(sfc_inputs, 'read_export', side_effect=export), \
+                    patch.object(tableau_source, 'append_records') as save:
+                quarter = sfc_inputs.load_sfc_quarter(Path(temporary), run, lambda *_: None)
+            self.assertEqual(quarter.values['FTT', '2026-09', 'VH'], Counts(100, 10, 100, 10))
+            self.assertEqual(quarter.rankings['FTT', 'VN'][0], [('Correct Model', 20, 200)])
+            self.assertEqual(quarter.rankings['FTT', 'VN'][1], [('Cleanness', 20, 20)])
+            self.assertEqual(quarter.rankings['HFPA', 'VN'][0], [('HFPA Model 2 keep', 10, 100)])
+            self.assertEqual(quarter.rankings['HFPA', 'VN'][1], [('Rocking', 10, 10)])
+            self.assertTrue(all(row[3] == 'Correct Model' for row in save.call_args.args[1]))
+            self.assertEqual(path.read_bytes(), original)
+
+    def test_ftt_model_totals_and_issues_use_model_column_without_model2_fallback(self):
+        header = (*sfc_inputs.FTT_LOT, "Total Pair Produced", "Station", "Metric", "Number of pairs",
+                  "Defect Issues", "Issues Q'ty")
+        rows = []
+        for model, model2, produced, failed, issues in (
+            ("Model A", "Model 2 X", 100, 10, (("Cleanness", 6), ("Over cement", 4))),
+            ("Model A", "Model 2 Y", 200, 20, (("Over cement", 20),)),
+            ("Model B", "Model 2 X", 100, 5, (("Rocking", 5),)),
+            (None, "Do not substitute", 50, 2, (("Rocking", 2),)),
+        ):
+            lot = ("2026-11-04", "CLG", "VH", "A", "1", model, model2,
+                   f"SO-{model}-{model2}", "SP", "M", "S", "C")
+            rows.append((*lot, produced, "Assembly", "AGrade", produced, "", 0))
+            for issue, qty in issues:
+                rows.append((*lot, produced, "Assembly", "Rework1", failed, issue, qty))
+        details = (Counter(), defaultdict(Counter))
+        item = dict(group="ftt", plant="VH", date_from="2026-11-01", date_to="2026-11-05")
+        counts, count = sfc_inputs.source_counts(Path("unused.xlsx"), item, details, export=(header, rows))
+        self.assertEqual((counts, count), (Counts(450, 37, 450, 37), len(rows)))
+        self.assertEqual(details[0], {"Model A": 30, "Model B": 5})
+        self.assertEqual(details[1]["Model A"], {"Over cement": 24, "Cleanness": 6})
+        self.assertEqual(details[1]["Model B"], {"Rocking": 5})
+        self.assertNotIn("Do not substitute", details[1])
+
     def test_updating_shared_formula_anchor_preserves_the_other_cell_formula(self):
         xml = f'''<worksheet xmlns="{X[1:-1]}"><sheetData><row r="23">
         <c r="Y23"><f t="shared" si="1" ref="Y23:Z23">1-Y14/Y5</f><v>0.9</v></c>

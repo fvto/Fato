@@ -20,6 +20,9 @@ from PIL import Image, ImageDraw, ImageFont
 from pptx import Presentation
 from openpyxl.chart import BarChart, LineChart, Reference, Series
 from openpyxl.chart.label import DataLabelList
+from openpyxl.drawing.spreadsheet_drawing import OneCellAnchor, AnchorMarker
+from openpyxl.drawing.xdr import XDRPositiveSize2D
+from openpyxl.utils.units import cm_to_EMU
 
 from dashboard_paths import APP_ROOT
 from report_tools.hfpa.agents.color_manager import ColorManager
@@ -293,6 +296,8 @@ def write_excel(template, output, quarter):
     updated[chart_name] = etree.tostring(chart)
     copy_package(template, output, updated)
     add_excel_charts(output, quarter, mappings)
+    from .editable_charts import prepare_excel_charts
+    prepare_excel_charts(output)
 
 
 def add_excel_charts(output, quarter, mappings):
@@ -301,6 +306,22 @@ def add_excel_charts(output, quarter, mappings):
         cached_sheets = {name: package.read(name) for name in package.namelist()
                          if re.fullmatch(r"xl/worksheets/sheet\d+\.xml", name)}
     wb = load_workbook(output)
+
+    def place_chart(sheet, chart, anchor):
+        # Explicit offsets keep Excel chart pairs apart even in templates with
+        # narrow/hidden columns or custom row heights. Each row has 1 cm padding.
+        match = re.fullmatch(r'([BJ])(\d+)', anchor)
+        column, row = match.groups()
+        base = 84 if sheet.title.strip() == 'FTT month-quarter' else 64
+        level = (int(row) - 1 - base) // 20
+        chart.anchor = OneCellAnchor(
+            _from=AnchorMarker(col=1, row=base,
+                               colOff=cm_to_EMU(16 if column == 'J' else 0),
+                               rowOff=cm_to_EMU(level * 10.5)),
+            ext=XDRPositiveSize2D(cx=cm_to_EMU(15), cy=cm_to_EMU(9.5)))
+        if chart.dataLabels is not None:
+            chart.dataLabels.numFmt = '0.0%'
+        sheet.add_chart(chart)
     
     # 1. Sheet: FTT month-quarter
     ftt_sheet = next((s for s in wb.sheetnames if s.strip() == "FTT month-quarter"), None)
@@ -316,10 +337,11 @@ def add_excel_charts(output, quarter, mappings):
             for col in range(start_col, end_col + 1):
                 letter = get_column_letter(col)
                 for row, offset in ((36, 0), (37, 2)):
-                    ws.cell(row, col, (
+                    cell = ws.cell(row, col, (
                         f'=IFERROR(({letter}{9+offset}+{letter}{10+offset}'
                         f'-{letter}{17+offset}-{letter}{18+offset})/'
                         f'({letter}{2+offset}+{letter}{3+offset}),"")'))
+                    cell.number_format = '0.0%'
             cats = Reference(ws, min_col=start_col, min_row=1, max_col=end_col, max_row=1)
             
             # Row 85: Line charts (Trend tracking)
@@ -335,7 +357,7 @@ def add_excel_charts(output, quarter, mappings):
                 lbl = ws.cell(r, 1).value or ("VN" if r == 36 else "VH" if r == 31 else "VH2")
                 c_vn.series.append(Series(Reference(ws, min_col=start_col, min_row=r, max_col=end_col, max_row=r), title=lbl))
             c_vn.set_categories(cats)
-            ws.add_chart(c_vn, "B85")
+            place_chart(ws, c_vn, "B85")
 
             c_indo = LineChart()
             c_indo.title = "INDO FTT% Trend Tracking"
@@ -349,77 +371,73 @@ def add_excel_charts(output, quarter, mappings):
                 lbl = ws.cell(r, 1).value or ("Indo" if r == 37 else "JV" if r == 33 else "JV2")
                 c_indo.series.append(Series(Reference(ws, min_col=start_col, min_row=r, max_col=end_col, max_row=r), title=lbl))
             c_indo.set_categories(cats)
-            ws.add_chart(c_indo, "J85")
+            place_chart(ws, c_indo, "J85")
 
             # Row 105: Top Models (VN & Indo)
-            if ws.cell(41, 4).value:
-                c_mod_vn = BarChart()
-                c_mod_vn.type = "col"
-                c_mod_vn.title = "Top FTT Models (VN)"
-                c_mod_vn.style = 10
-                c_mod_vn.width = 15
-                c_mod_vn.height = 9.5
-                c_mod_vn.legend = None
-                c_mod_vn.y_axis.number_format = "0.0%"
-                c_mod_vn.dataLabels = DataLabelList()
-                c_mod_vn.dataLabels.showVal = True
-                c_mod_vn.dataLabels.showSerName = False
-                c_mod_vn.dataLabels.showCatName = False
-                c_mod_vn.add_data(Reference(ws, min_col=7, min_row=41, max_col=7, max_row=43), titles_from_data=False)
-                c_mod_vn.set_categories(Reference(ws, min_col=4, min_row=41, max_col=4, max_row=43))
-                ws.add_chart(c_mod_vn, "B105")
+            c_mod_vn = BarChart()
+            c_mod_vn.type = "col"
+            c_mod_vn.title = "Top FTT Models (VN)"
+            c_mod_vn.style = 10
+            c_mod_vn.width = 15
+            c_mod_vn.height = 9.5
+            c_mod_vn.legend = None
+            c_mod_vn.y_axis.number_format = "0.0%"
+            c_mod_vn.dataLabels = DataLabelList()
+            c_mod_vn.dataLabels.showVal = True
+            c_mod_vn.dataLabels.showSerName = False
+            c_mod_vn.dataLabels.showCatName = False
+            c_mod_vn.add_data(Reference(ws, min_col=7, min_row=41, max_col=7, max_row=43), titles_from_data=False)
+            c_mod_vn.set_categories(Reference(ws, min_col=4, min_row=41, max_col=4, max_row=43))
+            place_chart(ws, c_mod_vn, "B105")
 
-            if ws.cell(38, 4).value:
-                c_mod_id = BarChart()
-                c_mod_id.type = "col"
-                c_mod_id.title = "Top FTT Models (Indo)"
-                c_mod_id.style = 12
-                c_mod_id.width = 15
-                c_mod_id.height = 9.5
-                c_mod_id.legend = None
-                c_mod_id.y_axis.number_format = "0.0%"
-                c_mod_id.dataLabels = DataLabelList()
-                c_mod_id.dataLabels.showVal = True
-                c_mod_id.dataLabels.showSerName = False
-                c_mod_id.dataLabels.showCatName = False
-                c_mod_id.add_data(Reference(ws, min_col=7, min_row=38, max_col=7, max_row=40), titles_from_data=False)
-                c_mod_id.set_categories(Reference(ws, min_col=4, min_row=38, max_col=4, max_row=40))
-                ws.add_chart(c_mod_id, "J105")
+            c_mod_id = BarChart()
+            c_mod_id.type = "col"
+            c_mod_id.title = "Top FTT Models (Indo)"
+            c_mod_id.style = 12
+            c_mod_id.width = 15
+            c_mod_id.height = 9.5
+            c_mod_id.legend = None
+            c_mod_id.y_axis.number_format = "0.0%"
+            c_mod_id.dataLabels = DataLabelList()
+            c_mod_id.dataLabels.showVal = True
+            c_mod_id.dataLabels.showSerName = False
+            c_mod_id.dataLabels.showCatName = False
+            c_mod_id.add_data(Reference(ws, min_col=7, min_row=38, max_col=7, max_row=40), titles_from_data=False)
+            c_mod_id.set_categories(Reference(ws, min_col=4, min_row=38, max_col=4, max_row=40))
+            place_chart(ws, c_mod_id, "J105")
 
             # Row 125: Top Defects of Top 1 Model (VN & Indo)
-            if ws.cell(51, 4).value:
-                c_def_vn = BarChart()
-                c_def_vn.type = "col"
-                c_def_vn.title = "Top Defects of Top 1 Model (VN)"
-                c_def_vn.style = 11
-                c_def_vn.width = 15
-                c_def_vn.height = 9.5
-                c_def_vn.legend = None
-                c_def_vn.y_axis.number_format = "0.0%"
-                c_def_vn.dataLabels = DataLabelList()
-                c_def_vn.dataLabels.showVal = True
-                c_def_vn.dataLabels.showSerName = False
-                c_def_vn.dataLabels.showCatName = False
-                c_def_vn.add_data(Reference(ws, min_col=7, min_row=51, max_col=7, max_row=53), titles_from_data=False)
-                c_def_vn.set_categories(Reference(ws, min_col=4, min_row=51, max_col=4, max_row=53))
-                ws.add_chart(c_def_vn, "B125")
+            c_def_vn = BarChart()
+            c_def_vn.type = "col"
+            c_def_vn.title = "Top Defects of Top 1 Model (VN)"
+            c_def_vn.style = 11
+            c_def_vn.width = 15
+            c_def_vn.height = 9.5
+            c_def_vn.legend = None
+            c_def_vn.y_axis.number_format = "0.0%"
+            c_def_vn.dataLabels = DataLabelList()
+            c_def_vn.dataLabels.showVal = True
+            c_def_vn.dataLabels.showSerName = False
+            c_def_vn.dataLabels.showCatName = False
+            c_def_vn.add_data(Reference(ws, min_col=7, min_row=51, max_col=7, max_row=53), titles_from_data=False)
+            c_def_vn.set_categories(Reference(ws, min_col=4, min_row=51, max_col=4, max_row=53))
+            place_chart(ws, c_def_vn, "B125")
 
-            if ws.cell(48, 4).value:
-                c_def_id = BarChart()
-                c_def_id.type = "col"
-                c_def_id.title = "Top Defects of Top 1 Model (Indo)"
-                c_def_id.style = 11
-                c_def_id.width = 15
-                c_def_id.height = 9.5
-                c_def_id.legend = None
-                c_def_id.y_axis.number_format = "0.0%"
-                c_def_id.dataLabels = DataLabelList()
-                c_def_id.dataLabels.showVal = True
-                c_def_id.dataLabels.showSerName = False
-                c_def_id.dataLabels.showCatName = False
-                c_def_id.add_data(Reference(ws, min_col=7, min_row=48, max_col=7, max_row=50), titles_from_data=False)
-                c_def_id.set_categories(Reference(ws, min_col=4, min_row=48, max_col=4, max_row=50))
-                ws.add_chart(c_def_id, "J125")
+            c_def_id = BarChart()
+            c_def_id.type = "col"
+            c_def_id.title = "Top Defects of Top 1 Model (Indo)"
+            c_def_id.style = 11
+            c_def_id.width = 15
+            c_def_id.height = 9.5
+            c_def_id.legend = None
+            c_def_id.y_axis.number_format = "0.0%"
+            c_def_id.dataLabels = DataLabelList()
+            c_def_id.dataLabels.showVal = True
+            c_def_id.dataLabels.showSerName = False
+            c_def_id.dataLabels.showCatName = False
+            c_def_id.add_data(Reference(ws, min_col=7, min_row=48, max_col=7, max_row=50), titles_from_data=False)
+            c_def_id.set_categories(Reference(ws, min_col=4, min_row=48, max_col=4, max_row=50))
+            place_chart(ws, c_def_id, "J125")
 
     # 2. Sheet: Quarter HFPA 
     hfpa_q_sheet = next((s for s in wb.sheetnames if s.strip() == "Quarter HFPA"), None)
@@ -447,7 +465,7 @@ def add_excel_charts(output, quarter, mappings):
                 lbl = ws_m.cell(r, 1).value or ("VN" if r == 28 else "VH" if r == 23 else "VH2")
                 c_vn_h.series.append(Series(Reference(ws_m, min_col=start_col, min_row=r, max_col=end_col, max_row=r), title=lbl))
             c_vn_h.set_categories(cats)
-            ws_q.add_chart(c_vn_h, "B65")
+            place_chart(ws_q, c_vn_h, "B65")
 
             c_id_h = LineChart()
             c_id_h.title = "INDO HFPA% Trend Tracking"
@@ -461,77 +479,73 @@ def add_excel_charts(output, quarter, mappings):
                 lbl = ws_m.cell(r, 1).value or ("Indo" if r == 29 else "JV" if r == 25 else "JV2")
                 c_id_h.series.append(Series(Reference(ws_m, min_col=start_col, min_row=r, max_col=end_col, max_row=r), title=lbl))
             c_id_h.set_categories(cats)
-            ws_q.add_chart(c_id_h, "J65")
+            place_chart(ws_q, c_id_h, "J65")
 
             # Row 85: Top Models (VN & Indo)
-            if ws_q.cell(7, 14).value:
-                c_mod_vn_h = BarChart()
-                c_mod_vn_h.type = "col"
-                c_mod_vn_h.title = "Top HFPA Models (VN)"
-                c_mod_vn_h.style = 10
-                c_mod_vn_h.width = 15
-                c_mod_vn_h.height = 9.5
-                c_mod_vn_h.legend = None
-                c_mod_vn_h.y_axis.number_format = "0.0%"
-                c_mod_vn_h.dataLabels = DataLabelList()
-                c_mod_vn_h.dataLabels.showVal = True
-                c_mod_vn_h.dataLabels.showSerName = False
-                c_mod_vn_h.dataLabels.showCatName = False
-                c_mod_vn_h.add_data(Reference(ws_q, min_col=17, min_row=7, max_col=17, max_row=9), titles_from_data=False)
-                c_mod_vn_h.set_categories(Reference(ws_q, min_col=14, min_row=7, max_col=14, max_row=9))
-                ws_q.add_chart(c_mod_vn_h, "B85")
+            c_mod_vn_h = BarChart()
+            c_mod_vn_h.type = "col"
+            c_mod_vn_h.title = "Top HFPA Models (VN)"
+            c_mod_vn_h.style = 10
+            c_mod_vn_h.width = 15
+            c_mod_vn_h.height = 9.5
+            c_mod_vn_h.legend = None
+            c_mod_vn_h.y_axis.number_format = "0.0%"
+            c_mod_vn_h.dataLabels = DataLabelList()
+            c_mod_vn_h.dataLabels.showVal = True
+            c_mod_vn_h.dataLabels.showSerName = False
+            c_mod_vn_h.dataLabels.showCatName = False
+            c_mod_vn_h.add_data(Reference(ws_q, min_col=17, min_row=7, max_col=17, max_row=9), titles_from_data=False)
+            c_mod_vn_h.set_categories(Reference(ws_q, min_col=14, min_row=7, max_col=14, max_row=9))
+            place_chart(ws_q, c_mod_vn_h, "B85")
 
-            if ws_q.cell(4, 14).value:
-                c_mod_id_h = BarChart()
-                c_mod_id_h.type = "col"
-                c_mod_id_h.title = "Top HFPA Models (Indo)"
-                c_mod_id_h.style = 12
-                c_mod_id_h.width = 15
-                c_mod_id_h.height = 9.5
-                c_mod_id_h.legend = None
-                c_mod_id_h.y_axis.number_format = "0.0%"
-                c_mod_id_h.dataLabels = DataLabelList()
-                c_mod_id_h.dataLabels.showVal = True
-                c_mod_id_h.dataLabels.showSerName = False
-                c_mod_id_h.dataLabels.showCatName = False
-                c_mod_id_h.add_data(Reference(ws_q, min_col=17, min_row=4, max_col=17, max_row=6), titles_from_data=False)
-                c_mod_id_h.set_categories(Reference(ws_q, min_col=14, min_row=4, max_col=14, max_row=6))
-                ws_q.add_chart(c_mod_id_h, "J85")
+            c_mod_id_h = BarChart()
+            c_mod_id_h.type = "col"
+            c_mod_id_h.title = "Top HFPA Models (Indo)"
+            c_mod_id_h.style = 12
+            c_mod_id_h.width = 15
+            c_mod_id_h.height = 9.5
+            c_mod_id_h.legend = None
+            c_mod_id_h.y_axis.number_format = "0.0%"
+            c_mod_id_h.dataLabels = DataLabelList()
+            c_mod_id_h.dataLabels.showVal = True
+            c_mod_id_h.dataLabels.showSerName = False
+            c_mod_id_h.dataLabels.showCatName = False
+            c_mod_id_h.add_data(Reference(ws_q, min_col=17, min_row=4, max_col=17, max_row=6), titles_from_data=False)
+            c_mod_id_h.set_categories(Reference(ws_q, min_col=14, min_row=4, max_col=14, max_row=6))
+            place_chart(ws_q, c_mod_id_h, "J85")
 
             # Row 105: Top Defects (VN & Indo)
-            if ws_q.cell(17, 14).value:
-                c_def_vn_h = BarChart()
-                c_def_vn_h.type = "col"
-                c_def_vn_h.title = "Top HFPA Defects (VN)"
-                c_def_vn_h.style = 11
-                c_def_vn_h.width = 15
-                c_def_vn_h.height = 9.5
-                c_def_vn_h.legend = None
-                c_def_vn_h.y_axis.number_format = "0.0%"
-                c_def_vn_h.dataLabels = DataLabelList()
-                c_def_vn_h.dataLabels.showVal = True
-                c_def_vn_h.dataLabels.showSerName = False
-                c_def_vn_h.dataLabels.showCatName = False
-                c_def_vn_h.add_data(Reference(ws_q, min_col=17, min_row=17, max_col=17, max_row=19), titles_from_data=False)
-                c_def_vn_h.set_categories(Reference(ws_q, min_col=14, min_row=17, max_col=14, max_row=19))
-                ws_q.add_chart(c_def_vn_h, "B105")
+            c_def_vn_h = BarChart()
+            c_def_vn_h.type = "col"
+            c_def_vn_h.title = "Top HFPA Defects (VN)"
+            c_def_vn_h.style = 11
+            c_def_vn_h.width = 15
+            c_def_vn_h.height = 9.5
+            c_def_vn_h.legend = None
+            c_def_vn_h.y_axis.number_format = "0.0%"
+            c_def_vn_h.dataLabels = DataLabelList()
+            c_def_vn_h.dataLabels.showVal = True
+            c_def_vn_h.dataLabels.showSerName = False
+            c_def_vn_h.dataLabels.showCatName = False
+            c_def_vn_h.add_data(Reference(ws_q, min_col=17, min_row=17, max_col=17, max_row=19), titles_from_data=False)
+            c_def_vn_h.set_categories(Reference(ws_q, min_col=14, min_row=17, max_col=14, max_row=19))
+            place_chart(ws_q, c_def_vn_h, "B105")
 
-            if ws_q.cell(14, 14).value:
-                c_def_id_h = BarChart()
-                c_def_id_h.type = "col"
-                c_def_id_h.title = "Top HFPA Defects (Indo)"
-                c_def_id_h.style = 11
-                c_def_id_h.width = 15
-                c_def_id_h.height = 9.5
-                c_def_id_h.legend = None
-                c_def_id_h.y_axis.number_format = "0.0%"
-                c_def_id_h.dataLabels = DataLabelList()
-                c_def_id_h.dataLabels.showVal = True
-                c_def_id_h.dataLabels.showSerName = False
-                c_def_id_h.dataLabels.showCatName = False
-                c_def_id_h.add_data(Reference(ws_q, min_col=17, min_row=14, max_col=17, max_row=16), titles_from_data=False)
-                c_def_id_h.set_categories(Reference(ws_q, min_col=14, min_row=14, max_col=14, max_row=16))
-                ws_q.add_chart(c_def_id_h, "J105")
+            c_def_id_h = BarChart()
+            c_def_id_h.type = "col"
+            c_def_id_h.title = "Top HFPA Defects (Indo)"
+            c_def_id_h.style = 11
+            c_def_id_h.width = 15
+            c_def_id_h.height = 9.5
+            c_def_id_h.legend = None
+            c_def_id_h.y_axis.number_format = "0.0%"
+            c_def_id_h.dataLabels = DataLabelList()
+            c_def_id_h.dataLabels.showVal = True
+            c_def_id_h.dataLabels.showSerName = False
+            c_def_id_h.dataLabels.showCatName = False
+            c_def_id_h.add_data(Reference(ws_q, min_col=17, min_row=14, max_col=17, max_row=16), titles_from_data=False)
+            c_def_id_h.set_categories(Reference(ws_q, min_col=14, min_row=14, max_col=14, max_row=16))
+            place_chart(ws_q, c_def_id_h, "J105")
 
     wb.save(output)
     wb.close()
@@ -775,7 +789,12 @@ def rank_image(image, metric, region, ranks, defect_colors=None):
 
 
 def defect_chart_colors(rankings):
-    names = {ColorManager.normalize_name(label) for _, defects in rankings.values() for label, _, _ in defects}
+    return defect_colors_for(label for _, defects in rankings.values() for label, _, _ in defects)
+
+
+def defect_colors_for(labels):
+    """Shared named palette for native Excel charts and legacy image exports."""
+    names = {ColorManager.normalize_name(label) for label in labels if label}
     if not names:
         return {}
     tools = APP_ROOT / "report_tools"
@@ -1023,6 +1042,7 @@ def update_consumer_promise(slide, quarter):
 
 
 def write_powerpoint(template, output, quarter):
+    excel = Path(output).with_suffix('.xlsx')
     deck = Presentation(template)
     slides = quality_slides(deck)
     parts = {}
@@ -1105,6 +1125,10 @@ def write_powerpoint(template, output, quarter):
         replace_image(spec["period"], period_image)
         for region in ("VN", "Indo"):
             trend, top_model, top_defect = spec[region]
+            if excel.is_file():
+                # These template pictures are only placement slots. The saved
+                # Excel charts replace them below; no intermediate chart image.
+                continue
             models, defects = quarter.rankings.get((metric, region), ([], []))
             replace_image(trend, lambda image: trend_image(image, quarter, metric, region))
             add_hyperlink(shapes[trend])
@@ -1131,7 +1155,6 @@ def write_powerpoint(template, output, quarter):
                                    if not line.startswith("Quarterly HFPA summary ")) + "\n" + note
             parts[str(slide.notes_slide.part.partname).lstrip("/")] = slide.notes_slide.part.blob
     copy_package(template, output, parts)
-    excel = Path(output).with_suffix('.xlsx')
     if excel.is_file():
         from .editable_charts import convert
         convert(BytesIO(Path(output).read_bytes()), excel, output, excel)

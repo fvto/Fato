@@ -9,6 +9,33 @@ from report_tools.quarterly_quality.template_output import C, X, repair_excel_ch
 
 
 class QuarterlyChartTests(unittest.TestCase):
+    def test_native_trend_legend_keeps_data_and_cell_names_and_is_idempotent(self):
+        from report_tools.quarterly_quality.editable_charts import compatible_trend_legend, NS
+        source = f'''<c:chartSpace xmlns:c="{C[1:-1]}"><c:chart><c:plotArea>
+        <c:layout><c:manualLayout><c:y val=".17"/><c:h val=".7"/></c:manualLayout></c:layout>
+        <c:lineChart><c:ser><c:tx><c:strRef><c:f>"VH"</c:f></c:strRef></c:tx>
+        <c:val><c:numRef><c:f>'Data'!$B$2:$D$2</c:f><c:numCache><c:pt idx="0"><c:v>.8</c:v></c:pt></c:numCache></c:numRef></c:val></c:ser>
+        <c:ser><c:tx><c:strRef><c:f>'Data'!$A$3</c:f><c:strCache><c:pt idx="0"><c:v>VH2</c:v></c:pt></c:strCache></c:strRef></c:tx></c:ser>
+        </c:lineChart></c:plotArea><c:legend><c:legendPos val="t"/><c:layout><c:manualLayout>
+        <c:x val=".74"/><c:h val=".06"/></c:manualLayout></c:layout><c:overlay val="1"/>
+        <c:spPr/></c:legend></c:chart></c:chartSpace>'''.encode()
+        result = compatible_trend_legend(source)
+        root = etree.fromstring(result)
+        self.assertEqual(root.find('.//c:ser/c:tx/c:v', NS).text, 'VH')
+        self.assertEqual(root.findall('.//c:ser/c:tx/c:strRef/c:f', NS)[0].text, "'Data'!$A$3")
+        self.assertEqual(root.find('.//c:val/c:numRef/c:f', NS).text, "'Data'!$B$2:$D$2")
+        self.assertEqual(root.find('.//c:val//c:pt/c:v', NS).text, '.8')
+        legend = root.find('.//c:legend', NS)
+        self.assertIsNone(legend.find('c:layout/c:manualLayout', NS))
+        self.assertEqual(legend.find('c:overlay', NS).get('val'), '0')
+        self.assertEqual([etree.QName(c).localname for c in legend], ['legendPos', 'layout', 'overlay', 'spPr', 'txPr'])
+        self.assertEqual(compatible_trend_legend(result), result)
+
+    def test_legend_repair_does_not_change_bar_charts(self):
+        from report_tools.quarterly_quality.editable_charts import compatible_trend_legend
+        source = f'<chartSpace xmlns="{C[1:-1]}"><chart><plotArea><barChart/></plotArea></chart></chartSpace>'.encode()
+        self.assertEqual(compatible_trend_legend(source), source)
+
     def test_ftt_region_chart_sources_use_weighted_totals(self):
         from openpyxl import Workbook
         from report_tools.quarterly_quality.editable_charts import Values

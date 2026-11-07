@@ -15,6 +15,7 @@ import math
 import copy
 import datetime
 import colorsys
+import hashlib
 import zipfile
 import xml.etree.ElementTree as ET
 import pandas as pd
@@ -30,6 +31,70 @@ ET.register_namespace('c', NS_C)
 ET.register_namespace('a', NS_A)
 ET.register_namespace('p', NS_P)
 ET.register_namespace('c15', NS_C15)
+
+# Country colours belong to the country, not its Top 5 rank in a factory.
+# Use explicit RGB fills so both pie slices and native legend keys agree.
+COUNTRY_COLORS = {
+    'USA': '4F81BD',
+    'CHINA': '9BBB59',
+    'BELGIUM': '4BACC6',
+    'JAPAN': '1F497D',
+    'MEXICO': '77933C',
+    'SOUTH KOREA': 'F79646',
+    'FRANCE': '8064A2',
+    'NETHERLANDS': '31859C',
+    'PARAGUAY': 'C0504D',
+    'OTHERS': 'CBCBCB',
+}
+COUNTRY_ALIASES = {
+    'US': 'USA', 'U.S.': 'USA', 'U.S.A.': 'USA',
+    'UNITED STATES': 'USA', 'UNITED STATES OF AMERICA': 'USA',
+    'REPUBLIC OF KOREA': 'SOUTH KOREA', 'KOREA, REPUBLIC OF': 'SOUTH KOREA',
+    'OTHER': 'OTHERS',
+}
+
+
+def get_country_hex(country):
+    """Stable across factories, ranking orders, country subsets and exports."""
+    name = ' '.join(str(country).replace('\xa0', ' ').upper().split())
+    name = COUNTRY_ALIASES.get(name, name)
+    if name in COUNTRY_COLORS:
+        return COUNTRY_COLORS[name]
+    # New countries also get the same colour on every chart without depending
+    # on Python's randomized hash(), a chart's theme or its other countries.
+    digest = hashlib.sha256(name.encode('utf-8')).digest()
+    hue = int.from_bytes(digest[:4], 'big') / 2**32
+    rgb = colorsys.hls_to_rgb(hue, .47, .52)
+    return ''.join(f'{round(channel * 255):02X}' for channel in rgb)
+
+
+def _set_country_point_colors(series, categories):
+    """Replace rank-based colour overrides while retaining point effects."""
+    previous = {point.find(f'{{{NS_C}}}idx').get('val'): point
+                for point in series.findall(f'{{{NS_C}}}dPt')
+                if point.find(f'{{{NS_C}}}idx') is not None}
+    for point in series.findall(f'{{{NS_C}}}dPt'):
+        series.remove(point)
+    # CT_PieSer requires dPt before dLbls, category and value references.
+    position = next((index for index, child in enumerate(series)
+                     if child.tag in {f'{{{NS_C}}}{tag}' for tag in ('dLbls', 'cat', 'val', 'extLst')}), len(series))
+    for index, country in enumerate(categories):
+        point = previous.get(str(index))
+        if point is None:
+            point = ET.Element(f'{{{NS_C}}}dPt')
+            ET.SubElement(point, f'{{{NS_C}}}idx', val=str(index))
+        properties = point.find(f'{{{NS_C}}}spPr')
+        if properties is None:
+            properties = ET.SubElement(point, f'{{{NS_C}}}spPr')
+        for child in list(properties):
+            if child.tag in {f'{{{NS_A}}}{tag}' for tag in
+                             ('noFill', 'solidFill', 'gradFill', 'blipFill', 'pattFill', 'grpFill')}:
+                properties.remove(child)
+        fill = ET.Element(f'{{{NS_A}}}solidFill')
+        ET.SubElement(fill, f'{{{NS_A}}}srgbClr', val=get_country_hex(country))
+        # DrawingML fill follows an optional transform and precedes line/effects.
+        properties.insert(1 if len(properties) and properties[0].tag == f'{{{NS_A}}}xfrm' else 0, fill)
+        series.insert(position + index, point)
 
 # ==============================================================================
 #  COLOR TEMPLATE LOADER, SYNCHRONIZER & UNIQUE COLOR GENERATOR
@@ -488,7 +553,7 @@ def _update_bar_chart_2series(xml_content, categories, values1, values2):
 def _update_pie3d_chart(xml_content, categories, values1, values2):
     """
     Update a 3D Pie Chart with categories and Grand Total + Percentage series.
-    Enforces clean, high-contrast, non-overlapping typography without truncation.
+    Uses the same country colours across all four factories and their legends.
     """
     root = ET.fromstring(xml_content)
     pie = root.find(f'.//{{{NS_C}}}pie3DChart')
@@ -497,6 +562,8 @@ def _update_pie3d_chart(xml_content, categories, values1, values2):
     if pie is None: return xml_content
 
     series_list = pie.findall(f'{{{NS_C}}}ser')
+    for series in series_list:
+        _set_country_point_colors(series, categories)
     for s_idx, (vals, is_pct) in enumerate([(values1, False), (values2, True)]):
         if s_idx >= len(series_list): break
         ser = series_list[s_idx]

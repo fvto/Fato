@@ -27,6 +27,7 @@ scratch/*.log
 .runtime/
 outputs/
 Report/ToolRuns/
+Report/.validation-cache/
 Report/Comparisons/
 Report/CombinedExcel/
 Report/InputBackups/
