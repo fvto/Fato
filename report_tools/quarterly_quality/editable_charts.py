@@ -197,6 +197,43 @@ class Values:
         return self.range(sheet.strip("'").replace("''","'"),address)
 
 
+def trend_label_layout(points):
+    """Place labels beside the lines and focus the axis on the observed rates."""
+    observations = [value for series in points for value in series.values() if math.isfinite(value)]
+    if observations:
+        spread = max(observations) - min(observations)
+        step = .005 if spread <= .04 else .02 if spread <= .20 else .05
+        low = max(0, math.floor((min(observations) - step) / step) * step)
+        high = min(1, math.ceil((max(observations) + step) / step) * step)
+    else:
+        low, high, step = 0, 1, .1
+    indices = sorted({index for series in points for index, value in series.items() if math.isfinite(value)})
+    positions = {}
+    for index in indices:
+        ranked = sorted(((series[index], owner) for owner, series in enumerate(points)
+                         if index in series and math.isfinite(series[index])),
+                        key=lambda item: (item[0], 1 if item[1] == 0 else 0 if item[1] == 1 else 2))
+        for rank, (value, owner) in enumerate(ranked):
+            if rank == 0:
+                position = 'b'
+            elif rank == len(ranked) - 1:
+                position = 't'
+            elif index == indices[-1]:
+                # The last point has free space to its right, even when the
+                # three lines converge. Keep its label away from that junction.
+                position = 'r'
+            elif index == indices[0]:
+                # A label above the first point can meet another series'
+                # incoming slope. The area before every line starts is clear.
+                position = 'l'
+            else:
+                above = ranked[rank + 1][0] - value
+                below = value - ranked[rank - 1][0]
+                position = 't' if above >= below else 'b'
+            positions[owner, index] = position
+    return positions, (low, high, step)
+
+
 def styled_chart(data, metric, region, kind, values, defect_colors=None):
     from .template_output import TREND_FORMAT, RANK_FORMAT
     from report_tools.hfpa.agents.color_manager import ColorManager
@@ -274,15 +311,7 @@ def styled_chart(data, metric, region, kind, values, defect_colors=None):
     trend_points = [{int(p.get('idx')): float(p.find('c:v', NS).text)
                      for p in ser.findall('c:val/c:numRef/c:numCache/c:pt', NS)}
                     for ser in series] if trend else []
-    label_positions = {}
-    for index in sorted({index for points in trend_points for index in points}):
-        # At each month the lowest label goes below, the highest above and
-        # the middle in the centre, even when factory lines cross or coincide.
-        ranked = sorted(((points[index], i) for i, points in enumerate(trend_points) if index in points),
-                        key=lambda item: (item[0], 1 if item[1] == 0 else 0 if item[1] == 1 else 2))
-        for rank, (_, owner) in enumerate(ranked):
-            label_positions[owner, index] = ('b' if rank == 0 else
-                                             't' if rank == len(ranked)-1 else 'ctr')
+    label_positions, trend_scale = trend_label_layout(trend_points)
     colors = [colour.lstrip('#') for colour in TREND_FORMAT[metric, region][-2]]
     for i,ser in enumerate(series):
         for old in list(ser):
@@ -316,7 +345,7 @@ def styled_chart(data, metric, region, kind, values, defect_colors=None):
             node(point,'showLegendKey',val=0);node(point,'showVal',val=0);node(point,'showCatName',val=0);node(point,'showSerName',val=0);node(point,'showPercent',val=0)
         node(labels,'numFmt',formatCode=PERCENT_FORMAT,sourceLinked=0)
         text_style(labels,750 if trend else 700,True)
-        node(labels,'dLblPos',val='ctr' if trend and i==0 else 'b' if trend and i==2 else 't' if trend else 'outEnd')
+        node(labels,'dLblPos',val='b' if trend and i==2 else 't' if trend else 'outEnd')
         node(labels,'showLegendKey',val=0);node(labels,'showVal',val=1)
         node(labels,'showCatName',val=0);node(labels,'showSerName',val=0)
         pos=next((j for j,n in enumerate(ser) if E.QName(n).localname in ('cat','val')),len(ser));ser.insert(pos,labels)
@@ -353,12 +382,7 @@ def styled_chart(data, metric, region, kind, values, defect_colors=None):
             scaling=axis.find('c:scaling',NS)
             for old in list(scaling):
                 if E.QName(old).localname in ('min','max'):scaling.remove(old)
-            low,high,step=(.5,.85,.05) if metric=='FTT' else (.80,.90,.02) if region=='VN' else (.70,.98,.04)
-            observations=[v for points in trend_points for v in points.values() if math.isfinite(v)]
-            if observations:
-                low=max(0, min(low, math.floor((min(observations)-step)/step)*step))
-                high=max(high, math.ceil((max(observations)+step)/step)*step)
-            if high-low > step*10: step=math.ceil((high-low)/.10)*.01
+            low,high,step=trend_scale
             node(scaling,'max',val=high);node(scaling,'min',val=low)
             unit=axis.find('c:majorUnit',NS)
             if unit is None:unit=node(axis,'majorUnit')
@@ -458,7 +482,7 @@ def chart_rectangle(slide_width, slide_height, region, kind):
                  zip((x, y, w, h), (slide_width, slide_height, slide_width, slide_height)))
 
 
-def convert(pptx, xlsx, output_pptx, output_xlsx=None):
+def convert(pptx, xlsx, output_pptx, output_xlsx=None, *, quarter=None):
     """Use native Office Copy/Paste; Excel owns the complete chart design."""
     from .office_charts import copy_charts
-    return copy_charts(pptx, xlsx, output_pptx, output_xlsx)
+    return copy_charts(pptx, xlsx, output_pptx, output_xlsx, quarter=quarter)

@@ -113,6 +113,9 @@ def fixture(group, plant):
     book = openpyxl.Workbook()
     book.active.append(list(data))
     book.active.append(list(data.values()))
+    if group == "reinspection":
+        other = dict(data, Category="QC" if data["Category"] == "MA" else "MA")
+        book.active.append(list(other.values()))
     stream = io.BytesIO()
     book.save(stream)
     book.close()
@@ -267,7 +270,7 @@ class OriginalEngineTests(unittest.TestCase):
                         palette = openpyxl.load_workbook(workspace / "Color_template.xlsx", read_only=True)
                         try:
                             colors = {row[2]: row[7] for row in palette["Sheet1"].values if row[2]}
-                            self.assertEqual(colors["Lacing"], "1A4474")
+                            self.assertEqual(colors["Lace"], "316CE5")
                         finally:
                             palette.close()
                         output = master.parent

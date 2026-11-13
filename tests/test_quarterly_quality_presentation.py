@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from zipfile import ZipFile
 
 from lxml import etree
@@ -68,13 +68,34 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
         self.qms_slide(deck, "HFPA", image.getvalue())
         return deck
 
-    def test_consumer_rates_weight_each_factory_by_its_inspection_quantity(self):
+    def test_consumer_rates_weight_factories_within_month_and_average_regions_equally(self):
         slide, table = self.consumer_slide(Presentation())
         template_output.update_consumer_promise(slide, self.quarter)
-        self.assertEqual([table.cell(row, 8).text for row in (8, 9, 10)], ["81.0%", "94.0%", "85.3%"])
+        self.assertEqual([table.cell(row, 8).text for row in (8, 9, 10)], ["81.0%", "94.0%", "87.5%"])
         self.assertEqual([table.cell(row, 9).text for row in (8, 9, 10)], ["95.0%"] * 3)
         self.assertEqual(table.cell(7, 8).text, "Q2FY27")
         self.assertEqual(table.cell(8, 8).text_frame.paragraphs[0].runs[0].font.size, Pt(12))
+
+    def test_consumer_averages_three_months_despite_different_inspection_volumes(self):
+        self.quarter.covered = self.quarter.months
+        for month, volume, vn_rate, indo_rate in zip(
+                self.quarter.months, (10000, 100000, 1000), (0.847, 0.848, 0.849), (0.903, 0.905, 0.868)):
+            for plant in PLANTS:
+                rate = vn_rate if plant in ("VH", "VH2") else indo_rate
+                self.quarter.values["HFPA", month, plant] = Counts(volume, volume * (1 - rate))
+        slide, table = self.consumer_slide(Presentation())
+        template_output.update_consumer_promise(slide, self.quarter)
+        self.assertEqual([table.cell(row, 8).text for row in (8, 9, 10)], ["84.8%", "89.2%", "87.0%"])
+
+    def test_consumer_does_not_drop_a_missing_month_from_the_average(self):
+        self.quarter.covered = self.quarter.months[:2]
+        for plant in PLANTS:
+            self.quarter.values["HFPA", self.quarter.months[1], plant] = Counts(100, 10)
+        del self.quarter.values["HFPA", self.quarter.months[1], "JV2"]
+        rates = template_output.consumer_hfpa_rates(self.quarter)
+        self.assertAlmostEqual(rates["VH"], 0.855)
+        self.assertIsNone(rates["JV"])
+        self.assertIsNone(rates["CLG"])
 
     def test_missing_prior_and_zero_inspections_have_no_numeric_rate(self):
         self.quarter.values = {("HFPA", "2026-09", plant): Counts(0, 0) for plant in PLANTS}
@@ -90,7 +111,7 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
         for row, value in zip((8, 9, 10), prior):
             table.cell(row, 9).text = value
         template_output.update_consumer_promise(slide, self.quarter)
-        self.assertEqual([table.cell(row, 8).text for row in (8, 9, 10)], ["81.0%", "94.0%", "85.3%"])
+        self.assertEqual([table.cell(row, 8).text for row in (8, 9, 10)], ["81.0%", "94.0%", "87.5%"])
         self.assertEqual([table.cell(row, 9).text for row in (8, 9, 10)], prior)
 
     def test_export_handles_full_and_compact_decks_without_changing_shared_source_images(self):
@@ -98,13 +119,16 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
             with self.subTest(full=full), TemporaryDirectory() as folder:
                 source, output = (Path(folder) / name for name in ("template.pptx", "result.pptx"))
                 self.make_deck(full).save(source)
-                template_output.write_powerpoint(source, output, self.quarter)
+                output.with_suffix(".xlsx").touch()
+                with patch("report_tools.quarterly_quality.editable_charts.convert",
+                           side_effect=lambda source, excel, output, *args, **kwargs: Path(output).write_bytes(source.getvalue())):
+                    template_output.write_powerpoint(source, output, self.quarter)
                 deck = Presentation(output)
                 self.assertEqual(len(deck.slides), 8 if full else 3)
                 self.assertIn("FY27 Q2 QMS FTT ANALYSIS", [s.text for s in deck.slides[-2].shapes if s.has_text_frame])
                 if full:
                     table = next(shape.table for shape in deck.slides[0].shapes if shape.has_table)
-                    self.assertEqual(table.cell(10, 8).text, "85.3%")
+                    self.assertEqual(table.cell(10, 8).text, "87.5%")
                 with ZipFile(source) as original, ZipFile(output) as result:
                     for name in original.namelist():
                         if name.startswith("ppt/media/") or full and name == "ppt/slides/slide2.xml":
@@ -136,25 +160,14 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
                 (root / "report_tools_config.json").write_text(json.dumps({"quarterly_templates": {"powerpoint": "custom.pptx"}}))
                 self.assertEqual(template_output.template_paths()[1], configured)
 
-    def test_powerpoint_charts_have_hyperlinks_to_excel(self):
-        image = BytesIO()
-        Image.new("RGB", (1300, 500), "white").save(image, "PNG")
-        deck = Presentation()
-        deck.slides.add_slide(deck.slide_layouts[6])
-        self.qms_slide(deck, "FTT", image.getvalue())
-        self.qms_slide(deck, "HFPA", image.getvalue())
-
+    def test_powerpoint_requires_excel_and_does_not_create_a_fallback_chart(self):
         with TemporaryDirectory() as folder:
-            source = Path(folder) / "template.pptx"
-            output = Path(folder) / "result.pptx"
-            deck.save(source)
-            template_output.write_powerpoint(source, output, self.quarter)
-
-            with ZipFile(output) as package:
-                rels_xml = package.read("ppt/slides/_rels/slide2.xml.rels")
-                rels = etree.fromstring(rels_xml)
-                hlink_targets = [rel.get("Target") for rel in rels if "hyperlink" in rel.get("Type", "")]
-                self.assertIn("result.xlsx", hlink_targets)
+            source = Path(folder) / 'template.pptx'
+            output = Path(folder) / 'report.pptx'
+            self.make_deck(full=True).save(source)
+            with self.assertRaisesRegex(ValueError, 'Excel'):
+                template_output.write_powerpoint(source, output, self.quarter)
+            self.assertFalse(output.exists())
 
     def test_excel_charts_style_b(self):
         wb = Workbook()
@@ -205,6 +218,8 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
                 convert.assert_called_once()
                 trend_image.assert_not_called()
                 rank_image.assert_not_called()
+                self.assertIs(convert.call_args.kwargs["quarter"], self.quarter)
+                self.assertFalse(output.exists())
                 deck,workbook,target,styled_workbook=convert.call_args.args
                 self.assertEqual((workbook,target,styled_workbook),(excel,output,excel))
                 with ZipFile(deck) as package:
@@ -303,62 +318,29 @@ class QuarterlyQualityPresentationTests(unittest.TestCase):
                             colour = template_output.TREND_FORMAT[metric, region][-1].lstrip('#')
                             self.assertEqual(primary.xpath('c:dLbls/c:dLbl/c:spPr/a:solidFill/a:srgbClr/@val', namespaces=NS), [colour] * 3)
                             self.assertEqual(primary.xpath('c:dLbls/c:dLbl/c:tx/c:rich//a:highlight/a:srgbClr/@val', namespaces=NS), [colour] * 3)
-                            if metric == 'HFPA':
-                                self.assertEqual(primary.xpath('c:dLbls/c:dLbl/c:dLblPos/@val', namespaces=NS), ['ctr'] * 3)
+                            self.assertNotIn('ctr', source.xpath('.//c:dLblPos/@val', namespaces=NS))
 
-    def test_consumer_summary_table_image_generates_crisp_excel_style_screenshot(self):
-        png_bytes = template_output.consumer_summary_table_image(self.quarter)
-        im = Image.open(BytesIO(png_bytes))
-        self.assertEqual(im.size, (547, 486))
-
-    def test_consumer_corner_sticker_updates_date_box_and_table_image(self):
-        template = "Report/Quarterly/Partner QBR Format Q2 FY27-CLG.pptx"
-        if not Path(template).is_file():
-            return
-        with TemporaryDirectory() as folder:
-            output = Path(folder) / "result.pptx"
-            template_output.write_powerpoint(template, output, self.quarter)
-            prs = Presentation(output)
-            slide = prs.slides[0]
-            s5 = next((s for s in slide.shapes if s.shape_id == 5), None)
-            s6 = next((s for s in slide.shapes if s.shape_id == 6), None)
-            self.assertIsNotNone(s5)
-            self.assertIsNotNone(s6)
-            self.assertIn("Sep to", s5.text_frame.text)
-            self.assertEqual(s6.image.size, (547, 486))
-
-    def test_sanitize_chart_links_normalizes_external_targets_to_peer_excel(self):
-        from report_tools.quarterly_quality.office_charts import _sanitize_chart_links, _check_links, OfficeChartCopyError
-        with TemporaryDirectory() as folder:
-            folder = Path(folder)
-            temp_source = folder / "office-qbr-12345" / "source.xlsx"
-            pptx_path = folder / "test.pptx"
-            with ZipFile(pptx_path, "w") as z:
-                z.writestr("ppt/slides/slide1.xml", "<p:sld/>")
-                rel_xml = (
-                    f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
-                    f'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-                    f'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject" '
-                    f'Target="{temp_source.as_uri()}" TargetMode="External"/>'
-                    f'</Relationships>'
-                ).encode("utf-8")
-                z.writestr("ppt/charts/_rels/chart1.xml.rels", rel_xml)
-
-            # Before sanitize: _check_links must raise error because of temp folder
-            with self.assertRaises(OfficeChartCopyError):
-                _check_links(pptx_path, temp_source)
-
-            # Sanitize to peer file name
-            _sanitize_chart_links(pptx_path, "HFPA-FTT-FY27-Q2.xlsx")
-
-            # After sanitize: _check_links must succeed
-            _check_links(pptx_path, temp_source)
-
-            # Verify target content inside zip
-            with ZipFile(pptx_path) as z:
-                rels_content = z.read("ppt/charts/_rels/chart1.xml.rels").decode("utf-8")
-                self.assertIn('Target="HFPA-FTT-FY27-Q2.xlsx"', rels_content)
-                self.assertNotIn("office-qbr", rels_content)
+    def test_corner_uses_selected_quarter_months_and_live_excel_formulas(self):
+        from report_tools.quarterly_quality.office_charts import _summary_sheet
+        # A different quarter crosses a year boundary; reference months/numbers
+        # from the user's picture must never become the next run's settings.
+        self.quarter.months = ('2026-12', '2027-01', '2027-02')
+        self.quarter.covered = self.quarter.months[:2]
+        self.quarter.values = {('HFPA', month, plant): Counts(100, 10)
+                               for month in self.quarter.covered for plant in PLANTS}
+        book, sheet = MagicMock(), MagicMock()
+        book.Worksheets.Item.return_value = sheet
+        cells = {}
+        sheet.Cells.side_effect = lambda row, col: cells.setdefault((row, col), MagicMock())
+        _summary_sheet(book, self.quarter, dict(zip(self.quarter.months, (28, 29, 30))))
+        self.assertEqual([cells[1, col].Value for col in (2, 3, 4)], [12, 1, 2])
+        self.assertIn("'Month HFPA'!AB14:AB15", cells[2, 2].Formula)
+        self.assertIn("'Month HFPA'!AC7:AC8", cells[3, 3].Formula)
+        self.assertIsNone(cells[2, 4].Value)
+        self.assertIsNone(cells[3, 4].Value)
+        self.assertIn('COUNT(B2:D2)=3', cells[2, 5].Formula)
+        self.assertIn('COUNT(E2:E3)=2', sheet.Range('E4').Formula)
+        sheet.Calculate.assert_called_once()
 
 
 if __name__ == "__main__":

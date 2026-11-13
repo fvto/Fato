@@ -9,6 +9,26 @@ from report_tools.quarterly_quality.template_output import C, X, repair_excel_ch
 
 
 class QuarterlyChartTests(unittest.TestCase):
+    def test_hfpa_indo_labels_stay_outside_lines_at_the_november_junction(self):
+        from report_tools.quarterly_quality.editable_charts import trend_label_layout
+        points = [{0:.903,1:.905,2:.868}, {0:.871,1:.873,2:.873}, {0:.942,1:.941,2:.864}]
+        positions, (low, high, step) = trend_label_layout(points)
+        self.assertEqual([positions[0,i] for i in range(3)], ['l','t','r'])
+        self.assertEqual([positions[i,2] for i in range(3)], ['r','t','b'])
+        self.assertAlmostEqual(low,.84)
+        self.assertAlmostEqual(high,.98)
+        self.assertAlmostEqual(step,.02)
+
+    def test_trend_labels_follow_crossing_lines_and_tight_starting_points(self):
+        from report_tools.quarterly_quality.editable_charts import trend_label_layout
+        points = [{0:.80,1:.83,2:.79}, {0:.80,1:.81,2:.82}, {0:.80,1:.78,2:.85}]
+        positions, (low, high, _) = trend_label_layout(points)
+        self.assertEqual([positions[i,0] for i in range(3)], ['l','b','t'])
+        self.assertEqual(positions[1,2], 'r')
+        self.assertNotIn('ctr',positions.values())
+        self.assertLess(low,.78)
+        self.assertGreater(high,.85)
+
     def test_native_trend_legend_keeps_data_and_cell_names_and_is_idempotent(self):
         from report_tools.quarterly_quality.editable_charts import compatible_trend_legend, NS
         source = f'''<c:chartSpace xmlns:c="{C[1:-1]}"><c:chart><c:plotArea>

@@ -162,36 +162,12 @@ class ReconciliationEngineAgent:
 
     def load_color_template(self) -> Dict[str, str]:
         """Load defect color mappings from Color_template.xlsx."""
-        color_map: Dict[str, str] = {}
-        if not os.path.exists(self.color_template_path):
-            return color_map
-
         try:
-            wb = openpyxl.load_workbook(self.color_template_path, data_only=True)
-            if "Sheet1" in wb.sheetnames:
-                ws = wb["Sheet1"]
-                for row in ws.iter_rows(min_row=5, values_only=True):
-                    if len(row) >= 8 and row[2] and row[7]:
-                        dname = str(row[2]).strip().lower()
-                        norm_name = re.sub(r"[^a-z0-9]", "", dname)
-                        hex_code = str(row[7]).strip().replace("#", "").upper()
-                        if len(hex_code) == 6:
-                            color_map[dname] = hex_code
-                            color_map[norm_name] = hex_code
-            if "bc" in wb.sheetnames:
-                ws = wb["bc"]
-                for row in ws.iter_rows(min_row=2, values_only=True):
-                    if len(row) >= 5 and row[0] and row[4]:
-                        dname = str(row[0]).strip().lower()
-                        norm_name = re.sub(r"[^a-z0-9]", "", dname)
-                        hex_code = str(row[4]).strip().replace("#", "").upper()
-                        if len(hex_code) == 6:
-                            color_map[dname] = hex_code
-                            color_map[norm_name] = hex_code
-            wb.close()
-        except Exception as e:
-            print(f"[-] Color template loading warning: {e}")
-        return color_map
+            from .color_manager import ColorManager
+        except (ImportError, ValueError):
+            from agents.color_manager import ColorManager
+        return ColorManager(self.color_template_path).load_color_map()
+
 
     def load_raw_datasets(
         self, target_month: str, target_year: str, *, input_files=None

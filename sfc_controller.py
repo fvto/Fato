@@ -1024,14 +1024,17 @@ def _execute_dynamic_action(action_type, target_id=None, params=None):
 
                     # Mở popup Select Station nếu chưa mở
                     page.evaluate("""() => {
-                        const coll = aspxGetControlCollection();
+                        const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                        if (!coll) throw new Error('Trang hiện tại chưa nạp control SFC QA FTT.');
                         const popup = coll.Get('rpnlMain_ContentPlaceHolder1_popupSetArea');
-                        if (!popup || !popup.IsVisible()) {
+                        if (!popup) throw new Error('Không tìm thấy hộp thoại xuất Excel FTT (popupSetArea) trên trang hiện tại.');
+                        if (!popup.IsVisible()) {
                             const btnALL = coll.Get('rpnlMain_ContentPlaceHolder1_btnExcelALL');
                             if (btnALL) btnALL.DoClick();
                             else {
                                 const el = document.getElementById('rpnlMain_ContentPlaceHolder1_btnExcelALL');
-                                if (el) el.click();
+                                if (!el) throw new Error('Không tìm thấy nút btnExcelALL trên trang QA FTT.');
+                                el.click();
                             }
                         }
                     }""")
@@ -1083,12 +1086,13 @@ def _execute_dynamic_action(action_type, target_id=None, params=None):
                     try:
                         with page.expect_download(timeout=SFC_WAIT_MS) as dl_info:
                             page.evaluate("""(bid) => {
-                                const coll = aspxGetControlCollection();
-                                const btn = coll.Get(bid);
+                                const coll = (typeof aspxGetControlCollection === 'function') ? aspxGetControlCollection() : null;
+                                const btn = coll ? coll.Get(bid) : null;
                                 if (btn && typeof btn.DoClick === 'function') btn.DoClick();
                                 else {
                                     const el = document.getElementById(bid);
-                                    if (el) el.click();
+                                    if (!el) throw new Error('Không tìm thấy nút xuất Excel FTT: ' + bid);
+                                    el.click();
                                 }
                             }""", target_btn_id)
                         dl = dl_info.value

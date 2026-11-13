@@ -845,120 +845,8 @@ def set_table_text(cell, value, style_cell):
         run.text = ""
 
 
-def consumer_summary_table_image(quarter):
-    """Render a crisp, Excel-styled screenshot of the current quarter HFPA summary table."""
-    w, h = 547, 486
-    image = Image.new("RGB", (w, h), color=(255, 255, 255))
-    draw = ImageDraw.Draw(image)
-
-    def get_font(size, bold=False):
-        for family in ("calibri.ttf", "arial.ttf"):
-            path = Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts" / family
-            try:
-                return ImageFont.truetype(str(path), size)
-            except OSError:
-                continue
-        return ImageFont.load_default()
-
-    font_regular = get_font(14)
-
-    col_widths = [85, 80, 80, 80, 80, 80, 62]
-    cols = [0]
-    for cw in col_widths:
-        cols.append(cols[-1] + cw)
-    cols[-1] = w - 1
-
-    row_h = 24
-    start_y = 27
-    num_rows = 19
-    grid_color = (212, 212, 212)
-    yellow_color = (255, 255, 0)
-
-    if getattr(quarter, "date_to", None):
-        start = date.fromisoformat(quarter.date_from)
-        end = date.fromisoformat(quarter.date_to)
-        date_hdr = f"{start:%b}-{end:%b}{end.day}"
-    elif getattr(quarter, "covered", None):
-        start = date.fromisoformat(quarter.covered[0] + "-01")
-        end = date.fromisoformat(quarter.covered[-1] + "-01")
-        date_hdr = f"{start:%b}-{end:%b}"
-    else:
-        date_hdr = getattr(quarter, "period", "")
-
-    headers = ["FTY", "Insp", "Def", "HFPA%", date_hdr]
-
-    def get_counts(plant):
-        if hasattr(quarter, "totals"):
-            tot = quarter.totals("HFPA", plant)
-            if tot is not None:
-                return float(tot.inspected), float(tot.defects)
-        return 0.0, 0.0
-
-    vh_insp, vh_def = get_counts("VH")
-    vh2_insp, vh2_def = get_counts("VH2")
-    vn_insp, vn_def = vh_insp + vh2_insp, vh_def + vh2_def
-    jv_insp, jv_def = get_counts("JV")
-    jv2_insp, jv2_def = get_counts("JV2")
-    indo_insp, indo_def = jv_insp + jv2_insp, jv_def + jv2_def
-    clg_insp, clg_def = vn_insp + indo_insp, vn_def + indo_def
-
-    def fmt_num(val):
-        return f"{int(round(val)):,d}" if val > 0 else "0"
-
-    def fmt_rate(insp, defs):
-        return f"{(1.0 - defs / insp):.1%}" if insp > 0 else "—"
-
-    rows_data = [
-        ("VH", fmt_num(vh_insp), fmt_num(vh_def), fmt_rate(vh_insp, vh_def)),
-        ("VH2", fmt_num(vh2_insp), fmt_num(vh2_def), fmt_rate(vh2_insp, vh2_def)),
-        ("VN", fmt_num(vn_insp), fmt_num(vn_def), fmt_rate(vn_insp, vn_def)),
-        ("JV", fmt_num(jv_insp), fmt_num(jv_def), fmt_rate(jv_insp, jv_def)),
-        ("JV2", fmt_num(jv2_insp), fmt_num(jv2_def), fmt_rate(jv2_insp, jv2_def)),
-        ("Indo", fmt_num(indo_insp), fmt_num(indo_def), fmt_rate(indo_insp, indo_def)),
-        ("CLG", fmt_num(clg_insp), fmt_num(clg_def), fmt_rate(clg_insp, clg_def)),
-    ]
-    yellow_row_indices = {3, 6, 7}
-
-    for r_idx in yellow_row_indices:
-        y1 = start_y + r_idx * row_h
-        y2 = y1 + row_h
-        draw.rectangle((0, y1, cols[4], y2), fill=yellow_color)
-
-    for r in range(num_rows + 1):
-        y = start_y + r * row_h
-        if y < h:
-            draw.line([(0, y), (w, y)], fill=grid_color, width=1)
-
-    for x in cols:
-        draw.line([(x, start_y), (x, min(h, start_y + num_rows * row_h))], fill=grid_color, width=1)
-
-    y_hdr = start_y + row_h / 2
-    for c_idx, text in enumerate(headers):
-        x1, x2 = cols[c_idx], cols[c_idx + 1]
-        if c_idx == 0 or c_idx == 4:
-            draw.text((x1 + 8, y_hdr), text, font=font_regular, fill=(0, 0, 0), anchor="lm")
-        else:
-            draw.text((x2 - 8, y_hdr), text, font=font_regular, fill=(0, 0, 0), anchor="rm")
-
-    for r_idx, row in enumerate(rows_data, start=1):
-        y_mid = start_y + r_idx * row_h + row_h / 2
-        for c_idx, val in enumerate(row):
-            x1, x2 = cols[c_idx], cols[c_idx + 1]
-            if c_idx == 0:
-                draw.text((x1 + 8, y_mid), val, font=font_regular, fill=(0, 0, 0), anchor="lm")
-            else:
-                draw.text((x2 - 8, y_mid), val, font=font_regular, fill=(0, 0, 0), anchor="rm")
-
-    out = BytesIO()
-    image.save(out, format="PNG")
-    return out.getvalue()
-
-
 def update_consumer_corner(slide, quarter, parts, package_names, relationships):
-    """Update executive corner sticky notes on Slide 1: date box and HFPA summary table picture."""
-    slide_name = str(slide.part.partname).lstrip("/")
-    rels_name = f"ppt/slides/_rels/{Path(slide_name).name}.rels"
-    rels = etree.fromstring(relationships[slide_name]) if slide_name in relationships else None
+    """Update the date label; the corner screenshot is copied from Excel later."""
 
     for shape in slide.shapes:
         if shape.shape_id == 5 or (shape.has_text_frame and shape.name == "Rectangle 4"):
@@ -984,30 +872,30 @@ def update_consumer_corner(slide, quarter, parts, package_names, relationships):
                     for r in p_extra.runs:
                         r.text = ""
 
-        if (shape.shape_id == 6 or (hasattr(shape, "image") and shape.name == "Picture 5")) and rels is not None:
-            table_png = consumer_summary_table_image(quarter)
-            index = 1
-            stem = f"quarterly_{Path(slide_name).stem}_corner_summary"
-            while f"ppt/media/{stem}_{index}.png" in package_names:
-                index += 1
-            media_name = f"ppt/media/{stem}_{index}.png"
-            package_names.add(media_name)
-            parts[media_name] = table_png
-            relationship_id = f"rIdQuarterlyCorner{shape.shape_id}"
-            while any(item.get("Id") == relationship_id for item in rels):
-                relationship_id += "x"
-            etree.SubElement(rels, "{http://schemas.openxmlformats.org/package/2006/relationships}Relationship",
-                             Id=relationship_id,
-                             Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
-                             Target="../media/" + Path(media_name).name)
-            shape._pic.blipFill.blip.rEmbed = relationship_id
 
-    if rels is not None:
-        parts[rels_name] = etree.tostring(rels)
+
+def consumer_hfpa_rates(quarter, prior=False):
+    """Average monthly regional HFPA rates, then give VN and Indo equal weight."""
+    months = quarter.prior_months[:len(quarter.covered)] if prior else quarter.covered
+    rates = {}
+    for label, region in (("VH", "VN"), ("JV", "Indo")):
+        monthly = []
+        for month in months:
+            records = [quarter.values.get(("HFPA", month, plant)) for plant in REGIONS[region]]
+            if any(record is None for record in records):
+                break
+            total = Counts(sum(record.inspected for record in records), sum(record.defects for record in records))
+            if total.rate is None:
+                break
+            monthly.append(total.rate)
+        rates[label] = math.fsum(monthly) / len(months) if months and len(monthly) == len(months) else None
+    rates["CLG"] = (math.fsum(rates.values()) / 2
+                    if all(rate is not None for rate in rates.values()) else None)
+    return rates
 
 
 def update_consumer_promise(slide, quarter):
-    """The QBR labels VH and JV represent their respective two-factory groups."""
+    """The QBR labels VH and JV show monthly means for VN and Indo."""
     tables = [(shape.table, row, col) for shape in slide.shapes if shape.has_table
               for row in range(len(shape.table.rows)) for col in range(len(shape.table.columns))
               if " ".join(shape.table.cell(row, col).text.upper().split()) == "QUALITY (HFPA)"]
@@ -1029,24 +917,21 @@ def update_consumer_promise(slide, quarter):
     set_table_text(table.cell(header + 1, column), period + fiscal_year,
                    table.cell(header + 1, column))
     periods = (False, True) if quarter.prior_date_to else (False,)
-    for label, plants in groups.items():
-        row = rows[label]
-        for prior in periods:
-            records = [quarter.totals("HFPA", plant, prior=prior) for plant in plants]
-            rate = None
-            if all(record is not None for record in records):
-                total = Counts(sum(record.inspected for record in records), sum(record.defects for record in records))
-                rate = total.rate
+    for prior in periods:
+        rates = consumer_hfpa_rates(quarter, prior=prior)
+        for label, row in rows.items():
+            rate = rates[label]
             set_table_text(table.cell(row, column + int(prior)), f"{rate:.1%}" if rate is not None else "—",
                            table.cell(row, column + 1))
 
 
 def write_powerpoint(template, output, quarter):
     excel = Path(output).with_suffix('.xlsx')
+    if not excel.is_file():
+        raise ValueError('Cần tạo Excel nguồn trước khi Copy/Paste sang PowerPoint.')
     deck = Presentation(template)
     slides = quality_slides(deck)
     parts = {}
-    defect_colors = defect_chart_colors(quarter.rankings)
     period_label = quarter.period.replace("-", " ")
     if quarter.date_to:
         start, end = (date.fromisoformat(day) for day in (quarter.date_from, quarter.date_to))
@@ -1106,37 +991,7 @@ def write_powerpoint(template, output, quarter):
                       font=font(points, italic=True), fill="#333333", anchor="lm")
             return png(image)
 
-        excel_filename = Path(output).with_suffix(".xlsx").name if output else f"HFPA-FTT-{quarter.period}.xlsx"
-        def add_hyperlink(shape):
-            hlink_id = f"rIdHlink{shape.shape_id}"
-            while any(item.get("Id") == hlink_id for item in rels):
-                hlink_id += "x"
-            etree.SubElement(rels, "{http://schemas.openxmlformats.org/package/2006/relationships}Relationship",
-                             Id=hlink_id,
-                             Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
-                             Target=excel_filename)
-            A_NS = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
-            R_NS = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
-            c_nv_pr = shape._element.xpath(".//p:cNvPr")[0]
-            for h in c_nv_pr.findall(A_NS + "hlinkClick"):
-                c_nv_pr.remove(h)
-            etree.SubElement(c_nv_pr, A_NS + "hlinkClick", attrib={R_NS + "id": hlink_id})
-
         replace_image(spec["period"], period_image)
-        for region in ("VN", "Indo"):
-            trend, top_model, top_defect = spec[region]
-            if excel.is_file():
-                # These template pictures are only placement slots. The saved
-                # Excel charts replace them below; no intermediate chart image.
-                continue
-            models, defects = quarter.rankings.get((metric, region), ([], []))
-            replace_image(trend, lambda image: trend_image(image, quarter, metric, region))
-            add_hyperlink(shapes[trend])
-            replace_image(top_model, lambda image: rank_image(image, metric, region, models))
-            add_hyperlink(shapes[top_model])
-            palette = [defect_colors[ColorManager.normalize_name(label)] for label, _, _ in defects]
-            replace_image(top_defect, lambda image: rank_image(image, metric, region, defects, palette))
-            add_hyperlink(shapes[top_defect])
         parts[slide_name] = slide.part.blob
         parts[f"ppt/slides/_rels/{Path(slide_name).name}.rels"] = etree.tostring(rels)
     for slide in consumer_slides:
@@ -1149,12 +1004,17 @@ def write_powerpoint(template, output, quarter):
                           "Prior-period figures use the saved template. ")
             note = (f"Quarterly HFPA summary {quarter.period}, through {quarter.date_to or quarter.covered[-1]}. "
                     f"{prior_note}"
-                    "VH = VH + VH2. JV = JV + JV2. CLG = VH + VH2 + JV + JV2. "
-                    "HFPA = 1 - total failed pairs / total inspected pairs. The vs PQ column shows the prior-period rate.")
+                    "Consumer Promise VH = arithmetic mean of monthly VN HFPA rates (VH + VH2). "
+                    "JV = arithmetic mean of monthly Indo HFPA rates (JV + JV2). "
+                    "CLG = (VN mean + Indo mean) / 2. Monthly regional HFPA = 1 - failed pairs / inspected pairs. "
+                    "Average unrounded rates and round only the displayed result. "
+                    "The vs PQ column shows the prior-period rate.")
             notes.text = "\n".join(line for line in notes.text.splitlines()
                                    if not line.startswith("Quarterly HFPA summary ")) + "\n" + note
             parts[str(slide.notes_slide.part.partname).lstrip("/")] = slide.notes_slide.part.blob
-    copy_package(template, output, parts)
-    if excel.is_file():
-        from .editable_charts import convert
-        convert(BytesIO(Path(output).read_bytes()), excel, output, excel)
+    # Do not publish the intermediate package if native Copy/Paste fails.
+    prepared = BytesIO()
+    copy_package(template, prepared, parts)
+    prepared.seek(0)
+    from .editable_charts import convert
+    convert(prepared, excel, output, excel, quarter=quarter)

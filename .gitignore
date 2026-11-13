@@ -5,8 +5,10 @@ __pycache__/
 
 # Pytest / Caches
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
+Cache/
 
 # Node / JS dependencies
 node_modules/
@@ -26,12 +28,17 @@ scratch/*.log
 # Runtime and generated report directories
 .runtime/
 outputs/
+work/
 Report/ToolRuns/
 Report/.validation-cache/
 Report/Comparisons/
 Report/CombinedExcel/
 Report/InputBackups/
+Report/QMSDocuments/
 Report/HFPAExports/
+report_tools/**/Output/
+report_tools/**/logs/
+report_tools/**/.backup/
 
 # Temporary and Office lock files
 ~$*.xlsx
@@ -50,3 +57,4 @@ Desktop.ini
 ehthumbs.db
 .vscode/
 .idea/
+.codex/

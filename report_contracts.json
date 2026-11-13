@@ -155,6 +155,24 @@
         "Audit Date": "Audit Date (dd-mmm-yyyy)",
         "Model": "Model 2"
       }
+    },
+    "hfpa_nike": {
+      "header_hints": ["Factory Group Cd_UccId", "Audit Sample Size", "Defect Q'ty (Total Defect Q'ty)"],
+      "required": ["Factory Group Cd_UccId", "Audit Date (dd-mmm-yyyy)", "Plant", "Line", "Model", "Audit Sample Size", "Defect Q'ty (Total Defect Q'ty)"],
+      "dates": ["Audit Date (dd-mmm-yyyy)"],
+      "numeric": ["Produced Q'ty", "Audit Sample Size", "Defective Q'ty(pair)", "Defect Q'ty (Total Defect Q'ty)"],
+      "keys": ["Factory Group Cd_UccId", "Plant", "Line", "Model"],
+      "multiple_sheets": false,
+      "report_mode": "NIKE"
+    },
+    "ftt_nike": {
+      "header_hints": ["Factory Code", "Inspection Date (dd-mmm-yyyy)", "Total A Grade Pairs"],
+      "required": ["Factory Code", "Plant", "Line", "Inspection Date (dd-mmm-yyyy)", "Model", "Total A Grade Pairs", "Total Rework", "Total B Grade Pairs (Reject)", "Total C Grade Pairs (Reject)"],
+      "dates": ["Inspection Date (dd-mmm-yyyy)"],
+      "numeric": ["Total A Grade Pairs", "1st Time Rework Pairs", "Total Rework", "Total B Grade Pairs (Reject)", "Total C Grade Pairs (Reject)"],
+      "keys": ["Factory Code", "Plant", "Line", "Model"],
+      "multiple_sheets": false,
+      "report_mode": "NIKE"
     }
   }
 }

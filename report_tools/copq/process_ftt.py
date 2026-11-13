@@ -928,6 +928,9 @@ def generate_ftt_report(
     for col_idx in range(2, 25):
         col_let = get_column_letter(col_idx)
         ws_pivot.column_dimensions[col_let].width = 25
+    # Preserve the custom color key rather than expanding its swatch column.
+    ws_pivot.column_dimensions['U'].width = 5
+    ws_pivot.column_dimensions['V'].width = 34
 
     # Save Output
     save_report(wb, output_file)

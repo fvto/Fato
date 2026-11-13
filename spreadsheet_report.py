@@ -83,8 +83,9 @@ def prepare(result,images=True):
         reported=finding_value(row,rule,'right') if row.get('right_rows') else exact_value(row,'report')
         expected=finding_value(row,rule,'left') if row.get('left_rows') else exact_value(row,'source')
         groups[key]['rows'].append({'index':index,'label':str(row.get('label') or ''),'location':f'{sheet}!{location}',
-                                   'reported':display_value(reported),'expected':display_value(expected),
-                                   'delta':display_value(delta_value(row),is_delta=True),
+                                   'reported':row.get('actual_display',display_value(reported)),
+                                   'expected':row.get('expected_display',display_value(expected)),
+                                   'delta':row.get('delta_display',display_value(delta_value(row),is_delta=True)),
                                    'reported_exact':reported,'expected_exact':expected,'delta_exact':delta_value(row),
                                    'reported_unrounded':row.get('actual_unrounded'),'expected_unrounded':row.get('expected_unrounded'),
                                    'reason':row.get('reason',''),'status':LABELS[row['status']],
@@ -93,6 +94,11 @@ def prepare(result,images=True):
         group['status']='; '.join(f'{label}: {count}' for label,count in Counter(row['status'] for row in group['rows']).items())
     workflow=result.get('workflow')
     scope=json_scope(workflow['scope']) if workflow else 'Theo các sheet / vùng dữ liệu đã chọn.'
+    if result.get('quick_summary'):
+        quick=result['quick_summary']
+        scope=quick['method']
+        if not quick['percent_checked']: scope+=' Không tìm thấy ô % để kiểm tra.'
+        if quick['unmatched_sheets']: scope+=f' Có {quick["unmatched_sheets"]} trang tính chưa ghép, chưa kiểm tra đủ %.'
     return dict(result=result,issues=issues,groups=list(groups.values()),tiles=tiles,
                 images=capture_images(tiles) if images else {},scope=scope)
 
@@ -186,9 +192,10 @@ def render_html(result):
     notes=workflow.get('warnings',[])+workflow.get('exclusions',[])
     extra=''.join(f'<li>{text(note)}</li>' for note in notes)
     exported=datetime.now(timezone(timedelta(hours=7))).strftime('%d/%m/%Y %H:%M UTC+7')
+    precision_note='Giá trị % hiển thị đầy đủ, không làm tròn.' if result.get('quick_summary') else 'Hiển thị tối đa 3 số lẻ, bỏ số 0 thừa.'
     return f'''<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'"><title>Báo cáo chênh lệch</title><style>{CSS}</style></head><body><main>
 <h1>Báo cáo chênh lệch</h1><p><b>{len(model['issues'])} mục khác nhau</b> · {len(model['groups'])} nhóm · <b>Sai số 0</b> · {exported}</p>
-<p class="muted">{text(model['scope'])}</p><p class="note">Hiển thị tối đa 3 số lẻ, bỏ số 0 thừa. {text(policy_label(result))}.</p>
+<p class="muted">{text(model['scope'])}</p><p class="note">{text(precision_note)} {text(policy_label(result))}.</p>
 <table class="group-table"><thead><tr><th>Phần kiểm tra</th><th>Vấn đề</th><th>Số mục</th><th>Chi tiết</th></tr></thead><tbody>{''.join(grouped)}</tbody></table>
 <details id="evidence"><summary>Ảnh highlight ({len(figures)})</summary><p class="note">Vàng: ô cần kiểm tra. Xanh: đầu vào. Ảnh dựng từ dữ liệu Excel, đã nhúng để xem offline.</p>{''.join(figures)}</details>
 <details class="method"><summary>Nguồn và phương pháp</summary><p>Mã kết quả: {text(result['id'])}. {text(policy_label(result))}.</p><ul>{sources}</ul><ul>{extra}</ul></details>

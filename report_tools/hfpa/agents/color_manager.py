@@ -49,6 +49,7 @@ COLOR_FAMILIES = {
 
 # Aliases mapping minor spelling / wording variations to canonical template defect names
 KNOWN_DEFECT_ALIASES: Dict[str, str] = {
+    "lacing": "lace",
     "damagedscratch": "damagescratch",
     "distancedecostitchtobiteline": "distancebetweendecostitchbiteline",
     "distancedecostitchbiteline": "distancebetweendecostitchbiteline",
@@ -136,7 +137,7 @@ class ColorManager:
                     if hex_val:
                         h_clean = str(hex_val).strip().replace("#", "").upper()
                         if len(h_clean) == 6:
-                            exact_map[d_raw.lower()] = h_clean
+                            exact_map[" ".join(d_raw.lower().split())] = h_clean
                             norm_map[d_norm] = h_clean
                             existing_hexes.add(h_clean)
 
@@ -145,16 +146,29 @@ class ColorManager:
             for r in range(2, ws_bc.max_row + 1):
                 dname = ws_bc.cell(r, 1).value
                 hex_val = ws_bc.cell(r, 5).value
+                if not hex_val and dname:
+                    rgb = [ws_bc.cell(r, col).value for col in (2, 3, 4)]
+                    if all(isinstance(value, (int, float)) and 0 <= value <= 255 for value in rgb):
+                        hex_val = self.rgb_to_hex(*(int(value) for value in rgb))
                 if dname and str(dname).strip() and hex_val:
                     h_clean = str(hex_val).strip().replace("#", "").upper()
                     if len(h_clean) == 6:
                         d_raw = str(dname).strip()
-                        exact_map[d_raw.lower()] = h_clean
+                        exact_map[" ".join(d_raw.lower().split())] = h_clean
                         norm_map[self.normalize_name(d_raw)] = h_clean
                         existing_hexes.add(h_clean)
 
         wb.close()
         return exact_map, norm_map, existing_hexes, last_row
+
+    def load_color_map(self) -> Dict[str, str]:
+        """Expose exact, normalized and known alias keys for HFPA consumers."""
+        exact, normalized, _, _ = self.load_existing_template()
+        colors = {**exact, **normalized}
+        for alias, canonical in KNOWN_DEFECT_ALIASES.items():
+            if canonical in normalized:
+                colors[alias] = normalized[canonical]
+        return colors
 
     def sync_reference_colors(self, reference_path: str) -> None:
         """Apply the Re-Inspection reference to shared defects in this run's copy."""

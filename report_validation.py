@@ -230,6 +230,7 @@ def validate_file(path, tool, group, period, *, mime=None, normalize=False):
         bc_quantity="0",
         business_exclusions=dict(rework_rows=0, rework_cost="0"),
         category_counts={},
+        hfpa_fail_count=0,
     )
 
     def issue(message, sheet=None, row=None, column=None, *, cell_type=None):
@@ -541,6 +542,8 @@ def validate_file(path, tool, group, period, *, mime=None, normalize=False):
                     result["category_counts"][category] = (
                         result["category_counts"].get(category, 0) + 1
                     )
+            if schema_id == "hfpa" and values[labels.index("Pass/Fail")] == "Fail":
+                result["hfpa_fail_count"] += 1
             if schema_id == "ftt":
                 metric = str(values[labels.index("Metric")] or "").strip()
                 defect = str(values[labels.index("Defect Issues")] or "").strip()
@@ -584,3 +587,52 @@ def validate_file(path, tool, group, period, *, mime=None, normalize=False):
             path.unlink()  # only the isolated staged copy
         result["staged_name"] = destination.name
     return result
+
+
+def validate_reinspection_coverage(reports, *, plant_of):
+    """Compare audit record counts per plant after individual file validation.
+
+    QC and MA each cover at least the failed HFPA lots; MA also covers QC.
+    Missing source files are handled by acquisition/completeness checks. Keep
+    this comparison outside the per-file cache: its result depends on both files.
+    """
+    sources = {}
+    for report in reports:
+        if report["valid"] and report["group"] in ("hfpa", "reinspection"):
+            plant = plant_of(report["name"])
+            if plant:
+                sources.setdefault(plant, {})[report["group"]] = report
+    checks = []
+    for plant, groups in sources.items():
+        reinspection = groups.get("reinspection")
+        if reinspection is None:
+            continue
+        counts = reinspection["category_counts"]
+        qc, ma = counts.get("QC", 0), counts.get("MA", 0)
+        comparisons = []
+        if "hfpa" in groups:
+            fail = groups["hfpa"]["hfpa_fail_count"]
+            comparisons.extend([
+                ("qc_hfpa", "QC", qc, "HFPA Fail", fail),
+                ("ma_hfpa", "MA", ma, "HFPA Fail", fail),
+            ])
+        comparisons.append(("ma_qc", "MA", ma, "QC", qc))
+        for rule, category, actual, reference, minimum in comparisons:
+            passed = actual >= minimum
+            message = (
+                f"{plant}: số lượt kiểm {category} = {actual}; "
+                f"{reference} = {minimum}. "
+                + ("Đạt yêu cầu." if passed else
+                   f"{category} phải bằng hoặc lớn hơn {reference}; thiếu {minimum - actual} lượt.")
+            )
+            rule_id = f"reinspection.{plant}.{rule}"
+            checks.append(dict(rule=rule_id, status="passed" if passed else "error",
+                               message=message, expected=minimum, actual=actual))
+            if not passed:
+                reinspection["error_count"] += 1
+                if len(reinspection["issues"]) < 100:
+                    reinspection["issues"].append(dict(
+                        sheet=reinspection["sheets"][0]["name"], row=None, column=None,
+                        rule=rule_id, message=message))
+                reinspection["valid"] = False
+    return checks

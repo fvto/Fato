@@ -4,18 +4,18 @@
 update_copq_pptx.py
 ===================
 Clone the COPQ/FTT PowerPoint report and update its data for a new reporting
-period, preserving 100% of structure/layout/formatting/fonts/colors/position.
+period using the existing template layout.
 
 SAFETY (hard):
   * Original .pptx is NEVER modified (we copy it first).
-  * Existing chart categories & series are KEPT; only their numeric values
+  * COPQ chart categories & series are KEPT; only their numeric values
     (and, where the period changes them, category labels) are rewritten by a
     (series x category) lookup.
-  * Missing data -> OLD value kept + WARNING logged (never fabricated).
-  * A defect type not present as a series in that chart -> that chart is SKIPPED
-    (kept unchanged) and flagged for the user to supply a color; we never
-    auto-invent a color or silently add/remove series.
-  * Chart type never changed; slides/charts never added or deleted.
+  * Missing COPQ data -> OLD value kept + WARNING logged (never fabricated).
+  * The four FTT defect charts and their cell-based legends are copied from
+    FTT_Combined_Report.xlsx through Office, preserving all source defects.
+    They replace the corresponding template slots. No FTT chart is rebuilt
+    from raw data or recolored in PowerPoint.
 
 DATA CONTRACT (verified read-only):
   * COPQ_Clean.xlsx : one sheet per site (VH,VH2,VH3,VH4,JV,JV2,JV3). JV3->JVB.
@@ -31,10 +31,8 @@ import os
 import sys
 import shutil
 import logging
-import io
 import math
 from lxml import etree
-from PIL import Image, ImageDraw, ImageFont
 
 import pandas as pd
 from pptx import Presentation
@@ -59,6 +57,7 @@ for p in (BASE, os.path.join(BASE, "Source")):
         sys.path.insert(0, p)
 
 from monthly_reporting import classify_copq_type
+from copq_office_charts import copy_ftt_charts
 
 SRC_PPTX  = os.path.join(BASE, "Template_COPQ", "Template_COPQ.pptx")
 COPQ_XLSX = os.path.join(OUT_DIR, "COPQ_Clean.xlsx")
@@ -98,7 +97,7 @@ ANALYSIS_CHART_LAYOUT = {
     },
     3: {
         "model": [("Chart 4", 115503, 2103120, 2598821, 2280920), ("Chart 13", 3208235, 2135019, 2578691, 2281555), ("Chart 15", 6198669, 2103120, 2551801, 2324452), ("Chart 17", 9211377, 2103120, 2541069, 2223346)],
-        "pie": [("Chart 9", 335280, 4480560, 1828800, 2286000), ("Chart 11", 3616960, 4480560, 1828800, 2286000), ("Chart 19", 6664960, 4480560, 1828800, 2286000), ("Chart 21", 9540240, 4480560, 1869440, 2302510)],
+        "pie": [("Chart 9", 335280, 4920000, 1828800, 1900000), ("Chart 11", 3616960, 4920000, 1828800, 1900000), ("Chart 19", 6664960, 4920000, 1828800, 1900000), ("Chart 21", 9540240, 4920000, 1869440, 1900000)],
     },
 }
 
@@ -397,10 +396,34 @@ def set_series_categories(ser, cats):
         v = etree.SubElement(pt, qn('c:v'))
         v.text = str(c)
 
-def format_model_chart(chart):
+def strip_filtered_extensions(chart):
+    """Strip Microsoft Office 2013+ filtered extensions (c:extLst) so PowerPoint displays newly updated live data without falling back to stale filtered cache."""
+    plot_area = chart._chartSpace.chart.plotArea
+    for ext in list(plot_area.iter(qn('c:extLst'))):
+        p = ext.getparent()
+        if p is not None:
+            p.remove(ext)
+
+def format_model_chart(chart, rot=-35, font_sz=650):
     """Keep model chart labels readable after replacing template cache data."""
     plot_area = chart._chartSpace.chart.plotArea
-    for axis in list(plot_area.iter(qn('c:catAx'))) + list(plot_area.iter(qn('c:valAx'))):
+
+    # Ensure manualLayout leaves enough room at bottom for rotated category labels
+    ml = plot_area.find('.//' + qn('c:manualLayout'))
+    if ml is not None:
+        y_el = ml.find(qn('c:y'))
+        h_el = ml.find(qn('c:h'))
+        if y_el is not None and h_el is not None:
+            try:
+                y_val = float(y_el.attrib.get('val', '0.2'))
+                h_val = float(h_el.attrib.get('val', '0.58'))
+                if y_val + h_val > 0.80:
+                    y_el.set('val', '0.18')
+                    h_el.set('val', '0.58')
+            except Exception:
+                pass
+
+    for axis in list(plot_area.iter(qn('c:catAx'))):
         tx_pr = axis.find(qn('c:txPr'))
         if tx_pr is None:
             tx_pr = etree.SubElement(axis, qn('c:txPr'))
@@ -408,16 +431,28 @@ def format_model_chart(chart):
         if body_pr is None:
             body_pr = etree.SubElement(tx_pr, qn('a:bodyPr'))
         body_pr.set('wrap', 'none')
+        body_pr.set('rot', str(int(rot * 60000)))
+        body_pr.set('vertOverflow', 'clip')
         for latin in tx_pr.iter(qn('a:latin')):
             latin.set('typeface', 'Arial')
         for def_rpr in tx_pr.iter(qn('a:defRPr')):
-            def_rpr.set('sz', '600')
+            def_rpr.set('sz', str(font_sz))
+
+    for axis in list(plot_area.iter(qn('c:valAx'))):
+        tx_pr = axis.find(qn('c:txPr'))
+        if tx_pr is not None:
+            for def_rpr in tx_pr.iter(qn('a:defRPr')):
+                def_rpr.set('sz', '600')
 
     for ser in _ser_elements(chart):
         d_lbl_groups = ser.findall(qn('c:dLbls'))
         if not d_lbl_groups:
             continue
         for d_lbls in d_lbl_groups:
+            pos = d_lbls.find(qn('c:dLblPos'))
+            if pos is None:
+                pos = etree.SubElement(d_lbls, qn('c:dLblPos'))
+            pos.set('val', 'outEnd')
             num_fmts = list(d_lbls.iter(qn('c:numFmt')))
             if not num_fmts:
                 num_fmts = [etree.SubElement(d_lbls, qn('c:numFmt'))]
@@ -435,6 +470,7 @@ def format_model_chart(chart):
                 for def_rpr in tx_pr.iter(qn('a:defRPr')):
                     def_rpr.set('sz', '700')
                     def_rpr.set('b', '1')
+    strip_filtered_extensions(chart)
 
 def set_series_color(ser, hex_color):
     sp = ser.find(qn('c:spPr'))
@@ -483,11 +519,20 @@ def apply_analysis_layout(prs):
 # --------------------------------------------------------------------------
 # Updaters
 # --------------------------------------------------------------------------
-def clean_model_name(name, max_len=26):
+def clean_model_name(name, max_len=22):
     """Clean model name: collapse whitespace, trim, limit length cleanly."""
     if not isinstance(name, str) or str(name).strip().lower() in ("none", "nan", ""):
         return ""
     s = " ".join(name.strip().split())
+    # Smart strip common brand prefixes but preserve gender qualifiers (WMNS, W)
+    if s.upper().startswith("WMNS NIKE "):
+        s = "WMNS " + s[10:].strip()
+    elif s.upper().startswith("W NIKE "):
+        s = "W " + s[7:].strip()
+    elif s.upper().startswith("NIKE SB "):
+        s = s[8:].strip()
+    elif s.upper().startswith("NIKE "):
+        s = s[5:].strip()
     if len(s) > max_len:
         return s[:max_len-2].strip() + ".."
     return s
@@ -582,6 +627,14 @@ def update_na_badges(prs, copq):
                 needed_slots.append((SITE_X[site], CAT_Y[cat]))
 
     na_shapes = [s for s in slide0.shapes if s.name == "Rectangle 64"]
+    while len(na_shapes) < len(needed_slots):
+        new_shp = slide0.shapes.add_shape(1, 0, 0, 383540, 245110)
+        new_shp.name = "Rectangle 64"
+        new_shp.fill.background()
+        new_shp.line.color.rgb = RGBColor(220, 220, 220)
+        new_shp.line.width = Pt(0.75)
+        na_shapes.append(new_shp)
+
     for i, (x, y) in enumerate(needed_slots):
         if i < len(na_shapes):
             shp = na_shapes[i]
@@ -607,16 +660,75 @@ def update_bottom_trend_charts(prs, copq):
     """Update Charts 32, 34, 36, 38, 40 at the bottom of Slide 0."""
     slide0 = list(prs.slides)[0]
 
+    def _format_bottom_labels(ch):
+        # The template rotates category text by -1000 degrees and enables
+        # ellipsis in a narrow margin. Reserve room and show horizontal site
+        # names on both the quantity and working-hours charts.
+        plot_area = ch._chartSpace.chart.plotArea
+        layout = plot_area.find(qn('c:layout'))
+        if layout is not None:
+            manual = layout.find(qn('c:manualLayout'))
+            if manual is not None:
+                for tag, value in (('x', '0.25'), ('y', '0.22'), ('w', '0.70'), ('h', '0.63')):
+                    element = manual.find(qn('c:' + tag))
+                    if element is not None:
+                        element.set('val', value)
+        for axis in plot_area.iter(qn('c:catAx')):
+            hidden = axis.find(qn('c:delete'))
+            if hidden is not None:
+                hidden.set('val', '0')
+            for body in axis.iter(qn('a:bodyPr')):
+                body.set('rot', '0')
+                body.set('vert', 'horz')
+                body.set('wrap', 'none')
+                body.set('vertOverflow', 'overflow')
+                for inset in ('lIns', 'rIns', 'tIns', 'bIns'):
+                    body.set(inset, '0')
+            for font in axis.iter(qn('a:defRPr')):
+                font.set('sz', '650')
+                font.set('b', '0')
+            for latin in axis.iter(qn('a:latin')):
+                latin.set('typeface', 'Arial')
+        for ser in _ser_elements(ch):
+            for dlbls in ser.findall(qn('c:dLbls')):
+                pos = dlbls.find(qn('c:dLblPos'))
+                if pos is None:
+                    pos = etree.SubElement(dlbls, qn('c:dLblPos'))
+                pos.set('val', 'outEnd')
+                for dl in dlbls.findall(qn('c:dLbl')):
+                    for ml in dl.findall(qn('c:layout')):
+                        dl.remove(ml)
+                    for ext in dl.findall(qn('c:extLst')):
+                        dl.remove(ext)
+                tx_prs = list(dlbls.iter(qn('c:txPr')))
+                if not tx_prs:
+                    tx_prs = [etree.SubElement(dlbls, qn('c:txPr'))]
+                for tx_pr in tx_prs:
+                    for body_pr in tx_pr.iter(qn('a:bodyPr')):
+                        body_pr.set('wrap', 'none')
+                        body_pr.set('lIns', '0')
+                        body_pr.set('rIns', '0')
+                        body_pr.set('tIns', '0')
+                        body_pr.set('bIns', '0')
+                        body_pr.set('vertOverflow', 'clip')
+                    for latin in tx_pr.iter(qn('a:latin')):
+                        latin.set('typeface', 'Arial')
+                    for def_rpr in tx_pr.iter(qn('a:defRPr')):
+                        def_rpr.set('sz', '650')
+                        def_rpr.set('b', '1')
+        strip_filtered_extensions(ch)
+
     # Chart 32: B/C Qty (prs) [JV2, JV, VH2, VH]
     ch32 = get_chart_by_name(slide0, "Chart 32")
     if ch32:
         vals = []
         for s in ["JV2", "JV", "VH2", "VH"]:
             df = copq.get(s)
-            v = df[df.apply(map_bar_cat, axis=1) == "B/C Grade"]["Defective Qty(Pair)"].sum() if df is not None else 0.0
-            vals.append(round(v, 1))
+            v = df[df.apply(map_bar_cat, axis=1) == "B/C Grade"]["Defective Qty(Pair)"].sum() if df is not None and not df.empty else 0.0
+            vals.append(round(v, 1) if v > 0.001 else None)
         for ser in _ser_elements(ch32):
-            set_series_values_ordered(ser, vals)
+            set_series_values_ordered(ser, vals, format_code='#,##0.0')
+        _format_bottom_labels(ch32)
         log.info(f"Chart 32 (B/C Qty): {vals}")
 
     # Chart 34: Re-inspection Qty (prs) [JVB, JV2, JV, VH3, VH2, VH]
@@ -625,10 +737,12 @@ def update_bottom_trend_charts(prs, copq):
         vals = []
         for s in ["JVB", "JV2", "JV", "VH3", "VH2", "VH"]:
             df = copq.get(s)
-            v = df[df.apply(map_bar_cat, axis=1) == "Re-inspection"]["Defective Qty(Pair)"].sum() if df is not None else 0.0
-            vals.append(round(v, 0))
+            v = df[df.apply(map_bar_cat, axis=1) == "Re-inspection"]["Defective Qty(Pair)"].sum() if df is not None and not df.empty else 0.0
+            vals.append(round(v, 0) if v > 0.001 else None)
         for ser in _ser_elements(ch34):
-            set_series_values_ordered(ser, vals)
+            set_series_values_ordered(ser, vals, format_code='#,##0')
+        _format_bottom_labels(ch34)
+        _set_chart_valax_max(ch34, 185000)
         log.info(f"Chart 34 (Re-insp Qty): {vals}")
 
     # Chart 36: Re-inspection Work hours [JVB, JV2, JV, VH3, VH2, VH]
@@ -637,10 +751,11 @@ def update_bottom_trend_charts(prs, copq):
         vals = []
         for s in ["JVB", "JV2", "JV", "VH3", "VH2", "VH"]:
             df = copq.get(s)
-            v = df[df.apply(map_bar_cat, axis=1) == "Re-inspection"]["Working hours"].sum() if df is not None else 0.0
-            vals.append(round(v, 1))
+            v = df[df.apply(map_bar_cat, axis=1) == "Re-inspection"]["Working hours"].sum() if df is not None and not df.empty else 0.0
+            vals.append(round(v, 1) if v > 0.001 else None)
         for ser in _ser_elements(ch36):
-            set_series_values_ordered(ser, vals)
+            set_series_values_ordered(ser, vals, format_code='#,##0.0')
+        _format_bottom_labels(ch36)
         log.info(f"Chart 36 (Re-insp Hours): {vals}")
 
     # Chart 38: Touch-up Qty (prs) [JV, VH4, VH2, VH]
@@ -649,10 +764,12 @@ def update_bottom_trend_charts(prs, copq):
         vals = []
         for s in ["JV", "VH4", "VH2", "VH"]:
             df = copq.get(s)
-            v = df[df.apply(map_bar_cat, axis=1) == "Touch up paint"]["Defective Qty(Pair)"].sum() if df is not None else 0.0
-            vals.append(round(v, 0))
+            v = df[df.apply(map_bar_cat, axis=1) == "Touch up paint"]["Defective Qty(Pair)"].sum() if df is not None and not df.empty else 0.0
+            vals.append(round(v, 0) if v > 0.001 else None)
         for ser in _ser_elements(ch38):
-            set_series_values_ordered(ser, vals)
+            set_series_values_ordered(ser, vals, format_code='#,##0')
+        _format_bottom_labels(ch38)
+        _set_chart_valax_max(ch38, 185000)
         log.info(f"Chart 38 (Touch-up Qty): {vals}")
 
     # Chart 40: Touch-up Work hours [JV, VH4, VH2, VH]
@@ -661,10 +778,15 @@ def update_bottom_trend_charts(prs, copq):
         vals = []
         for s in ["JV", "VH4", "VH2", "VH"]:
             df = copq.get(s)
-            v = df[df.apply(map_bar_cat, axis=1) == "Touch up paint"]["Working hours"].sum() if df is not None else 0.0
-            vals.append(round(v, 1))
+            v = df[df.apply(map_bar_cat, axis=1) == "Touch up paint"]["Working hours"].sum() if df is not None and not df.empty else 0.0
+            vals.append(round(v, 1) if v > 0.001 else None)
         for ser in _ser_elements(ch40):
-            set_series_values_ordered(ser, vals)
+            set_series_values_ordered(ser, vals, format_code='#,##0.0')
+        _format_bottom_labels(ch40)
+        log.info(f"Chart 40 (Touch-up Hours): {vals}")
+        for ser in _ser_elements(ch40):
+            set_series_values_ordered(ser, vals, format_code='#,##0.0')
+        _format_bottom_labels(ch40)
         log.info(f"Chart 40 (Touch-up Hours): {vals}")
 
 def update_slide1_monthly(prs):
@@ -699,6 +821,8 @@ def update_slide1_monthly(prs):
         jan_col = 18
 
     month_cols = list(range(jan_col, curr_col + 1))
+    if len(month_cols) > 7:
+        month_cols = month_cols[-7:]
     months = [str(ws.cell(2, c).value or "") for c in month_cols]
 
     site_row_map = {
@@ -721,25 +845,101 @@ def update_slide1_monthly(prs):
             set_series_categories(sers[0], months)
             set_series_categories(sers[1], months)
             set_series_values_ordered(sers[0], qty_vals)
-            set_series_values_ordered(sers[1], cost_vals)
+            set_series_values_ordered(sers[1], cost_vals, format_code='"$"#,##0')
 
-            # Set font size to 7.5pt (sz=750) horizontally (rot=0)
-            _format_monthly_cost_labels(sers[1], rot=0, font_sz=750)
+            _format_monthly_qty_labels(sers[0], qty_vals=qty_vals, rot=0, font_sz=700)
+            _format_monthly_cost_labels(sers[1], cost_vals=cost_vals, rot=0, font_sz=750)
+            strip_filtered_extensions(ch)
             log.info(f"Slide 1 monthly trend {info['name']} ({site}): Qty={qty_vals[-1]}, Cost=${cost_vals[-1]:,.2f}")
 
-def _format_monthly_cost_labels(ser, rot=0, font_sz=750):
-    """Format data labels for monthly trend cost series horizontally with 7.5pt font size."""
+def _format_monthly_qty_labels(ser, qty_vals=None, rot=0, font_sz=700):
+    """Format data labels for monthly trend qty series horizontally with bottom position.
+    Suppresses 0-value labels to avoid collision at zero axis."""
     dlbls = ser.xpath('.//c:dLbls')
     if dlbls:
         dl = dlbls[0]
+        for ind_dl in dl.findall(qn('c:dLbl')):
+            for ml in ind_dl.findall(qn('c:layout')):
+                ind_dl.remove(ml)
+            for ext in ind_dl.findall(qn('c:extLst')):
+                ind_dl.remove(ext)
+            pos_i = ind_dl.find(qn('c:dLblPos'))
+            if pos_i is not None:
+                pos_i.set('val', 'b')
+
+        if qty_vals:
+            for i, q in enumerate(qty_vals):
+                if q == 0 or q < 0.001:
+                    d_del = etree.Element(qn('c:dLbl'))
+                    etree.SubElement(d_del, qn('c:idx'), val=str(i))
+                    etree.SubElement(d_del, qn('c:delete'), val='1')
+                    dl.insert(0, d_del)
+
+        pos = dl.find(qn('c:dLblPos'))
+        if pos is None:
+            pos = etree.SubElement(dl, qn('c:dLblPos'))
+        pos.set('val', 'b')
         txPr = dl.xpath('.//c:txPr')
         if txPr:
             bodyPr = txPr[0].xpath('.//a:bodyPr')
             if bodyPr:
                 bodyPr[0].attrib['rot'] = str(rot)
+                bodyPr[0].attrib['wrap'] = 'none'
+                bodyPr[0].attrib['lIns'] = '0'
+                bodyPr[0].attrib['rIns'] = '0'
             defRPr = txPr[0].xpath('.//a:defRPr')
             if defRPr:
                 defRPr[0].attrib['sz'] = str(font_sz)
+                defRPr[0].attrib['b'] = '1'
+
+def _format_monthly_cost_labels(ser, cost_vals=None, rot=0, font_sz=750):
+    """Format data labels for monthly trend cost series horizontally with top position.
+    Lifts 0-value labels slightly to avoid touching the zero axis marker."""
+    dlbls = ser.xpath('.//c:dLbls')
+    if dlbls:
+        dl = dlbls[0]
+        for ind_dl in dl.findall(qn('c:dLbl')):
+            for ml in ind_dl.findall(qn('c:layout')):
+                ind_dl.remove(ml)
+            for ext in ind_dl.findall(qn('c:extLst')):
+                ind_dl.remove(ext)
+            pos_i = ind_dl.find(qn('c:dLblPos'))
+            if pos_i is not None:
+                pos_i.set('val', 't')
+
+        if cost_vals:
+            for i, c in enumerate(cost_vals):
+                if c == 0 or c < 0.01:
+                    d_lift = etree.Element(qn('c:dLbl'))
+                    etree.SubElement(d_lift, qn('c:idx'), val=str(i))
+                    lay = etree.SubElement(d_lift, qn('c:layout'))
+                    ml = etree.SubElement(lay, qn('c:manualLayout'))
+                    etree.SubElement(ml, qn('c:y'), val='-0.04')
+                    etree.SubElement(d_lift, qn('c:dLblPos'), val='t')
+                    etree.SubElement(d_lift, qn('c:showLegendKey'), val='0')
+                    etree.SubElement(d_lift, qn('c:showVal'), val='1')
+                    etree.SubElement(d_lift, qn('c:showCatName'), val='0')
+                    etree.SubElement(d_lift, qn('c:showSerName'), val='0')
+                    etree.SubElement(d_lift, qn('c:showPercent'), val='0')
+                    etree.SubElement(d_lift, qn('c:showBubbleSize'), val='0')
+                    dl.insert(0, d_lift)
+
+        pos = dl.find(qn('c:dLblPos'))
+        if pos is None:
+            pos = etree.SubElement(dl, qn('c:dLblPos'))
+        pos.set('val', 't')
+        txPr = dl.xpath('.//c:txPr')
+        if txPr:
+            bodyPr = txPr[0].xpath('.//a:bodyPr')
+            if bodyPr:
+                bodyPr[0].attrib['rot'] = str(rot)
+                bodyPr[0].attrib['wrap'] = 'none'
+                bodyPr[0].attrib['lIns'] = '0'
+                bodyPr[0].attrib['rIns'] = '0'
+            defRPr = txPr[0].xpath('.//a:defRPr')
+            if defRPr:
+                defRPr[0].attrib['sz'] = str(font_sz)
+                defRPr[0].attrib['b'] = '1'
 
 
 def update_pie_chart_data(ch, cat_val_pairs, default_colors=None):
@@ -752,22 +952,20 @@ def update_pie_chart_data(ch, cat_val_pairs, default_colors=None):
     if not series:
         return
     ser = series[0]
-
-    cat_elem = ser.find(qn('c:cat'))
-    old_cats = []
-    if cat_elem is not None:
-        strref = cat_elem.find(qn('c:strRef'))
-        if strref is not None:
-            cache = strref.find(qn('c:strCache'))
-            if cache is not None:
-                pts = sorted(cache.findall(qn('c:pt')), key=lambda x: int(x.get('idx', 0)))
-                old_cats = [p.find(qn('c:v')).text if p.find(qn('c:v')) is not None else "" for p in pts]
-
     dpts = ser.findall(qn('c:dPt'))
 
     active_pairs = [(c, round(float(v), 2)) for c, v in cat_val_pairs if v is not None and float(v) > 0.0001]
     if not active_pairs:
-        active_pairs = [(cat_val_pairs[0][0], 0.0)] if cat_val_pairs else [("N/A", 0.0)]
+        set_series_categories(ser, [""])
+        set_series_values_ordered(ser, [None])
+        for dp in dpts:
+            ser.remove(dp)
+        for dlbls in ser.findall(qn('c:dLbls')):
+            for dl in list(dlbls):
+                dlbls.remove(dl)
+            dlbls.append(etree.Element(qn('c:delete'), val='1'))
+        strip_filtered_extensions(ch)
+        return
 
     new_cats = [c for c, _ in active_pairs]
     new_vals = [v for _, v in active_pairs]
@@ -790,9 +988,36 @@ def update_pie_chart_data(ch, cat_val_pairs, default_colors=None):
             line_fill = etree.SubElement(line, qn('a:solidFill'))
             etree.SubElement(line_fill, qn('a:srgbClr'), val='FFFFFF')
 
+    # Remove old manual offsets and individual txPr overrides in dLbl so PowerPoint auto bestFit avoids wrapping
+    for dlbls in ser.findall(qn('c:dLbls')):
+        for dl in dlbls.findall(qn('c:dLbl')):
+            for ml in dl.findall(qn('c:layout')):
+                dl.remove(ml)
+            for tx in dl.findall(qn('c:txPr')):
+                dl.remove(tx)
+        txPr = dlbls.find(qn('c:txPr'))
+        if txPr is None:
+            txPr = etree.SubElement(dlbls, qn('c:txPr'))
+        bodyPr = txPr.find(qn('a:bodyPr'))
+        if bodyPr is None:
+            bodyPr = etree.SubElement(txPr, qn('a:bodyPr'))
+        bodyPr.set('wrap', 'none')
+        for defRPr in txPr.iter(qn('a:defRPr')):
+            defRPr.set('sz', '750')
+            defRPr.set('b', '1')
+
+    strip_filtered_extensions(ch)
 
 def update_factory_pie(prs, copq):
     slide1 = list(prs.slides)[1]
+    # Safety layout: adjust JV2 pie chart height/top so it does not collide with footer
+    ch_jv2 = get_chart_by_name(slide1, "Chart 33")
+    if ch_jv2:
+        shp_jv2 = next((s for s in slide1.shapes if s.name == "Chart 33"), None)
+        if shp_jv2:
+            shp_jv2.top = 5120000
+            shp_jv2.height = 1300000
+
     for g in SLIDE1_GROUPS:
         site = g["site"]
         ch = get_chart_by_name(slide1, g["factory_pie"])
@@ -800,9 +1025,11 @@ def update_factory_pie(prs, copq):
             WARN.append(f"factory pie '{g['factory_pie']}' ({site}) not found"); continue
         df = copq.get(site)
         if df is None or df.empty:
-            WARN.append(f"factory pie ({site}): no COPQ data"); continue
+            update_pie_chart_data(ch, [])
+            continue
         bc = df[df.apply(map_bar_cat, axis=1) == "B/C Grade"]
-        if bc.empty:
+        if bc.empty or bc["Ttl cost ($)"].sum() < 0.01:
+            update_pie_chart_data(ch, [])
             continue
         fac_sum = bc.groupby("Factory")["Ttl cost ($)"].sum().to_dict()
         cat_val_pairs = sorted([(str(k), float(v)) for k, v in fac_sum.items()], key=lambda x: x[1], reverse=True)
@@ -813,21 +1040,30 @@ def update_top3_model(prs, copq):
     top5_charts = {"VH": "Chart 24", "VH2": "Chart 35",
                    "JV": "Chart 38", "JV2": "Chart 40"}
     slide1 = list(prs.slides)[1]
+    copq_top_models = {}
     for site, name in top5_charts.items():
         ch = get_chart_by_name(slide1, name)
         if ch is None:
             WARN.append(f"top3 model '{name}' ({site}) not found"); continue
         df = copq.get(site)
         if df is None or df.empty:
+            for ser in _ser_elements(ch):
+                set_series_categories(ser, ["", "", "", "", ""])
+                set_series_values_ordered(ser, [None, None, None, None, None])
+            strip_filtered_extensions(ch)
             WARN.append(f"top3 model ({site}): no COPQ data"); continue
         bc = df[df.apply(map_bar_cat, axis=1) == "B/C Grade"]
-        if bc.empty:
+        if bc.empty or bc["Ttl cost ($)"].sum() < 0.01:
+            for ser in _ser_elements(ch):
+                set_series_categories(ser, ["", "", "", "", ""])
+                set_series_values_ordered(ser, [None, None, None, None, None])
+            strip_filtered_extensions(ch)
             continue
         n = 5
         top = bc.groupby("Model")["Ttl cost ($)"].sum().sort_values(ascending=False).head(n)
-        # Reverse order so highest cost model is at the TOP of the horizontal bar chart
+        copq_top_models[site] = top.head(3).index.tolist()
         top_asc = top.iloc[::-1]
-        cats = [clean_model_name(str(m)) for m in top_asc.index]
+        cats = [clean_model_name(str(m), max_len=20) for m in top_asc.index]
         vals = [round(float(v), 2) for v in top_asc.values]
         while len(cats) < n:
             cats.insert(0, "")
@@ -836,18 +1072,22 @@ def update_top3_model(prs, copq):
             set_series_categories(ser, cats)
             set_series_values_ordered(ser, vals)
 
+        format_model_chart(ch, rot=0, font_sz=650)
+
         # Enforce Safe Zone: Dynamically scale valAx max so horizontal bars and labels
         # never encroach or collide with the adjacent 'Top 3 Defect' stacked chart!
         valid_vals = [v for v in vals if v is not None and v > 0]
         if valid_vals:
             max_cost = max(valid_vals)
-            default_min = 4000 if site == "JV" else 2000
-            dynamic_max = max(default_min, max_cost * 15.0)
+            default_min = 3000 if site == "JV" else 1500
+            dynamic_max = max(default_min, max_cost * 4.2)
             rounded_max = int(math.ceil(dynamic_max / 1000.0) * 1000)
             _set_chart_valax_max(ch, rounded_max)
             log.info(f"top model ({site}) -> valAx max scaled to {rounded_max} for safe zone")
 
+        strip_filtered_extensions(ch)
         log.info(f"top model ({site}) -> {[c for c in cats if c]}")
+    return copq_top_models
 
 
 def _set_chart_valax_max(ch, max_val):
@@ -863,359 +1103,6 @@ def _set_chart_valax_max(ch, max_val):
             else:
                 etree.SubElement(scaling[0], qn('c:max'), val=str(int(max_val)))
 
-def _is_dark_hex(hex_str):
-    """Return True if hex color is visually dark (needs white font)."""
-    h = str(hex_str).lstrip("#")
-    if len(h) == 8:
-        h = h[2:]
-    try:
-        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
-        lum = 0.299 * r + 0.587 * g + 0.114 * b
-        return lum < 128
-    except Exception:
-        return False
-
-def _build_ser(idx, name, cats, vals, hex_color):
-    """Construct a <c:ser> matching the exact structure and formatting of the format file."""
-    ser = etree.Element(qn('c:ser'))
-    etree.SubElement(ser, qn('c:idx'), val=str(idx))
-    etree.SubElement(ser, qn('c:order'), val=str(idx))
-
-    # tx
-    tx = etree.SubElement(ser, qn('c:tx'))
-    strref = etree.SubElement(tx, qn('c:strRef'))
-    etree.SubElement(strref, qn('c:f')).text = f"'[FTT_Combined_Report.xlsx]Top Defects Summary'!$A${idx + 2}"
-    cache = etree.SubElement(strref, qn('c:strCache'))
-    etree.SubElement(cache, qn('c:ptCount'), val='1')
-    pt0 = etree.SubElement(cache, qn('c:pt'), idx='0')
-    etree.SubElement(pt0, qn('c:v')).text = str(name)
-
-    # spPr (series fill color)
-    spPr = etree.SubElement(ser, qn('c:spPr'))
-    sf = etree.SubElement(spPr, qn('a:solidFill'))
-    etree.SubElement(sf, qn('a:srgbClr'), val=hex_color)
-
-    # dLbls: MATCHING FORMAT FILE EXACTLY (numbers only, no shoe names, no defect names, no legend keys)
-    dlbls = etree.SubElement(ser, qn('c:dLbls'))
-    etree.SubElement(dlbls, qn('c:numFmt'), formatCode='0.00%', sourceLinked='1')
-
-    dl_spPr = etree.SubElement(dlbls, qn('c:spPr'))
-    etree.SubElement(dl_spPr, qn('a:noFill'))
-    dl_ln = etree.SubElement(dl_spPr, qn('a:ln'))
-    etree.SubElement(dl_ln, qn('a:noFill'))
-
-    font_color = "FFFFFF" if _is_dark_hex(hex_color) else "000000"
-    txPr = etree.SubElement(dlbls, qn('c:txPr'))
-    etree.SubElement(txPr, qn('a:bodyPr'), rot='0', vert='horz', wrap='square', anchor='ctr', anchorCtr='1', lIns='38100', tIns='19050', rIns='38100', bIns='19050')
-    etree.SubElement(txPr, qn('a:lstStyle'))
-    p = etree.SubElement(txPr, qn('a:p'))
-    pPr = etree.SubElement(p, qn('a:pPr'))
-    defRPr = etree.SubElement(pPr, qn('a:defRPr'), lang='en-US', sz='600', b='1', i='0', u='none', strike='noStrike', kern='1200', baseline='0')
-    solidFill = etree.SubElement(defRPr, qn('a:solidFill'))
-    etree.SubElement(solidFill, qn('a:srgbClr'), val=font_color)
-    etree.SubElement(defRPr, qn('a:latin'), typeface='+mn-lt')
-    etree.SubElement(defRPr, qn('a:cs'), typeface='+mn-cs')
-
-    etree.SubElement(dlbls, qn('c:dLblPos'), val='ctr')
-    etree.SubElement(dlbls, qn('c:showLegendKey'), val='0')
-    etree.SubElement(dlbls, qn('c:showVal'), val='1')
-    etree.SubElement(dlbls, qn('c:showCatName'), val='0')
-    etree.SubElement(dlbls, qn('c:showSerName'), val='0')
-    etree.SubElement(dlbls, qn('c:showPercent'), val='0')
-    etree.SubElement(dlbls, qn('c:showBubbleSize'), val='0')
-    etree.SubElement(dlbls, qn('c:showLeaderLines'), val='0')
-
-    # cat
-    cat = etree.SubElement(ser, qn('c:cat'))
-    cref = etree.SubElement(cat, qn('c:strRef'))
-    etree.SubElement(cref, qn('c:f')).text = "'[FTT_Combined_Report.xlsx]Top Defects Summary'!$A$1"
-    ccache = etree.SubElement(cref, qn('c:strCache'))
-    etree.SubElement(ccache, qn('c:ptCount'), val=str(len(cats)))
-    for i, c in enumerate(cats):
-        cpt = etree.SubElement(ccache, qn('c:pt'), idx=str(i))
-        etree.SubElement(cpt, qn('c:v')).text = str(c)
-
-    # val: ONLY non-zero points are added to numCache (matching format file)
-    val = etree.SubElement(ser, qn('c:val'))
-    vref = etree.SubElement(val, qn('c:numRef'))
-    etree.SubElement(vref, qn('c:f')).text = "'[FTT_Combined_Report.xlsx]Top Defects Summary'!$A$1"
-    vcache = etree.SubElement(vref, qn('c:numCache'))
-    etree.SubElement(vcache, qn('c:formatCode')).text = "0.00%"
-    etree.SubElement(vcache, qn('c:ptCount'), val=str(len(vals)))
-    for i, x in enumerate(vals):
-        if x is not None and x > 0.0001:
-            vpt = etree.SubElement(vcache, qn('c:pt'), idx=str(i))
-            etree.SubElement(vpt, qn('c:v')).text = str(x)
-
-    return ser
-
-def load_ftt_top_defects_from_excel(ftt_xlsx_path):
-    """
-    Load Top Defects Summary matrix directly from FTT_Combined_Report.xlsx.
-    Returns a dict mapping site -> {
-        'models': [model1, model2, model3],
-        'defects': [defect1, defect2, ...],
-        'matrix': {defect: [rate_m1, rate_m2, rate_m3]}
-    }
-    """
-    if not os.path.exists(ftt_xlsx_path):
-        return {}
-    try:
-        import openpyxl
-        wb = openpyxl.load_workbook(ftt_xlsx_path, data_only=False)
-        if "Top Defects Summary" not in wb.sheetnames:
-            return {}
-        ws = wb["Top Defects Summary"]
-        xl = pd.ExcelFile(ftt_xlsx_path)
-        site_dfs = {}
-        for s in ("VH", "VH2", "JV", "JV2"):
-            sheet = f"Site_{s}"
-            if sheet in xl.sheet_names:
-                df = xl.parse(sheet)
-                df["FTT_Qty"] = pd.to_numeric(df.get("FTT_Qty"), errors="coerce").fillna(0)
-                site_dfs[s] = df
-
-        out = {}
-        current_site = None
-        header_row = None
-        for r in range(1, ws.max_row + 1):
-            val = ws.cell(r, 1).value
-            if val in ("VH", "VH2", "JV", "JV2"):
-                current_site = val
-                header_row = r
-                defects = []
-                c = 2
-                while True:
-                    d_val = ws.cell(r, c).value
-                    if not d_val:
-                        break
-                    defects.append(str(d_val).strip())
-                    c += 1
-                out[current_site] = {'defects': defects, 'models': [], 'model_rows': []}
-            elif current_site and r <= header_row + 3 and val:
-                out[current_site]['models'].append(str(val).strip())
-                out[current_site]['model_rows'].append(r)
-
-        results = {}
-        for site, info in out.items():
-            defects = info['defects']
-            models = info['models']
-            model_rows = info['model_rows']
-            df = site_dfs.get(site)
-            matrix = {d: [0.0] * len(models) for d in defects}
-            if df is not None and not df.empty:
-                for m_idx, (model_name, r_idx) in enumerate(zip(models, model_rows)):
-                    m_df = df[df["Model"] == model_name]
-                    ttl_qty = float(m_df["FTT_Qty"].sum())
-                    for d_idx, defect_name in enumerate(defects, start=2):
-                        cell = ws.cell(r_idx, d_idx)
-                        if cell.value is not None:
-                            d_qty = float(m_df[m_df["Defect_Issue"] == defect_name]["FTT_Qty"].sum())
-                            rate = (d_qty / ttl_qty) if ttl_qty > 0 else 0.0
-                            matrix[defect_name][m_idx] = rate
-                        else:
-                            matrix[defect_name][m_idx] = 0.0
-            results[site] = {'models': models, 'defects': defects, 'matrix': matrix}
-        return results
-    except Exception as e:
-        log.warning(f"Could not load Top Defects Summary from {ftt_xlsx_path}: {e}")
-        return {}
-
-def format_file_model_name(name):
-    """Normalize model name to match the exact format file spelling."""
-    s = " ".join(str(name).strip().split())
-    if "WINFLO 12" in s and "WIDE" in s:
-        return "NIKE AIR WINFLO 12"
-    return s
-
-def update_top3_defect(prs, ftt, palette):
-    summary_data = load_ftt_top_defects_from_excel(FTT_XLSX)
-    slide1 = list(prs.slides)[1]
-    for g in SLIDE1_GROUPS:
-        site = g["site"]
-        name = g["defect"]
-        ch = get_chart_by_name(slide1, name)
-        if ch is None:
-            WARN.append(f"top3 defect '{name}' ({site}) not found"); continue
-
-        if summary_data and site in summary_data:
-            info = summary_data[site]
-            raw_models = info['models']
-            models = [format_file_model_name(m) for m in raw_models]
-            defects = info['defects']
-            matrix = info['matrix']
-
-            series = _ser_elements(ch)
-            if not series:
-                WARN.append(f"top3 defect ({site}): no <c:ser> found"); continue
-            parent = series[0].getparent()
-            for s in series:
-                parent.remove(s)
-
-            for i, d in enumerate(defects):
-                norm_d = norm_defect(d)
-                col = palette.get(norm_d, "BFBFBF")
-                vals = matrix.get(d, [0.0] * len(models))
-                parent.append(_build_ser(i, d, models, vals, col))
-            log.info(f"top3 defect ({site}) mapped from FTT Top Defects Summary: "
-                     f"{len(defects)} series, models={models}")
-            continue
-
-        df = ftt.get(site)
-        if df is None or df.empty:
-            WARN.append(f"top3 defect ({site}): no FTT site sheet"); continue
-        series = _ser_elements(ch)
-        if not series:
-            WARN.append(f"top3 defect ({site}): no <c:ser> found -> skipped"); continue
-        # Keep ORIGINAL display labels (e.g. "C/X-ray", "C/Bond gap / Rat hole")
-        # for the legend. Only normalize for palette/lookup matching.
-        existing_raw = [_ser_name(s) for s in series if _ser_name(s)]
-        existing_norm = [norm_defect(n) for n in existing_raw]
-        display = dict(zip(existing_norm, existing_raw))
-        n = len(_cat_strs(series[0]))
-        model_tot = df.groupby("Model")["FTT_Qty"].sum().sort_values(ascending=False)
-        models = [str(m) for m in model_tot.head(n).index]
-        sub = df[df["Model"].isin(models)]
-        pivot = (sub.pivot_table(index="Model", columns="Defect_Issue",
-                                 values="FTT_Qty", aggfunc="sum").fillna(0)
-                 .reindex(models).fillna(0))
-        pivot_norm = pivot.copy()
-        pivot_norm.columns = [norm_defect(c) for c in pivot.columns]
-        if DEFECT_VALUE_MODE == "proportion":
-            pivot_norm = pivot_norm.div(pivot_norm.sum(axis=1).replace(0, 1), axis=0)
-        new_defects = [d for d in pivot_norm.columns if d not in existing_norm]
-        missing_pal = [d for d in new_defects if str(d).strip() not in palette]
-        if missing_pal:
-            raise SystemExit(
-                f"\n[STOP] Top-3 Defect ({site}) needs color for new defect "
-                f"type(s) not in palette: {missing_pal}\nAdd a color in "
-                f"Color_Defect.xlsx (or the FTT ColorMap) and re-run. "
-                f"Nothing was written yet.")
-        # Preserve existing order (and their original display labels); append new.
-        final_defects = [d for d in existing_norm if d in pivot_norm.columns] + new_defects
-        parent = series[0].getparent()
-        for s in series:
-            parent.remove(s)
-        for i, d in enumerate(final_defects):
-            col = palette.get(str(d).strip(), "BFBFBF")
-            vals = [float(pivot_norm.loc[m, d]) if (m in pivot_norm.index and d in pivot_norm.columns) else 0.0
-                    for m in models]
-            # Display label: original casing if it was an existing defect,
-            # otherwise use the original data spelling (pre-normalization) so new
-            # defects keep their natural "C/Name" form instead of a forced case.
-            label = display.get(d)
-            if label is None:
-                # find the original (raw) defect label from the pivot columns
-                raw = next((c for c in pivot.columns if norm_defect(c) == d), None)
-                label = raw if raw else str(d)
-            parent.append(_build_ser(i, label, models, vals, col))
-        log.info(f"top3 defect ({site}) rebuilt: {len(final_defects)} defect series, "
-                 f"models={models}")
-
-def render_defect_legend_png(site_name, defects_with_colors, scale=3):
-    """
-    Render a clean, high-DPI image of the Excel custom defect legend.
-    defects_with_colors: list of (defect_name, hex_color_str)
-    """
-    row_height = 20 * scale
-    col_color_w = 24 * scale
-    col_text_w = 176 * scale
-    total_w = col_color_w + col_text_w
-    num_rows = 1 + len(defects_with_colors)
-    total_h = num_rows * row_height
-
-    img = Image.new("RGB", (total_w, total_h), (255, 255, 255))
-    draw = ImageDraw.Draw(img)
-
-    try:
-        font_hdr = ImageFont.truetype("arialbd.ttf", 11 * scale)
-        font_row = ImageFont.truetype("arial.ttf", 9 * scale)
-    except Exception:
-        font_hdr = ImageFont.load_default()
-        font_row = ImageFont.load_default()
-
-    border_color = (180, 180, 180)
-    hdr_fill = (31, 78, 120)  # #1F4E78
-
-    # Row 0: Header
-    draw.rectangle([0, 0, total_w - 1, row_height - 1], fill=hdr_fill, outline=border_color, width=scale)
-    hdr_text = f"Site {site_name}"
-    bbox = draw.textbbox((0, 0), hdr_text, font=font_hdr)
-    tx = (total_w - (bbox[2] - bbox[0])) // 2
-    ty = (row_height - (bbox[3] - bbox[1])) // 2
-    draw.text((tx, ty), hdr_text, fill=(255, 255, 255), font=font_hdr)
-
-    # Rows: Defects
-    for i, (defect_name, hex_color) in enumerate(defects_with_colors, start=1):
-        y0 = i * row_height
-        y1 = y0 + row_height - 1
-
-        hex_clean = str(hex_color).lstrip("#")
-        if len(hex_clean) == 8:
-            hex_clean = hex_clean[2:]
-        try:
-            r = int(hex_clean[0:2], 16)
-            g = int(hex_clean[2:4], 16)
-            b = int(hex_clean[4:6], 16)
-            color_rgb = (r, g, b)
-        except Exception:
-            color_rgb = (180, 180, 180)
-
-        # Color box
-        draw.rectangle([0, y0, col_color_w - 1, y1], fill=color_rgb, outline=border_color, width=scale)
-
-        # Text box
-        draw.rectangle([col_color_w - 1, y0, total_w - 1, y1], fill=(255, 255, 255), outline=border_color, width=scale)
-        t_bbox = draw.textbbox((0, 0), defect_name, font=font_row)
-        text_y = y0 + (row_height - (t_bbox[3] - t_bbox[1])) // 2
-        text_x = col_color_w + 5 * scale
-        draw.text((text_x, text_y), defect_name, fill=(0, 0, 0), font=font_row)
-
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    return buf.getvalue()
-
-def update_slide1_legends(prs, palette):
-    """Replace outdated Slide 1 custom defect legend images with newly rendered PNGs
-    at the exact positions and dimensions from the format file."""
-    summary_data = load_ftt_top_defects_from_excel(FTT_XLSX)
-    if not summary_data:
-        return
-    slide1 = list(prs.slides)[1]
-    site_shapes = {
-        "VH": 66,
-        "VH2": 89,
-        "JV": 95,
-        "JV2": 99,
-    }
-    for site, shp_id in site_shapes.items():
-        if site not in summary_data:
-            continue
-        info = summary_data[site]
-        defects = info['defects']
-        defects_with_colors = []
-        for d in defects:
-            col = palette.get(norm_defect(d), "BFBFBF")
-            defects_with_colors.append((d, col))
-
-        matching = [s for s in slide1.shapes if s.shape_id == shp_id]
-        if not matching:
-            continue
-        shp = matching[0]
-        png_bytes = render_defect_legend_png(site, defects_with_colors, scale=3)
-        left = shp.left
-        top = shp.top
-        width = shp.width
-        height = shp.height
-
-        # Remove old placeholder / picture shape
-        parent = shp._element.getparent()
-        parent.remove(shp._element)
-
-        # Add new crisp PNG picture at exact original coordinates
-        slide1.shapes.add_picture(io.BytesIO(png_bytes), left, top, width=width, height=height)
-        log.info(f"Slide 1 legend ({site}) updated with {len(defects)} defects at ({left}, {top}, {width}, {height})")
-
 def update_all_slide_titles(prs, period_label):
     """Update title and subtitles across all slides to reflect period_label."""
     # Slide 0 Title
@@ -1228,7 +1115,7 @@ def update_all_slide_titles(prs, period_label):
                 p.runs[0].font.name = "Arial"
                 p.runs[0].font.size = Pt(20)
                 p.runs[0].font.bold = True
-                p.runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                p.runs[0].font.color.rgb = RGBColor(60, 77, 160)  # Chingluh Brand Navy #3C4DA0
             log.info(f"Slide 0 title -> 'Cost of Poor Quality (CoPQ)_{period_label}'")
             break
 
@@ -1625,10 +1512,14 @@ def update_slide2_reinspection(prs, copq):
             continue
         df = copq.get(site)
         sub = df[df.apply(map_bar_cat, axis=1) == "Re-inspection"] if df is not None and not df.empty else None
-        if sub is None or sub.empty:
+        if sub is None or sub.empty or sub["Ttl cost ($)"].sum() < 0.01:
+            for ser in _ser_elements(ch):
+                set_series_categories(ser, ["", "", ""])
+                set_series_values_ordered(ser, [None, None, None])
+            strip_filtered_extensions(ch)
             continue
         top = sub.groupby("Model")["Ttl cost ($)"].sum().sort_values(ascending=False).head(3)
-        cats = [clean_model_name(str(m), max_len=18) for m in top.index]
+        cats = [clean_model_name(str(m), max_len=22) for m in top.index]
         vals = [round(float(v), 2) for v in top.values]
         if len(cats) > 1:
             while len(cats) < 3:
@@ -1638,7 +1529,15 @@ def update_slide2_reinspection(prs, copq):
             set_series_categories(ser, cats)
             set_series_values_ordered(ser, vals)
             set_series_color(ser, "33CCFF")
-        format_model_chart(ch)
+        format_model_chart(ch, rot=-35, font_sz=650)
+        valid_vals = [v for v in vals if v is not None and v > 0]
+        if valid_vals:
+            max_v = max(valid_vals)
+            target_max = int(math.ceil((max_v * 1.25) / 100.0) * 100)
+            if target_max < 200:
+                target_max = int(math.ceil((max_v * 1.25) / 20.0) * 20)
+            _set_chart_valax_max(ch, max(target_max, 50))
+        strip_filtered_extensions(ch)
         log.info(f"Slide 2 models {name} ({site}): {cats} -> {vals}")
 
     # 3. Factory / Shopfloor Pie Charts
@@ -1656,7 +1555,8 @@ def update_slide2_reinspection(prs, copq):
             continue
         df = copq.get(site)
         sub = df[df.apply(map_bar_cat, axis=1) == "Re-inspection"] if df is not None and not df.empty else None
-        if sub is None or sub.empty:
+        if sub is None or sub.empty or sub["Ttl cost ($)"].sum() < 0.01:
+            update_pie_chart_data(ch, [])
             continue
         col_to_group = "Factory" if "Factory" in sub.columns else "Fty/Line"
         fac_sum = sub.groupby(col_to_group)["Ttl cost ($)"].sum().to_dict()
@@ -1715,10 +1615,14 @@ def update_slide3_touchup(prs, copq):
             continue
         df = copq.get(site)
         sub = df[df.apply(map_bar_cat, axis=1) == "Touch up paint"] if df is not None and not df.empty else None
-        if sub is None or sub.empty:
+        if sub is None or sub.empty or sub["Ttl cost ($)"].sum() < 0.01:
+            for ser in _ser_elements(ch):
+                set_series_categories(ser, ["", "", ""])
+                set_series_values_ordered(ser, [None, None, None])
+            strip_filtered_extensions(ch)
             continue
         top = sub.groupby("Model")["Ttl cost ($)"].sum().sort_values(ascending=False).head(3)
-        cats = [clean_model_name(str(m), max_len=18) for m in top.index]
+        cats = [clean_model_name(str(m), max_len=22) for m in top.index]
         vals = [round(float(v), 2) for v in top.values]
         if len(cats) > 1:
             while len(cats) < 3:
@@ -1728,7 +1632,15 @@ def update_slide3_touchup(prs, copq):
             set_series_categories(ser, cats)
             set_series_values_ordered(ser, vals)
             set_series_color(ser, "33CCFF")
-        format_model_chart(ch)
+        format_model_chart(ch, rot=-35, font_sz=650)
+        valid_vals = [v for v in vals if v is not None and v > 0]
+        if valid_vals:
+            max_v = max(valid_vals)
+            target_max = int(math.ceil((max_v * 1.25) / 100.0) * 100)
+            if target_max < 200:
+                target_max = int(math.ceil((max_v * 1.25) / 20.0) * 20)
+            _set_chart_valax_max(ch, max(target_max, 50))
+        strip_filtered_extensions(ch)
         log.info(f"Slide 3 models {name} ({site}): {cats} -> {vals}")
 
     # 3. Shopfloor / Factory Pie Charts
@@ -1744,7 +1656,8 @@ def update_slide3_touchup(prs, copq):
             continue
         df = copq.get(site)
         sub = df[df.apply(map_bar_cat, axis=1) == "Touch up paint"] if df is not None and not df.empty else None
-        if sub is None or sub.empty:
+        if sub is None or sub.empty or sub["Ttl cost ($)"].sum() < 0.01:
+            update_pie_chart_data(ch, [])
             continue
         col_to_group = "Factory" if "Factory" in sub.columns else "Fty/Line"
         fac_sum = sub.groupby(col_to_group)["Ttl cost ($)"].sum().to_dict()
@@ -1834,7 +1747,8 @@ def generate_copq_presentation(
     ftt_xlsx=None,
     src_pptx=None,
     db_overview=None,
-    db_type=None
+    db_type=None,
+    allow_linked_ftt=True
 ):
     global PERIOD_LABEL, DB_MONTH, OUT_PPTX, COPQ_XLSX, FTT_XLSX, SRC_PPTX, DB_OVERVIEW, DB_TYPE
 
@@ -1878,10 +1792,7 @@ def generate_copq_presentation(
     if not copq:
         log.warning("No COPQ data loaded from database; falling back to COPQ_Clean.xlsx")
         copq = load_copq()
-    ftt, cmap = load_ftt()
-
     prs = Presentation(target)
-    palette = build_palette(prs, cmap)
 
     # 1. Update Titles & Subtitles across all 4 slides
     update_all_slide_titles(prs, PERIOD_LABEL)
@@ -1897,8 +1808,8 @@ def generate_copq_presentation(
     update_slide1_monthly(prs)
     update_factory_pie(prs, copq)
     update_top3_model(prs, copq)
-    update_top3_defect(prs, ftt, palette)
-    update_slide1_legends(prs, palette)
+    # FTT charts and legends are transferred from Excel by Office after all
+    # python-pptx edits. Their contents and formatting are never regenerated.
 
     # 4. Slide 2: Re-Inspection Detail
     update_slide2_reinspection(prs, copq)
@@ -1906,7 +1817,7 @@ def generate_copq_presentation(
     # 5. Slide 3: Touch-Up Paint Detail
     update_slide3_touchup(prs, copq)
 
-    # 6. Apply reference-deck geometry only; all chart data was updated above.
+    # 6. Apply reference-deck geometry; native FTT transfer follows below.
     apply_analysis_layout(prs)
 
     # 7. Apply live interactive hyperlinks to all charts & summary tables
@@ -1919,6 +1830,9 @@ def generate_copq_presentation(
 
     # 8. Update internal chart OLE relationship targets (pass full absolute paths DB_OVERVIEW and DB_TYPE)
     update_pptx_chart_data_sources(target, DB_OVERVIEW, DB_TYPE, FTT_XLSX)
+    transfer = copy_ftt_charts(target, FTT_XLSX, allow_linked=allow_linked_ftt)
+    target = transfer['output']
+    log.info(f"FTT charts copied from Excel: {transfer}")
     log.info("-" * 70)
     verify_opens(target)
     log.info("=" * 70)

@@ -6,6 +6,7 @@ import spreadsheet_chat as chat
 from spreadsheet_chat_tools import artifact_csv
 from spreadsheet_compare_html import build_report
 import spreadsheet_workflows as workflows
+import spreadsheet_quick_compare as quick_compare
 
 blueprint = Blueprint('spreadsheet_compare', __name__)
 ISSUES = {'difference', 'missing_value', 'missing_input', 'formula_error', 'formula_uncached',
@@ -24,7 +25,7 @@ def page():
 
 @blueprint.route('/api/compare/chat/status')
 def chat_status():
-    return jsonify(chat.status())
+    return jsonify(chat.status(request.args.get('provider', 'codex')))
 
 
 @blueprint.route('/api/compare/chat/messages', methods=['POST'])
@@ -114,6 +115,7 @@ def download_workbook(workbook_id):
 
 
 def result_page(result):
+    result = quick_compare.with_row_deltas(result)
     status = request.args.get('status', 'issues')
     rows = result['results']
     if status == 'issues':
@@ -147,6 +149,11 @@ def preview_workflow():
     return jsonify(workflows.preview(request.get_json(silent=True) or {}))
 
 
+@blueprint.route('/api/compare/quick', methods=['POST'])
+def quick_check():
+    return jsonify(result_page(quick_compare.run(request.get_json(silent=True) or {})))
+
+
 @blueprint.route('/api/compare/workflows/<plan_id>/run', methods=['POST'])
 def run_workflow(plan_id):
     data = request.get_json(silent=True) or {}
@@ -162,7 +169,7 @@ def result(result_id):
 
 @blueprint.route('/api/compare/results/<result_id>/download.<extension>')
 def download(result_id, extension):
-    result = compare.read_result(result_id)
+    result = quick_compare.with_row_deltas(compare.read_result(result_id))
     if extension == 'pptx':
         from spreadsheet_pptx import pptx_bytes
         return Response(pptx_bytes(result),content_type='application/vnd.openxmlformats-officedocument.presentationml.presentation',

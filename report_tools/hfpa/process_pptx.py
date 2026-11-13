@@ -142,62 +142,11 @@ def get_label_font_color(hex_color):
 
 def load_defect_color_map(color_file_path=COLOR_TEMPLATE):
     """Load defect -> HEX color mapping from Color_template.xlsx."""
-    color_map = {}
-    if not os.path.exists(color_file_path):
-        print(f"[!] Warning: Color template file not found: {color_file_path}")
-        return color_map
-
     try:
-        wb = openpyxl.load_workbook(color_file_path, data_only=True)
-        # Scan sheets
-        for sheet_name in wb.sheetnames:
-            ws = wb[sheet_name]
-            for r in range(1, ws.max_row + 1):
-                for c in range(1, ws.max_column - 1):
-                    val = ws.cell(r, c).value
-                    if val and "defect" in str(val).lower() and "type" in str(val).lower():
-                        header_r = r
-                        defect_col = c
-                        hex_col = None
-                        r_col = g_col = b_col = None
-                        for sc in range(c + 1, ws.max_column + 1):
-                            sval = str(ws.cell(r, sc).value or "").strip().lower()
-                            if sval == "hex":
-                                hex_col = sc
-                            elif sval in ("red", "r"):
-                                r_col = sc
-                            elif sval in ("green", "g"):
-                                g_col = sc
-                            elif sval in ("blue", "b"):
-                                b_col = sc
-
-                        for dr in range(header_r + 1, ws.max_row + 1):
-                            dname = ws.cell(dr, defect_col).value
-                            if not dname or not str(dname).strip():
-                                continue
-                            norm_name = normalize_defect_name(dname)
-                            hex_val = None
-                            if hex_col:
-                                raw_hex = str(ws.cell(dr, hex_col).value or "").strip().lstrip("#")
-                                if re.fullmatch(r"[0-9A-Fa-f]{6}", raw_hex):
-                                    hex_val = raw_hex.upper()
-                            if not hex_val and r_col and g_col and b_col:
-                                try:
-                                    rv = int(float(ws.cell(dr, r_col).value or 0))
-                                    gv = int(float(ws.cell(dr, g_col).value or 0))
-                                    bv = int(float(ws.cell(dr, b_col).value or 0))
-                                    hex_val = f"{rv:02X}{gv:02X}{bv:02X}"
-                                except Exception:
-                                    pass
-                            if hex_val:
-                                color_map[norm_name] = hex_val
-                        break
-        wb.close()
-    except Exception as e:
-        print(f"[!] Error reading color mapping: {e}")
-
-    print(f"   [+] Loaded {len(color_map)} defect color mappings from {os.path.basename(color_file_path)}")
-    return color_map
+        from .agents.color_manager import ColorManager
+    except (ImportError, ValueError):
+        from agents.color_manager import ColorManager
+    return ColorManager(color_file_path).load_color_map()
 
 
 def get_defect_color(defect_name, color_map, fallback_cache):

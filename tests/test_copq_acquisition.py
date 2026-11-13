@@ -65,6 +65,52 @@ class AcquisitionTests(unittest.TestCase):
         fake.sync_playwright.assert_not_called()
         fake._execute_dynamic_action.assert_not_called()
 
+    def test_populated_copy_wins_over_newer_empty_export_with_same_name(self):
+        name = 'Cost Of Poor Quality 2026-09-01_2026-09-30-VH.xlsx'
+        populated = self.exports / 'older' / name
+        empty = self.exports / 'newer' / name
+        raw_file(populated, 'copq')
+        book = openpyxl.load_workbook(populated)
+        book.active.append(['2026-09-01', 'Internal', 'B/C', 'Factory 1', 12])
+        book.save(populated)
+        book.close()
+        raw_file(empty, 'copq')
+        book = openpyxl.load_workbook(empty)
+        book.active.append(['Count=0'])
+        book.save(empty)
+        book.close()
+        os.utime(populated, (100, 100))
+        os.utime(empty, (200, 200))
+        self.assertEqual(reports.input_catalog('copq')[0]['id'], 'sfc:newer/' + name)
+        plan = acquisition.plan('2026-09', 'combine')
+        self.assertEqual(len(plan['available']), 1)
+        self.assertEqual(acquisition.source_path(plan['available'][0]), populated)
+
+    def test_newest_populated_copy_keeps_priority_over_older_populated_copy(self):
+        name = 'Cost Of Poor Quality 2026-09-01_2026-09-30-VH.xlsx'
+        for directory, timestamp in [('older', 100), ('newer', 200)]:
+            path = self.exports / directory / name
+            raw_file(path, 'copq')
+            book = openpyxl.load_workbook(path)
+            book.active.append(['2026-09-01', 'Internal', 'B/C', 'Factory 1', 12])
+            book.save(path)
+            book.close()
+            os.utime(path, (timestamp, timestamp))
+        plan = acquisition.plan('2026-09', 'combine')
+        self.assertEqual(plan['available'][0]['id'], 'sfc:newer/' + name)
+
+    def test_legacy_xls_excel_date_is_recognized_as_populated(self):
+        import xlrd
+
+        headers = ['Date', 'Category', 'Type', 'Factory', 'Ttl cost ($)']
+        rows = [[SimpleNamespace(ctype=xlrd.XL_CELL_TEXT, value=v) for v in headers],
+                [SimpleNamespace(ctype=xlrd.XL_CELL_DATE, value=46266)] +
+                [SimpleNamespace(ctype=xlrd.XL_CELL_TEXT, value=v) for v in ['Internal', 'B/C', 'Factory 1', 12]]]
+        sheet = SimpleNamespace(nrows=2, row=lambda i: rows[i])
+        book = SimpleNamespace(datemode=0, sheet_by_index=lambda i: sheet, release_resources=lambda: None)
+        with patch('xlrd.open_workbook', return_value=book):
+            self.assertTrue(acquisition.valid_schema(str(self.root / 'legacy.xls'), 1, 1, 'copq', True))
+
     def test_auto_start_needs_no_manual_input_and_reserves_browser(self):
         with patch.object(reports.subprocess,'Popen'):
             run=reports.start_run('copq','2026-09','all',[],acquire_missing=True)

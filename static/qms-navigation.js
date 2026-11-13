@@ -1,6 +1,6 @@
 'use strict';
-// English labels are keyed by destination so refreshing the crawled memory cannot
-// bring translated labels back or change the original navigation URLs.
+// Prefer names, categories and codes from the live QMS menu. Older snapshots use
+// the English destination catalog below without changing their navigation URLs.
 window.QmsNavigation = (() => {
     const groups = ['Control Plan', 'Basic Information', 'QA Document', 'Collect Data',
         'Quality Database', 'Performance Management', 'Other Modules'];
@@ -8,7 +8,7 @@ window.QmsNavigation = (() => {
         ['id=Q101', 'Quality Risk', 0], ['id=Q102', 'PFMEA', 0], ['id=Q103', 'Order Information', 0],
         ['QAReason.aspx', 'Inspection Basic Data', 1], ['id=Q202', 'BDTS Rule', 1], ['id=Q203', 'Notification', 1],
         ['id=Q301', 'Inspection Strategy', 2], ['id=Q302', 'CTQ & CTP', 2],
-        ['QAReasonBasic.aspx', 'QA Manual', 2], ['id=Q304', 'Play Book/Guideline', 2],
+        ['QAReasonBasic.aspx', 'QA Manual', 2], ['QADocument.aspx', 'QA Document', 2], ['id=Q304', 'Play Book/Guideline', 2],
         ['AQLTracking.aspx', 'AQL', 3], ['QARecordCOPQ.aspx', 'Cost Of Poor Quality (CoPQ)', 3],
         ['BondTest.aspx', 'Bonding Test', 3], ['GoreTexTest.aspx', 'Gore-Tex', 3],
         ['LearningCase.aspx', 'CFM', 3], ['/Update/Reason.aspx', 'Abnormal Tracking', 3],
@@ -36,9 +36,9 @@ window.QmsNavigation = (() => {
             const match = catalog.find(([key]) => key.startsWith('id=')
                 ? url.searchParams.get('id') === key.slice(3)
                 : url.pathname.toLowerCase().endsWith(key.toLowerCase()));
-            const code = url.searchParams.get('id') || url.searchParams.get('tree_id') || '';
-            return {...module, name: match ? match[1] : module.name,
-                category: match ? groups[match[2]] : groups[6], code};
+            const code = module.code || url.searchParams.get('id') || url.searchParams.get('tree_id') || '';
+            return {...module, name: module.category ? module.name : match ? match[1] : module.name,
+                category: groups.includes(module.category) ? module.category : match ? groups[match[2]] : groups[6], code};
         });
     }
     function filter(modules, query, category = '') {
@@ -89,6 +89,16 @@ window.QmsNavigation = (() => {
                         window.jumpToQmsModule(module.href, module.name);
                     });
                     item.appendChild(link);
+                    if (/\/(QAReasonBasic|QADocument)\.aspx$/i.test(new URL(module.href).pathname)) {
+                        const pdf = document.createElement('button');
+                        pdf.type = 'button';
+                        pdf.className = 'qms-pdf-shortcut';
+                        pdf.textContent = '↓ PDF';
+                        pdf.title = `Download ${module.name} PDFs`;
+                        pdf.addEventListener('click', () => window.QmsDocuments.open(
+                            /QAReasonBasic/i.test(module.href) ? 'manual' : 'document'));
+                        item.appendChild(pdf);
+                    }
                     list.appendChild(item);
                 });
                 section.appendChild(list);

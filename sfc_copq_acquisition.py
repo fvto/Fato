@@ -36,7 +36,7 @@ def source_path(item):
 
 
 @lru_cache(maxsize=512)
-def valid_schema(filename, size, modified, group):
+def valid_schema(filename, size, modified, group, require_records=False):
     path = Path(filename)
     try:
         if path.suffix.lower() == '.csv':
@@ -55,14 +55,29 @@ def valid_schema(filename, size, modified, group):
             book = xlrd.open_workbook(str(path), on_demand=True, logfile=io.StringIO())
             try:
                 sheet = book.sheet_by_index(0)
-                rows = [sheet.row_values(i) for i in range(min(12,sheet.nrows))]
+                rows = [[xlrd.xldate_as_datetime(cell.value, book.datemode)
+                         if cell.ctype == xlrd.XL_CELL_DATE else cell.value
+                         for cell in sheet.row(i)] for i in range(min(12, sheet.nrows))]
             finally:
                 book.release_resources()
-        for row in rows:
+        for index, row in enumerate(rows):
             labels = {re.sub(r'[^a-z0-9]', '', str(value).lower()) for value in row}
             required = {'date','category','type','factory','ttlcost'} if group == 'copq' else {'date','factory','metric','numberofpairs','defectissues','so'}
             if required <= labels:
-                return True
+                if not require_records:
+                    return True
+                date_column = next(i for i, value in enumerate(row) if str(value).strip().lower() == 'date')
+                # Header-only exports and Count=0 footers are not evidence of
+                # populated data. Keep them reusable, but prefer a populated
+                # export of the same month/site when one is already available.
+                from report_validation import parse_date
+                for record in rows[index + 1:]:
+                    try:
+                        parse_date(record[date_column])
+                        return True
+                    except (ValueError, TypeError, IndexError):
+                        continue
+                return False
     except Exception:
         pass
     return False
@@ -85,13 +100,21 @@ def plan(period, mode='all'):
     first, last = month_window(period)
     required = required_inputs(mode)
     available = {}
-    for item in reports.input_catalog('copq'):
+    priorities = {}
+    # Retain older copies until their contents have been considered. A newer
+    # header-only file must not hide a populated copy with the same filename.
+    for item in reports.input_catalog('copq', include_duplicates=True):
         group, plant = item['group'], item.get('plant')
         if group not in required or plant not in required[group] or not cache_matches(item, first, last):
             continue
         key = (group,plant)
-        if key not in available or item['source'] == 'sfc' and available[key]['source'] != 'sfc':
+        path = source_path(item)
+        stat = path.stat()
+        populated = group != 'copq' or valid_schema(str(path), stat.st_size, stat.st_mtime_ns, group, True)
+        priority = (populated, item['source'] == 'sfc')
+        if key not in available or priority > priorities[key]:
             available[key] = item
+            priorities[key] = priority
     reused, missing = [], []
     for group, plants in required.items():
         for plant in plants:

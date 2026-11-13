@@ -1,211 +1,348 @@
 {
-  "crawled_at": "2026-10-24 13:33:15",
+  "crawled_at": "2026-11-10T09:49:58+07:00",
   "source_url": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx",
   "description": "Bộ nhớ danh mục chức năng Quản Lý Chất Lượng (QMS) trích xuất trực tiếp từ QMSMain.aspx",
   "qms_modules": [
     {
-      "name": "Rủi Ro Chất Lượng (Quality Risk - Q101)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q101"
+      "name": "Quality Risk",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q101",
+      "category": "Control Plan",
+      "code": "Q101"
     },
     {
-      "name": "PFMEA (Q102)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q102"
+      "name": "PFMEA",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q102",
+      "category": "Control Plan",
+      "code": "Q102"
     },
     {
-      "name": "Thông tin đặt hàng (Order Info - Q103)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q103"
+      "name": "Order Information",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q103",
+      "category": "Control Plan",
+      "code": "Q103"
     },
     {
-      "name": "Nhập Nguyên Nhân QA (Inspection Basic Data)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QAReason.aspx"
+      "name": "Inspection Basic Data",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAReason.aspx",
+      "category": "Basic Information",
+      "code": "mes401"
     },
     {
-      "name": "Quy Tắc BDTS (BDTS Rule - Q202)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q202"
+      "name": "BDTS Rule",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q202",
+      "category": "Basic Information",
+      "code": "Q202"
     },
     {
-      "name": "Thông Báo QA (Notification - Q203)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q203"
+      "name": "Notification",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q203",
+      "category": "Basic Information",
+      "code": "Q203"
     },
     {
-      "name": "Chiến Lược Kiểm Tra (Inspection Strategy - Q301)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q301"
+      "name": "QA Manual",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAReasonBasic.aspx?tree_id=Q05",
+      "category": "QA Document",
+      "code": "Q05"
     },
     {
-      "name": "CTQ & CTP (Q302)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q302"
+      "name": "QA Document",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QADocument.aspx?id=QMS750",
+      "category": "QA Document",
+      "code": "QMS750"
     },
     {
-      "name": "Hướng Dẫn QA (QA Manual - Q05)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QAReasonBasic.aspx?tree_id=Q05"
+      "name": "AQL",
+      "href": "https://sfc.chingluh.com/vhmes/QA/AQLTracking.aspx",
+      "category": "Collect Data",
+      "code": "mes406"
     },
     {
-      "name": "Sách Hướng Dẫn / Play Book (Q304)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q304"
-    },
-    {
-      "name": "AQL Tracking",
-      "href": "https://sfc.chingluh.com/vhmes/QA/AQLTracking.aspx"
-    },
-    {
-      "name": "Cost Of Poor Quality (CoPQ) - Nhập liệu Record",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QARecordCOPQ.aspx"
+      "name": "Cost Of Poor Quality (CoPQ)",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QARecordCOPQ.aspx",
+      "category": "Collect Data",
+      "code": "mes414"
     },
     {
       "name": "Bonding Test",
-      "href": "https://sfc.chingluh.com/vhmes/QA/BondTest.aspx"
+      "href": "https://sfc.chingluh.com/vhmes/QA/BondTest.aspx",
+      "category": "Collect Data",
+      "code": "mes403"
     },
     {
-      "name": "Gore-Tex Test",
-      "href": "https://sfc.chingluh.com/vhmes/QA/GoreTexTest.aspx"
+      "name": "Gore-Tex",
+      "href": "https://sfc.chingluh.com/vhmes/QA/GoreTexTest.aspx",
+      "category": "Collect Data",
+      "code": "qms501"
     },
     {
-      "name": "CFM (Learning Case)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/LearningCase.aspx"
+      "name": "CFM",
+      "href": "https://sfc.chingluh.com/vhmes/QA/LearningCase.aspx",
+      "category": "Collect Data",
+      "code": "mes409"
     },
     {
-      "name": "Theo Dõi Dị Thường (Abnormal Tracking)",
-      "href": "https://sfc.chingluh.com/vhmes/Update/Reason.aspx"
+      "name": "Abnormal Tracking",
+      "href": "https://sfc.chingluh.com/vhmes/Update/Reason.aspx",
+      "category": "Collect Data",
+      "code": "abn001"
     },
     {
-      "name": "Quản lí tiêu hủy (Destruction Mgmt)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QABCDSTRRecord.aspx"
+      "name": "Destruction Management",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QABCDSTRRecord.aspx",
+      "category": "Collect Data",
+      "code": "qms607"
     },
     {
-      "name": "Hiệu chuẩn quy trình sản phẩm (PPC Calibration)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/MesQAPPC.aspx"
+      "name": "Product Process Calibration",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MesQAPPC.aspx",
+      "category": "Collect Data",
+      "code": "qms608"
     },
     {
-      "name": "Đánh giá MQAA (Audit Check)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/MQAACheck.aspx"
+      "name": "MQAA Audit",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MQAACheck.aspx",
+      "category": "Collect Data",
+      "code": "qms609"
     },
     {
-      "name": "Kiểm Tra AQL (AQL Inspection - Q501)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q501"
+      "name": "AQL Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q501",
+      "category": "Quality Database",
+      "code": ""
     },
     {
-      "name": "Phân Tích Chất Lượng (Quality Analysis)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QAAnalysis.aspx"
+      "name": "Quality Analysis",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAAnalysis.aspx",
+      "category": "Quality Database",
+      "code": ""
     },
     {
-      "name": "QA HFPA (Mã Q504)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx?tree_id=Q504"
+      "name": "HFPA",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx",
+      "category": "Quality Database",
+      "code": "mes410"
     },
     {
-      "name": "Đóng Gói (Packing Check)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/PackingCheck.aspx"
+      "name": "Packing",
+      "href": "https://sfc.chingluh.com/vhmes/QA/PackingCheck.aspx",
+      "category": "Quality Database",
+      "code": "mes410"
     },
     {
-      "name": "Phân tích kết quả lực kéo (Bond Analysis)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/BondTestAnalysis.aspx"
+      "name": "Bond Test Analysis",
+      "href": "https://sfc.chingluh.com/vhmes/QA/BondTestAnalysis.aspx",
+      "category": "Quality Database",
+      "code": ""
     },
     {
-      "name": "Chất Lượng Mặt Giày (Upper Quality Data)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/DefectiveReturn.aspx"
+      "name": "Upper Quality Data",
+      "href": "https://sfc.chingluh.com/vhmes/QA/DefectiveReturn.aspx",
+      "category": "Quality Database",
+      "code": "mes411"
     },
     {
-      "name": "FGWH (QA Finished Goods Warehouse)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QCFGWH.aspx"
+      "name": "FGWH",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCFGWH.aspx",
+      "category": "Quality Database",
+      "code": "qms604"
     },
     {
-      "name": "Kiểm tra lại (Re-Inspection)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QCRECHK.aspx"
+      "name": "Re-Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCRECHK.aspx",
+      "category": "Quality Database",
+      "code": "qms606"
     },
     {
-      "name": "IMQC (Q508)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q508"
+      "name": "IMQC",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx?id=Q508",
+      "category": "Quality Database",
+      "code": ""
     },
     {
-      "name": "Báo cáo Hiệu chuẩn PPC",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QCPPC.aspx"
+      "name": "Product Process Calibration Report",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QCPPC.aspx",
+      "category": "Quality Database",
+      "code": "qms610"
     },
     {
-      "name": "Báo cáo MQAA (Report)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx"
+      "name": "MQAA Report",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MQAAReport.aspx",
+      "category": "Quality Database",
+      "code": "qms609"
     },
     {
-      "name": "COPQ Report (3 Tùy chọn Xuất: 1.Report COPQ, 2.COPQ Data, 3.Monthly)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx"
+      "name": "COPQ Report",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAReportTrackingCOPQ.aspx",
+      "category": "Performance Management",
+      "code": "mes414_a"
     },
     {
-      "name": "Báo Cáo BDTS (Report NIKE)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QAReportNIKE.aspx"
+      "name": "BDTS Report",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QAReportNIKE.aspx",
+      "category": "Performance Management",
+      "code": "mes412"
     },
     {
-      "name": "Bảng Điều Khiển QA Dashboard",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QADashboard.aspx"
+      "name": "Dashboard",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QADashboard.aspx",
+      "category": "Performance Management",
+      "code": ""
     },
     {
-      "name": "FTT (First Time Through)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QA.aspx"
+      "name": "FTT",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QA.aspx",
+      "category": "Performance Management",
+      "code": ""
     },
     {
-      "name": "Hệ Thống Quản Lý Chất Lượng (QMS Home)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx"
+      "name": "SFC",
+      "href": "https://sfc.chingluh.com/vhmes/FlowChart.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Màn hình điện tử QA (E-Display)",
-      "href": "https://sfc.chingluh.com/vhmes/Reports/EDisplayQA.aspx"
+      "name": "E-Display for QA",
+      "href": "https://sfc.chingluh.com/vhmes/Reports/EDisplayQA.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Màn hình điện tử GCĐ (Stockfitting)",
-      "href": "https://sfc.chingluh.com/vhmes/Reports/EDisplaySF.aspx"
+      "name": "E-Display for Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/Update/ReasonBottomTV.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chất lượng QC CTB",
-      "href": "https://sfc.chingluh.com/vhmes/MesQACheck.aspx"
+      "name": "E-Display for Stockfitting",
+      "href": "https://sfc.chingluh.com/vhmes/Reports/EDisplaySF.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chất lượng QC HFPA (Packing OQC)",
-      "href": "https://sfc.chingluh.com/vhmes/MesQACheckPackingOQC.aspx"
+      "name": "Dashboard for Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/Update/DashboardBottom.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chất lượng QC FGWH",
-      "href": "https://sfc.chingluh.com/vhmes/QA/MesQACheckPackingFGWH.aspx"
+      "name": "QC CTB Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQACheck.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Kiểm tra lại HFPA (RECHK)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/MesQACheckPackingRECHK.aspx"
+      "name": "QC HFPA",
+      "href": "https://sfc.chingluh.com/vhmes/MesQACheckPackingOQC.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "OMD (Article Inspection)",
-      "href": "https://sfc.chingluh.com/vhmes/QA/ArticleInspection.aspx"
+      "name": "QC FGWH",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MesQACheckPackingFGWH.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chất lượng QC IP",
-      "href": "https://sfc.chingluh.com/vhmes/MesQAIPCheck.aspx"
+      "name": "Re-Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/QA/MesQACheckPackingRECHK.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chất lượng QC DP",
-      "href": "https://sfc.chingluh.com/vhmes/MesQADPCheck.aspx"
+      "name": "OMD",
+      "href": "https://sfc.chingluh.com/vhmes/QA/ArticleInspection.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chất lượng QC RB/OS",
-      "href": "https://sfc.chingluh.com/vhmes/MesQAOSCheck.aspx"
+      "name": "QC IP Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQAIPCheck.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chất lượng QC PU",
-      "href": "https://sfc.chingluh.com/vhmes/MesQAPUCheck.aspx"
+      "name": "QC DP Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQADPCheck.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chất lượng QC CMP",
-      "href": "https://sfc.chingluh.com/vhmes/MesQACMPCheck.aspx"
+      "name": "QC OS Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQAOSCheck.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chuyển giao mặt giầy QC",
-      "href": "https://sfc.chingluh.com/vhmes/MesQATransferFrom.aspx"
+      "name": "QC PU Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQAPUCheck.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Chuyển giao đế giầy QC",
-      "href": "https://sfc.chingluh.com/vhmes/MesQATransferBottom.aspx"
+      "name": "QC CMP Inspection",
+      "href": "https://sfc.chingluh.com/vhmes/MesQACMPCheck.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Giầy báo phế B/C Grade QA",
-      "href": "https://sfc.chingluh.com/vhmes/QA/BCGrade.aspx"
+      "name": "QC Transfer Upper",
+      "href": "https://sfc.chingluh.com/vhmes/MesQATransferFrom.aspx",
+      "category": "Other Modules",
+      "code": ""
     },
     {
-      "name": "Đóng gói UCC",
-      "href": "https://sfc.chingluh.com/vhmes/QA/PackingUCC.aspx"
+      "name": "QC Transfer Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MesQATransferBottom.aspx",
+      "category": "Other Modules",
+      "code": ""
+    },
+    {
+      "name": "IP Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=IP",
+      "category": "Other Modules",
+      "code": ""
+    },
+    {
+      "name": "DP Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=DP",
+      "category": "Other Modules",
+      "code": ""
+    },
+    {
+      "name": "RB Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=OS",
+      "category": "Other Modules",
+      "code": ""
+    },
+    {
+      "name": "PU Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=PU",
+      "category": "Other Modules",
+      "code": ""
+    },
+    {
+      "name": "CMP Operator Bottom",
+      "href": "https://sfc.chingluh.com/vhmes/MPS/MPS701.aspx?dept=CMP",
+      "category": "Other Modules",
+      "code": ""
+    },
+    {
+      "name": "B/C Grade QA",
+      "href": "https://sfc.chingluh.com/vhmes/QA/BCGrade.aspx",
+      "category": "Other Modules",
+      "code": ""
+    },
+    {
+      "name": "Packing UCC",
+      "href": "https://sfc.chingluh.com/vhmes/QA/PackingUCC.aspx",
+      "category": "Other Modules",
+      "code": ""
+    },
+    {
+      "name": "QMS Home",
+      "href": "https://sfc.chingluh.com/vhmes/QA/QMSMain.aspx",
+      "category": "Other Modules"
     }
   ],
   "factories_and_lines": [
@@ -761,5 +898,6 @@
       "text": "VT - VB PCC",
       "value": "VT2300"
     }
-  ]
+  ],
+  "qms_plant": "VH"
 }

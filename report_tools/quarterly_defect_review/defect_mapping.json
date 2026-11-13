@@ -1,0 +1,238 @@
+{
+  "mapping_version": "2026-11-11-nike-v1",
+  "basis": "Master Plan Section 5 (NIKE HFPA Standard Parent Groups & 25 FTT NIKE columns) + verified SFC live exports 2026-11-11",
+  "confirmed_by": "MASTER_PLAN_Quarterly_NIKE_Defect_Review",
+  "confirmed_at": "2026-11-11",
+  "standard_groups": [
+    {
+      "id": "airbag",
+      "label": "Airbag",
+      "short_label": "Airbag",
+      "color": "007A87",
+      "hfpa_aliases": ["airbag", "airbag defect"]
+    },
+    {
+      "id": "alignment_lr_symmetry",
+      "label": "Alignment L+R Symmetry",
+      "short_label": "Alignment L+R",
+      "color": "2B547E",
+      "hfpa_aliases": ["alignment l+r symmetry", "alignment l r symmetry", "alignment"]
+    },
+    {
+      "id": "bond_gap_bonding",
+      "label": "Bond gap / Bonding",
+      "short_label": "Bonding",
+      "color": "1F77B4",
+      "hfpa_aliases": ["bond gap", "bond gap / bonding", "bond gap/bonding", "bonding"]
+    },
+    {
+      "id": "cement",
+      "label": "Cement",
+      "short_label": "Cement",
+      "color": "ED7D31",
+      "hfpa_aliases": ["cement", "over cement"]
+    },
+    {
+      "id": "contamination",
+      "label": "Contamination",
+      "short_label": "Contamination",
+      "color": "B8860B",
+      "hfpa_aliases": ["contamination"]
+    },
+    {
+      "id": "interior_sockliner",
+      "label": "Interior (including sock-liner)",
+      "short_label": "Interior",
+      "color": "5E35B1",
+      "hfpa_aliases": ["interior (including sock-liner)", "interior including sock-liner", "interior (including sock liner)"]
+    },
+    {
+      "id": "poor_quality_spray_paint",
+      "label": "Poor Quality Spray / Paint",
+      "short_label": "Spray / Paint",
+      "color": "A22A60",
+      "hfpa_aliases": ["poor quality spray/paint", "poor quality spray / paint", "spray/paint"]
+    },
+    {
+      "id": "scratch_tear_rip_high_buffing",
+      "label": "Scratch / Tear / Rip / High Buffing",
+      "short_label": "Scratch / Tear / Buffing",
+      "color": "8C6239",
+      "hfpa_aliases": ["scratch/tear/rip/high buffing", "scratch / tear / rip / high buffing", "scratch/tear/rip/ high buffing"]
+    },
+    {
+      "id": "stitching_loose_thread",
+      "label": "Stitching / Loose Thread",
+      "short_label": "Stitching / Thread",
+      "color": "4682B4",
+      "hfpa_aliases": ["stitching/ loose thread", "stitching/loose thread", "stitching / loose thread"]
+    },
+    {
+      "id": "wrinkle_crease_misshape",
+      "label": "Wrinkle / Crease / Mis-shape",
+      "short_label": "Wrinkle / Mis-shape",
+      "color": "546E7A",
+      "hfpa_aliases": ["wrinkle/crease/mis-shape", "wrinkle / crease / mis-shape", "wrinkle/crease/misshape"]
+    },
+    {
+      "id": "other_miscellaneous",
+      "label": "Other / Miscellaneous",
+      "short_label": "Other / Misc",
+      "color": "91A3B0",
+      "hfpa_aliases": ["other/miscellaneous", "other / miscellaneous"]
+    }
+  ],
+  "ftt_subtypes": [
+    {
+      "id": "airbag_defect",
+      "label": "Airbag Defect",
+      "standard_group_id": "airbag",
+      "aliases": ["airbag defect"]
+    },
+    {
+      "id": "alignment_lr_symmetry",
+      "label": "Alignment L+R Symmetry",
+      "standard_group_id": "alignment_lr_symmetry",
+      "aliases": ["alignment l+r symmetry", "alignment l r symmetry"]
+    },
+    {
+      "id": "bond_gap_rat_hole",
+      "label": "Bond gap / Rat hole",
+      "standard_group_id": "bond_gap_bonding",
+      "aliases": ["bond gap / rat hole", "bond gap/rat hole", "bond gap / rat hole"]
+    },
+    {
+      "id": "delamination",
+      "label": "Delamination",
+      "standard_group_id": "bond_gap_bonding",
+      "aliases": ["delamination"]
+    },
+    {
+      "id": "over_cement",
+      "label": "Over cement",
+      "standard_group_id": "cement",
+      "aliases": ["over cement"]
+    },
+    {
+      "id": "contamination",
+      "label": "Contamination",
+      "standard_group_id": "contamination",
+      "aliases": ["contamination"]
+    },
+    {
+      "id": "interior_defect",
+      "label": "Interior defect",
+      "standard_group_id": "interior_sockliner",
+      "aliases": ["interior defect"]
+    },
+    {
+      "id": "accessories_defect",
+      "label": "Accessories defect",
+      "standard_group_id": "interior_sockliner",
+      "aliases": ["accessories defect"]
+    },
+    {
+      "id": "color_paint_migration_bleeding",
+      "label": "Color/Paint migration, bleeding",
+      "standard_group_id": "poor_quality_spray_paint",
+      "aliases": ["color/paint migration, bleeding", "color / paint migration, bleeding"]
+    },
+    {
+      "id": "color_mismatch",
+      "label": "Color mis-match",
+      "standard_group_id": "poor_quality_spray_paint",
+      "aliases": ["color mis-match", "color mismatch"]
+    },
+    {
+      "id": "paint_surface_quality",
+      "label": "Paint surface quality",
+      "standard_group_id": "poor_quality_spray_paint",
+      "aliases": ["paint surface quality"]
+    },
+    {
+      "id": "material_damaged",
+      "label": "Material damaged",
+      "standard_group_id": "scratch_tear_rip_high_buffing",
+      "aliases": ["material damaged"]
+    },
+    {
+      "id": "holes_quality",
+      "label": "Holes quality",
+      "standard_group_id": "scratch_tear_rip_high_buffing",
+      "aliases": ["holes quality"]
+    },
+    {
+      "id": "over_buffing",
+      "label": "Over buffing",
+      "standard_group_id": "scratch_tear_rip_high_buffing",
+      "aliases": ["over buffing"]
+    },
+    {
+      "id": "jump_broken_loose_stitch",
+      "label": "Jump / Broken / Loose Stitch",
+      "standard_group_id": "stitching_loose_thread",
+      "aliases": ["jump / broken / loose stitch", "jump/broken/loose stitch"]
+    },
+    {
+      "id": "thread_end",
+      "label": "Thread end",
+      "standard_group_id": "stitching_loose_thread",
+      "aliases": ["thread end"]
+    },
+    {
+      "id": "stitching_margin",
+      "label": "Stitching margin",
+      "standard_group_id": "stitching_loose_thread",
+      "aliases": ["stitching margin"]
+    },
+    {
+      "id": "off_center",
+      "label": "Off-center",
+      "standard_group_id": "wrinkle_crease_misshape",
+      "aliases": ["off-center", "off center"]
+    },
+    {
+      "id": "rocking",
+      "label": "Rocking",
+      "standard_group_id": "wrinkle_crease_misshape",
+      "aliases": ["rocking"]
+    },
+    {
+      "id": "toe_spring",
+      "label": "Toe spring",
+      "standard_group_id": "wrinkle_crease_misshape",
+      "aliases": ["toe spring"]
+    },
+    {
+      "id": "wrinkle_or_deformed_bottom",
+      "label": "Wrinkle or Deformed Bottom",
+      "standard_group_id": "wrinkle_crease_misshape",
+      "aliases": ["wrinkle or deformed bottom"]
+    },
+    {
+      "id": "wrinkle_or_deformed_upper",
+      "label": "Wrinkle or Deformed Upper",
+      "standard_group_id": "wrinkle_crease_misshape",
+      "aliases": ["wrinkle or deformed upper"]
+    },
+    {
+      "id": "x_ray",
+      "label": "X-ray",
+      "standard_group_id": "wrinkle_crease_misshape",
+      "aliases": ["x-ray", "x ray", "xray"]
+    },
+    {
+      "id": "yellowing",
+      "label": "Yellowing",
+      "standard_group_id": "other_miscellaneous",
+      "aliases": ["yellowing"]
+    },
+    {
+      "id": "other_defects",
+      "label": "Other Defects",
+      "standard_group_id": "other_miscellaneous",
+      "aliases": ["other defects", "other defect"]
+    }
+  ]
+}
+

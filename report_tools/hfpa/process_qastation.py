@@ -86,37 +86,11 @@ def extract_fty_from_filename(filename: str) -> str:
 
 def load_color_template():
     """Load defect color mappings from Color_template.xlsx."""
-    color_map = {}
-    if not os.path.exists(COLOR_TEMPLATE_PATH):
-        print("[-] Color_template.xlsx not found, skipping color mapping.")
-        return color_map
-
     try:
-        wb = openpyxl.load_workbook(COLOR_TEMPLATE_PATH, data_only=True)
-        if "Sheet1" in wb.sheetnames:
-            ws = wb["Sheet1"]
-            for row in ws.iter_rows(min_row=5, values_only=True):
-                if len(row) >= 8 and row[2] and row[7]:
-                    defect_name = str(row[2]).strip()
-                    hex_code = str(row[7]).strip().replace("#", "")
-                    if len(hex_code) == 6:
-                        color_map[defect_name.lower()] = hex_code
-                        color_map[re.sub(r"[^a-z0-9]", "", defect_name.lower())] = hex_code
-        
-        if "bc" in wb.sheetnames:
-            ws = wb["bc"]
-            for row in ws.iter_rows(min_row=2, values_only=True):
-                if len(row) >= 5 and row[0] and row[4]:
-                    defect_name = str(row[0]).strip()
-                    hex_code = str(row[4]).strip().replace("#", "")
-                    if len(hex_code) == 6:
-                        color_map[defect_name.lower()] = hex_code
-                        color_map[re.sub(r"[^a-z0-9]", "", defect_name.lower())] = hex_code
-        wb.close()
-        print(f"[+] Loaded {len(color_map)} color definitions from Color_template.xlsx")
-    except Exception as e:
-        print(f"[-] Warning: Failed to load color template: {e}")
-    return color_map
+        from .agents.color_manager import ColorManager
+    except (ImportError, ValueError):
+        from agents.color_manager import ColorManager
+    return ColorManager(COLOR_TEMPLATE_PATH).load_color_map()
 
 
 def purge_colormap_sheets(wb):

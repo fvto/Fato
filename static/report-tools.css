@@ -176,3 +176,28 @@ td a { color:var(--ink); text-underline-offset:3px; }
   .run > .run-head > strong { font-size:13px; }
   .runs-panel { padding:28px 0 0; margin-top:44px; }
 }
+.qdr-host { margin:14px 0 18px; }
+.qdr-panel { border:1px solid var(--rule); border-radius:6px; background:#fff; padding:16px 18px; }
+.qdr-banner { display:flex; flex-direction:column; gap:6px; padding:12px 14px; border-radius:4px; background:#f4f7fb; border:1px solid #d5e0ed; font-size:12px; margin-bottom:14px; }
+.qdr-dr-note { color:#795112; background:#fcf6e7; padding:6px 10px; border-radius:4px; border:1px solid #e6cfa0; font-size:11px; }
+.qdr-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; border-bottom:1px solid var(--rule); padding-bottom:10px; }
+.qdr-tabs button { padding:7px 14px; border:1px solid var(--rule); border-radius:4px; background:#f8f8f5; font-size:12px; cursor:pointer; }
+.qdr-tabs button.is-active { background:#1b365d; color:#fff; border-color:#1b365d; font-weight:600; }
+.qdr-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin:10px 0 16px; }
+.qdr-card { padding:12px; border:1px solid var(--rule); border-radius:4px; background:#fafaf7; }
+.qdr-card.is-warn { background:#fcf8ef; border-color:#d7bb8c; }
+.qdr-card-head { display:flex; justify-content:space-between; gap:6px; font-size:11px; margin-bottom:6px; }
+.qdr-pill { display:inline-block; padding:2px 6px; border-radius:3px; background:#e8eef6; color:#1b365d; font:10px var(--mono); }
+.qdr-big { font-size:20px; font-weight:700; color:#1b365d; }
+.qdr-big small { font-size:11px; font-weight:400; color:var(--ink-soft); }
+.qdr-sub { font-size:11px; color:var(--ink-soft); margin-top:4px; }
+.qdr-warn-text { color:#795112; font-size:11px; }
+.qdr-drill { margin:16px 0; padding:12px; border:1px solid var(--rule); border-radius:4px; background:#fcfcfa; }
+.qdr-drill-bar { display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:10px; font-size:12px; }
+.qdr-drill-bar select { margin-left:6px; padding:4px 8px; }
+.qdr-review-box { margin-top:12px; }
+.qdr-map-row { display:flex; gap:6px; align-items:center; }
+.qdr-slides { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; margin-top:10px; }
+.qdr-slide-card { margin:0; border:1px solid var(--rule); border-radius:4px; overflow:hidden; background:#fff; }
+.qdr-slide-card figcaption { padding:6px 10px; font:11px var(--mono); background:#f5f6f8; border-bottom:1px solid var(--rule); }
+.qdr-slide-card img { display:block; width:100%; height:auto; }

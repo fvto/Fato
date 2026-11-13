@@ -2,12 +2,31 @@
 
 Mở Dashboard ở `http://localhost:5050/compare`. Giữ server Dashboard chạy trên máy; chế độ **So sánh offline** không cần Internet, ChatGPT, Codex hay API AI.
 
+## Kiểm tra nhanh số dòng và %
+
+Nút **Kiểm tra số dòng và %** là lựa chọn bổ sung. Nút chính **Xem gợi ý so sánh** và luồng so sánh hiện có được giữ nguyên.
+
+Chọn File A / File B rồi bấm **Kiểm tra số dòng và %**. Kết quả báo riêng số dòng có giống nhau và giá trị % có giống nhau, kèm từng ô khác hoặc chưa xác minh được.
+
+- Đếm các dòng có nội dung, tính cả tiêu đề và dòng tổng, bỏ dòng trống và dòng chỉ có định dạng. Kiểm tra riêng từng trang tính; tổng số dòng bằng nhau không che giấu chênh lệch giữa các trang.
+- Ghép trang tính cùng tên. Nếu mỗi file chỉ có một trang tính, ghép hai trang dù tên khác nhau. Trang còn thiếu được báo riêng.
+- Chỉ đối chiếu ô có giá trị kèm `%` hoặc định dạng phần trăm, theo cùng vị trí dòng/cột. Không tự ghép theo mã, sắp xếp dòng/cột, tính lại tổng hoặc trung bình. Các cột văn bản và số thường không được so sánh trong nút này.
+- So sánh chính xác, không làm tròn, độc lập với lựa chọn làm tròn của luồng chính. Nhận diện tương đương `95%` dạng văn bản và `0.95` có định dạng phần trăm. Số thường `95` không tự được hiểu thành `95%`.
+- Không tìm thấy ô % sẽ báo **Không tìm thấy ô % để kiểm tra**. Công thức chưa có kết quả đã lưu, lỗi Excel và giá trị thiếu được báo cần xem lại, không coi là khớp.
+
+Kết quả và tải CSV/JSON được lưu cục bộ; tải lại trang chỉ khôi phục kết quả, không tự chạy lại.
+
+Chênh lệch số dòng hiển thị ngay ở đầu kết quả, ghi rõ lệch bao nhiêu dòng và file A hay B nhiều hơn. Bảng số dòng từng trang tính luôn mở, gồm số dòng hai bên và chênh lệch. Kết quả đã lưu từ bản trước cũng hiển thị được chênh lệch khi tải lại trang, không cần chạy lại.
+
 ## Workflow tự động
 
-1. Nhập hai file và chọn đúng **File nguồn / bản đối chiếu** và **File báo cáo cần kiểm tra**.
-2. Bấm **Nhận diện & lập kế hoạch**. Bước này chỉ đọc và lưu kế hoạch, chưa chạy đối chiếu.
-3. Xem sheet được ghép, phạm vi nhà máy/ngày, phương pháp và các mục chưa bao gồm. Xác nhận rồi bấm **Xác nhận & chạy workflow**.
-4. Rà soát kết quả và xuất HTML. Báo cáo giữ phương pháp, cảnh báo, phạm vi, tên nguồn/SHA-256, vị trí và ảnh đầu vào.
+1. Thêm hai file Excel. File đầu tiên là **File A · dùng làm bản gốc**, file tiếp theo là **File B · cần kiểm tra**; có thể đổi lại trước khi chạy.
+2. Bấm **Xem gợi ý so sánh**. Trang hiển thị cặp trang tính, cột ghép dòng, phạm vi và lưu ý. Bước này chưa chạy so sánh.
+3. Bấm **So sánh theo gợi ý** để xác nhận và xem chênh lệch. Có thể xuất báo cáo từ kết quả.
+
+Giao diện mặc định thu gọn file đã lưu, loại báo cáo, nhà máy và thiết lập thủ công. **Tùy chọn so sánh** cho phép đổi loại báo cáo hoặc làm tròn; số chữ số làm tròn luôn được hiển thị ở luồng chính. **Nâng cao · Tự chọn cột, vùng dữ liệu và phép tính** giữ toàn bộ công cụ thủ công và mẫu đã lưu. Khi không tự ghép được bảng, nút **Tự chọn dữ liệu cần so sánh** mở phần này với đúng hai file đang chọn.
+
+Bấm **So sánh theo gợi ý** là bước xác nhận phạm vi/phương pháp; không cần đánh dấu thêm ô xác nhận. Khi thay file hoặc tùy chọn, gợi ý cũ bị hủy và cần xem lại. Tải lại trang khôi phục kết quả đã lưu, không tự chạy lại. Báo cáo giữ phương pháp, cảnh báo, phạm vi, tên nguồn/SHA-256, vị trí và ảnh đầu vào.
 
 Workflow có hai mẫu chạy offline, được nhận diện lại từ tiêu đề mỗi lần nhập file:
 

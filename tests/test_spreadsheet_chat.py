@@ -129,6 +129,80 @@ class ChatAnalysisTests(unittest.TestCase):
         self.assertTrue(any('--allow-dir' in arg and '--read-only' in arg for arg in args))
         self.assertNotIn('--dangerously-bypass-approvals-and-sandbox',args)
 
+    def test_antigravity_status_uses_account_command_without_inference(self):
+        result = {'status': 'SUCCESS', 'command': {'name': 'usage'}}
+        with patch.object(chat, 'ANTIGRAVITY_STATUS_CACHE', (0, None)), \
+             patch.object(chat, 'antigravity_path', return_value='agy'), \
+             patch.object(chat, 'PYTHON') as runtime, patch.object(chat, 'EXCEL') as excel, \
+             patch.object(chat.subprocess, 'run', return_value=MagicMock(returncode=0, stdout=json.dumps(result))) as run:
+            runtime.exists.return_value = excel.exists.return_value = True
+            self.assertTrue(chat.status('antigravity')['ready'])
+            self.assertEqual(run.call_args.args[0], ['agy', '-p', '/usage', '--output-format', 'json'])
+            self.assertEqual(chat.status('antigravity')['provider_id'], 'antigravity')
+            self.assertEqual(run.call_count, 1)
+        with patch.object(chat, 'ANTIGRAVITY_STATUS_CACHE', (0, None)), \
+             patch.object(chat, 'antigravity_path', return_value=None):
+            self.assertFalse(chat.status('antigravity')['ready'])
+        self.assertEqual(server.app.test_client().get('/api/compare/chat/status?provider=unknown').status_code, 400)
+
+    def test_antigravity_job_configuration_is_read_only_and_local(self):
+        job_id = 'e'*32
+        workspace = self.root / 'isolated-workspace'
+        chat.prepare_antigravity(job_id, workspace)
+        config = json.loads((workspace / '.agents/mcp_config.json').read_text(encoding='utf-8'))
+        self.assertEqual(set(config['mcpServers']), {'spreadsheet-excel', 'spreadsheet-analysis'})
+        self.assertIn('--read-only', config['mcpServers']['spreadsheet-excel']['args'])
+        self.assertTrue(config['mcpServers']['spreadsheet-analysis']['tools']['query_data']['eager'])
+        agent = (workspace / '.agents/agents/dashboard-spreadsheet.md').read_text(encoding='utf-8')
+        self.assertIn('tools: [finish]', agent)
+        self.assertNotIn('run_command', agent.split('---')[1])
+        settings = json.loads((chat.folder(job_id)/'antigravity-settings.json').read_text(encoding='utf-8'))
+        self.assertIn('command(*)', settings['permissions']['deny'])
+        self.assertIn('write_file(*)', settings['permissions']['deny'])
+        self.assertEqual(settings['permissions']['allow'], ['mcp(spreadsheet-excel/*)', 'mcp(spreadsheet-analysis/*)'])
+        self.assertFalse(settings['useG1Credits'])
+        with patch.object(chat, 'antigravity_path', return_value='agy'):
+            args = chat.command(job_id, 'antigravity')
+        self.assertEqual(args[0], 'agy')
+        self.assertIn('--disable-slash-commands', args)
+        self.assertIn('--json-schema', args)
+        self.assertNotIn('--dangerously-skip-permissions', args)
+
+    def test_antigravity_stream_result_and_errors(self):
+        final = {'answer': 'Checked', 'answer_language': 'en', 'comparisons': [],
+                 'checked_scope': ['Data!A1'], 'needs_clarification': False}
+        def event(result):
+            return json.dumps({'event': 'result', 'result': result})
+        self.assertEqual(chat.parse_output(event({'status': 'SUCCESS', 'structured_output': final}), 'antigravity'), final)
+        self.assertEqual(chat.parse_output(event({'status': 'SUCCESS', 'response': json.dumps(final)}), 'antigravity'), final)
+        for output in [event({'status': 'ERROR', 'error': 'Login required'}),
+                       event({'status': 'SUCCESS', 'structured_output': {'answer': 'Incomplete'}}),
+                       event({'status': 'SUCCESS', 'structured_output': {**final, 'id': 'overwrite'}}),
+                       '[]\ninvalid JSON']:
+            with self.subTest(output=output), self.assertRaises(RuntimeError):
+                chat.parse_output(output, 'antigravity')
+
+    def test_antigravity_selection_is_saved_and_invalid_providers_are_rejected(self):
+        book = self.attach([[10, 15]])
+        payload = {'workbooks': [book], 'message': 'Compare', 'request_id': 'f'*32, 'provider': 'antigravity'}
+        job_id = None
+        try:
+            with patch.object(chat, 'status', return_value={'ready': True}) as status, \
+                 patch.object(chat.threading, 'Thread'):
+                result = chat.submit(payload)
+                job_id = result['id']
+                status.assert_called_once_with('antigravity')
+                self.assertEqual(result['provider'], 'antigravity')
+                self.assertEqual(chat.read_chat(result['chat_id'])['messages'][0]['provider'], 'antigravity')
+                self.assertEqual(chat.submit(payload)['id'], job_id)
+            for provider in ['unknown', [], None]:
+                with self.subTest(provider=provider), self.assertRaises(ValueError):
+                    chat.submit({**payload, 'provider': provider})
+        finally:
+            if job_id:
+                chat.ACTIVE.discard(job_id)
+                chat.CAPACITY.release()
+
     def test_comparison_cards_survive_execution_reload_and_followup_context(self):
         book = self.attach([['Section', 'Metric', 'Value'], ['Storage', 'Score', 90]])
         finding = {'section': 'Storage', 'item': 'Score', 'status': 'difference',

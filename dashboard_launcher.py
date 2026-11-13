@@ -61,11 +61,11 @@ def start_server():
         return
     if port_open(5050):
         raise RuntimeError("Cong 5050 dang duoc su dung. Hay dong server cu roi mo lai MO_SERVER.bat.")
-    missing = [name for name in ("flask", "playwright", "openpyxl", "xlrd")
+    missing = [name for name in ("flask", "playwright", "openpyxl", "xlrd", "charset_normalizer")
                if importlib.util.find_spec(name) is None]
     if missing:
         raise RuntimeError("Python thieu thu vien: " + ", ".join(missing)
-                           + ". Cai bang: python -m pip install flask playwright openpyxl xlrd")
+                           + ". Cai bang: python -m pip install flask playwright openpyxl xlrd charset-normalizer")
     log_path = ROOT / "scratch" / "dashboard_server.log"
     log_path.parent.mkdir(exist_ok=True)
     flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0

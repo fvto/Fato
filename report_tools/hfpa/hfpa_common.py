@@ -251,6 +251,10 @@ def compute_top3_defects(
     2. Original Quality Tracking order when issue counts are equal.
     """
     color_map = color_map or {}
+    def defect_color(name):
+        key = " ".join(str(name).lower().split())
+        return color_map.get(key, color_map.get(re.sub(r"[^a-z0-9]", "", key), ""))
+
     p2_records = []
 
     qa_df = qa_val_df.copy()
@@ -327,7 +331,7 @@ def compute_top3_defects(
                                 "Total Shoe Defects": int(tot_mes_def),
                                 "Defect Share %": share,
                                 "Spec Ratio (Total/Defects)": spec_ratio,
-                                "Color HEX": color_map.get(str(d_name).lower(), ""),
+                                "Color HEX": defect_color(d_name),
                                 "Data Status": "MES410_Fallback",
                             })
                         mes_handled = True
@@ -362,7 +366,7 @@ def compute_top3_defects(
                 def_qty = int(round(row._2))
                 share = (def_qty / tot_defects) if tot_defects > 0 else 0.0
                 spec_ratio = (tot_defects / def_qty) if def_qty > 0 else 0.0
-                hex_color = color_map.get(str(def_name).lower(), "")
+                hex_color = defect_color(def_name)
 
                 p2_records.append({
                     "FTY": fty,

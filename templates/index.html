@@ -1627,9 +1627,10 @@
     </style>
     <meta name="theme-color" content="#f3f2ee">
     <link rel="stylesheet" href="/static/workspace.css?v=nothing-1">
-    <link rel="stylesheet" href="/static/dashboard-theme.css?v=qms-search-2">
+    <link rel="stylesheet" href="/static/dashboard-theme.css?v=qms-pdf-3">
     <script src="/static/workspace.js?v=nothing-1" defer></script>
-    <script src="/static/qms-navigation.js?v=2"></script>
+    <script src="/static/qms-navigation.js?v=3"></script>
+    <script src="/static/qms-documents.js?v=4" defer></script>
 </head>
 <body class="dashboard-page" data-theme="light">
 {% include '_nothing_shell.html' %}
@@ -1875,6 +1876,35 @@
                         <p id="qms-search-count" role="status" aria-live="polite">Loading QMS modules…</p>
                         <div id="qms-module-groups" class="qms-menu-columns"></div>
                         <p id="qms-empty" class="qms-empty" hidden>No modules found. Try another name or code, or select All categories.</p>
+                        <p id="qms-refreshed-at" class="qms-updated"></p>
+                        <details id="qa-pdf-library" class="qa-pdf-library">
+                            <summary>QA Manual &amp; QA Document · PDF Library</summary>
+                            <div class="qa-pdf-controls">
+                                <label>Phần tài liệu<select id="qa-pdf-source" class="form-control"><option value="manual">QA Manual</option><option value="document">QA Document</option></select></label>
+                                <label>Factory<select id="qa-pdf-plant" class="form-control"><option>VH</option><option>VH2</option><option>VH3</option><option>VH4</option><option>JV</option><option>JV2</option><option>JVB</option></select></label>
+                                <label>Language<select id="qa-pdf-language" class="form-control"><option value="">All languages</option><option>EN</option><option>VN</option></select></label>
+                                <label>Nhóm tài liệu<select id="qa-pdf-collection" class="form-control"><option value="records">Bảng dữ liệu SFC</option><option value="hfpa">HFPA Guide</option><option value="bdts">BDTS</option><option value="">Tất cả PDF</option></select></label>
+                            </div>
+                            <div class="qa-pdf-search">
+                                <input id="qa-pdf-search" class="form-control" type="search" aria-label="Search PDF documents" placeholder="Search shoe code, name, type or project…">
+                                <button id="qa-pdf-refresh" type="button" class="btn-action">↻ Cập nhật từ SFC</button>
+                            </div>
+                            <p id="qa-pdf-reconciliation" class="qa-pdf-note"></p>
+                            <div class="qa-pdf-bulk">
+                                <button id="qa-pdf-download-all" type="button" class="btn-action" disabled>↓ Tải tất cả (ZIP)</button>
+                                <span class="qa-pdf-note">Chỉ tải phần tài liệu và nhóm đang chọn, theo bộ lọc trên tất cả các trang.</span>
+                            </div>
+                            <p id="qa-pdf-bulk-status" class="qa-pdf-note" role="status" aria-live="polite"></p>
+                            <a id="qa-pdf-bulk-link" class="qa-pdf-zip-link" hidden download>↓ Tải file ZIP</a>
+                            <button id="qa-pdf-bulk-resume" class="btn-action" type="button" hidden>↻ Tiếp tục / thử lại file lỗi</button>
+                            <p id="qa-pdf-status" role="status" aria-live="polite"></p>
+                            <div id="qa-pdf-list" class="qa-pdf-list"></div>
+                            <nav class="qa-pdf-pagination" aria-label="PDF pages">
+                                <button id="qa-pdf-prev" type="button" class="btn-action">← Previous</button>
+                                <span id="qa-pdf-page"></span>
+                                <button id="qa-pdf-next" type="button" class="btn-action">Next →</button>
+                            </nav>
+                        </details>
                     </section>
                 </div>
 
@@ -3158,6 +3188,8 @@
                 QmsNavigation.initialize();
                 const badgeEl = document.getElementById('qms-count-badge');
                 if (badgeEl) badgeEl.innerText = `${qmsList.length} modules`;
+                document.getElementById('qms-refreshed-at').textContent = data.crawled_at
+                    ? `Updated: ${data.crawled_at}` : '';
 
                 const memCountEl = document.getElementById('memory-count');
                 if (memCountEl) {

@@ -9,7 +9,7 @@ import contextlib
 
 from sfc_report_tools import file_hash, collect_files, make_bundle, now, read_json, write_json
 from report_runtime import Monitor, Cancelled, diagnostics, friendly_error, QuietEngineOutput
-from report_validation import validate_file, PreflightError
+from report_validation import validate_file, validate_reinspection_coverage, PreflightError
 from report_exports import check_outputs
 from report_brief import summarize_checks
 
@@ -35,6 +35,8 @@ def execute(folder):
             stage('Thu thập đầu vào đúng tháng từ SFC', 'acquisition')
             if tool == 'quarterly_quality':
                 from sfc_quarterly_quality_acquisition import acquire
+            elif tool == 'quarterly_defect_review':
+                from sfc_quarterly_defect_review_acquisition import acquire
             elif tool == 'reinspection':
                 from sfc_reinspection_acquisition import acquire
             elif tool == 'hfpa':
@@ -46,7 +48,7 @@ def execute(folder):
         stage('Kiểm tra toàn bộ dữ liệu trước khi xử lý', 'validation')
         from sfc_report_tools import TOOLS, TOOLS_ROOT
         validation = []
-        quarterly_sfc = tool == 'quarterly_quality' and run.get('acquire_missing')
+        quarterly_sfc = (tool == 'quarterly_quality' and run.get('acquire_missing')) or tool == 'quarterly_defect_review'
         for index, item in enumerate(() if quarterly_sfc else run['inputs']):
             stage(f'Kiểm tra file {index+1}/{len(run["inputs"])}: {item["name"]}')
             path = workspace / TOOLS[tool]['groups'][item['group']][1] / item.get('staged_name', item['name'])
@@ -63,6 +65,9 @@ def execute(folder):
             monitor.save()
             monitor.check_cancel()
         run['validation'] = validation
+        if tool == 'reinspection':
+            from sfc_report_tools import plant_of
+            run['business_review'] = validate_reinspection_coverage(validation, plant_of=plant_of)
         if any(not report['valid'] for report in validation):
             raise PreflightError(validation)
         if tool == 'reinspection':
@@ -76,8 +81,6 @@ def execute(folder):
                 kwargs['re_dir'], kwargs['ftt_dir'], kwargs['hfpa_dir'],
                 log_fn=stage)
             kwargs['all_sites_data'] = metrics
-            from sfc_report_tools import plant_of
-            run['business_review'] = []
             for report in validation:
                 if report['group'] != 'reinspection':
                     continue
@@ -141,9 +144,12 @@ def execute(folder):
                 raise ValueError('Đầu vào HFPA chưa sẵn sàng; xem nhật ký và input_readiness.json.')
             if mode != 'check':
                 stage('Đang đối chiếu QAStation và MES410...', 'reconciliation')
-                from agents.color_manager import ColorManager
-                ColorManager(str(workspace / 'Color_template.xlsx')).sync_reference_colors(
-                    str(TOOLS_ROOT / 'reinspection' / 'Color_Template.xlsx')
+                # HFPA owns this reference. Never overwrite its colors with
+                # the Re-Inspection palette or modify the archived original.
+                import shutil
+                shutil.copyfile(
+                    workspace / 'reference' / 'HFPA_Defect_Colors_06042026.xlsx',
+                    workspace / 'Color_template.xlsx',
                 )
                 inputs = {kind: [item.path for item in readiness.files if item.file_type == kind]
                           for kind in ('FTT', 'HFPA')}

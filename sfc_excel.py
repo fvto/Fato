@@ -106,8 +106,15 @@ def validate_export(path, date_from=None, date_to=None, nike=None):
 
 def file_info(path, rows=None):
     path = Path(path).resolve()
-    relative = path.relative_to(EXPORT_ROOT.resolve()).as_posix()
-    result = dict(name=path.name, path=str(path), url='/api/exports/' + quote(relative, safe='/'),
+    export_root = EXPORT_ROOT.resolve()
+    if path.is_relative_to(export_root):
+        relative = path.relative_to(export_root).as_posix()
+        url = '/api/exports/' + quote(relative, safe='/')
+    else:
+        # Isolated workflows (e.g. Cache/QuarterlyDefectReview) store files outside EXPORT_ROOT
+        # so they stay segregated from legacy HFPAExports and do not expose /api/exports/ URLs.
+        url = ''
+    result = dict(name=path.name, path=str(path), url=url,
                   size=path.stat().st_size, sha256=hashlib.sha256(path.read_bytes()).hexdigest())
     if rows is not None:
         result['rows'] = rows

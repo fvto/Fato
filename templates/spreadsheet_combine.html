@@ -1,13 +1,18 @@
 <!doctype html>
 <html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gộp file Excel · FATO</title><link rel="stylesheet" href="/static/workspace.css?v=nothing-1"><link rel="stylesheet" href="/static/spreadsheet-combine.css?v=3"><script src="/static/workspace.js?v=nothing-1" defer></script><script src="/static/spreadsheet-combine.js?v=3" defer></script></head>
+<title>Gộp file Excel / CSV · FATO</title><link rel="stylesheet" href="/static/workspace.css?v=nothing-1"><link rel="stylesheet" href="/static/spreadsheet-combine.css?v=5"><script src="/static/workspace.js?v=nothing-1" defer></script><script src="/static/spreadsheet-combine.js?v=12" defer></script></head>
 <body>{% include '_nothing_shell.html' %}
 <main id="main-content" class="combine-main">
-  <section class="combine-intro"><p class="eyebrow">FATO / COMBINE EXCEL</p><h1>Nhiều file Excel.<br><em>Một bảng dữ liệu.</em></h1><p>Gộp các bảng theo tên cột, kể cả khi thứ tự hoặc số cột khác nhau. Cột chỉ có ở một số file vẫn được giữ lại, ô thiếu để trống.</p><a href="/compare" class="combine-link">Đối chiếu Excel ↗</a></section>
+  <section class="combine-intro"><p class="eyebrow">FATO / COMBINE EXCEL</p><h1>Nhiều file Excel / CSV.<br><em>Một bảng dữ liệu.</em></h1><p>Gộp các bảng theo tên cột, kể cả khi thứ tự hoặc số cột khác nhau. Cột chỉ có ở một số file vẫn được giữ lại, ô thiếu để trống.</p><a href="/compare" class="combine-link">Đối chiếu Excel ↗</a></section>
   <p id="combine-notice" role="status" aria-live="polite"></p>
+  <ul id="combine-file-errors" role="alert" hidden></ul>
   <section class="combine-panel" aria-labelledby="upload-title"><div class="combine-heading"><div><p class="eyebrow">01 / FILE NGUỒN</p><h2 id="upload-title">Chọn file cần gộp.</h2></div><span id="combine-file-count">0 file</span></div>
-    <label class="combine-drop" id="combine-drop"><strong>Chọn file Excel hoặc kéo thả vào đây</strong><input id="combine-upload" type="file" accept=".xls,.xlsx,.xlsm" data-max-files="{{ max_files }}" multiple><span>.xls, .xlsx, .xlsm · Tối đa {{ max_files }} file · 40 MB/file · 500.000 ô/lượt</span></label>
-    <p class="combine-help">Dùng cho các bảng Excel có một dòng tiêu đề: bán hàng, tồn kho, sản xuất, chất lượng hoặc bảng dữ liệu khác. Hệ thống gợi ý dòng tiêu đề; bạn có thể đổi và giới hạn dòng cuối cho từng trang tính. Công thức dùng kết quả đã lưu trong Excel.</p>
+    <label class="combine-drop" id="combine-drop"><strong>Chọn file Excel / CSV hoặc kéo thả vào đây</strong><input id="combine-upload" type="file" accept=".xls,.xlsx,.xlsm,.csv" data-max-files="{{ max_files }}" data-max-bytes="{{ max_bytes }}" data-max-total-bytes="{{ max_total_bytes }}" multiple><span>.xls, .xlsx, .xlsm, .csv · Tối đa {{ max_files }} file · {{ max_file_mb }} MB/file · Tổng tải lên tối đa 5 GB · Xử lý file lớn theo luồng</span></label>
+    <p class="combine-help">Có thể chọn hỗn hợp Excel và CSV. CSV được đọc trực tiếp khi gộp; file nguồn được giữ nguyên. Trên 1 triệu dòng dữ liệu: xuất gói Power Query, không xuất dữ liệu chi tiết thành XLSX lớn. Hệ thống gợi ý dòng tiêu đề; bạn có thể đổi và giới hạn dòng cuối cho từng bảng. Công thức dùng kết quả đã lưu trong Excel. CSV giữ giá trị dạng chữ (kể cả mã có số 0 đầu); tỷ lệ phần trăm dùng quy tắc hiện có. Dòng CSV được đếm theo bản ghi, kể cả ô có xuống dòng.</p>
+    <details class="combine-csv-options"><summary>Tùy chọn CSV · chọn trước khi tải file</summary><div class="combine-option-grid">
+      <label>Encoding CSV<select id="combine-csv-encoding"><option value="auto">Tự nhận diện · UTF-8 / BOM và encoding thông dụng</option><option value="utf-8-sig">UTF-8 (có hoặc không BOM)</option><option value="utf-16">UTF-16 (có BOM)</option><option value="utf-32">UTF-32 (có BOM)</option><option value="cp1258">Windows-1258 · tiếng Việt</option><option value="cp1252">Windows-1252 · Tây Âu</option><option value="cp1250">Windows-1250 · Trung Âu</option><option value="iso8859-1">ISO-8859-1 / Latin-1</option><option value="shift_jis">Shift-JIS · tiếng Nhật</option><option value="gb18030">GB18030 · tiếng Trung giản thể</option><option value="big5">Big5 · tiếng Trung phồn thể</option></select></label>
+      <label>Dấu phân cách CSV<select id="combine-csv-delimiter"><option value="auto">Tự nhận diện</option><option value=",">Dấu phẩy (,)</option><option value=";">Dấu chấm phẩy (;)</option><option value="tab">Tab</option><option value="|">Dấu gạch đứng (|)</option></select></label>
+    </div><p class="combine-help">Áp dụng cho các file CSV của lượt tải tiếp theo. Tự nhận diện riêng từng file, hỗ trợ cả chỉ thị sep=. Nếu chữ hoặc cột chưa đúng, chọn encoding / dấu phân cách rồi tải lại. Với file ngắn hoặc encoding cũ, luôn kiểm tra bản xem trước.</p></details>
     <div id="combine-files"></div>
     <details class="combine-options"><summary>Tùy chọn ghép dữ liệu</summary><div class="combine-option-grid">
       <label>Cột giữa các bảng<select id="combine-schema-mode"><option value="union">Giữ tất cả cột · ô thiếu để trống</option><option value="strict">Chỉ gộp khi cùng bộ cột</option></select></label>
@@ -16,9 +21,27 @@
     <div class="combine-actions"><button id="combine-preview" class="combine-primary" type="button" disabled>Xem trước bản gộp →</button><button id="combine-reset" type="button" disabled>Chọn lại file</button></div>
   </section>
   <section id="combine-result" class="combine-panel" aria-labelledby="result-title" hidden><div class="combine-heading"><div><p class="eyebrow">02 / BẢN GỘP</p><h2 id="result-title">Xem trước dữ liệu.</h2></div><span id="combine-stats"></span></div>
-    <p id="combine-method" class="combine-help"></p><div class="combine-scroll" id="combine-preview-table" tabindex="0" aria-label="Bảng xem trước bản gộp"></div><p class="combine-help">Hiển thị tối đa 12 dòng đầu. File tải về có đầy đủ dữ liệu, bộ lọc, tiêu đề cố định và sheet Sources để đối chiếu số dòng từng nguồn. Các dòng dữ liệu trùng nhau được giữ nguyên.</p>
+    <p id="combine-method" class="combine-help"></p><div class="combine-scroll" id="combine-preview-table" tabindex="0" aria-label="Bảng xem trước bản gộp"></div><p class="combine-help">Hiển thị tối đa 12 dòng đầu. Đến 1 triệu dòng: XLSX có đủ dữ liệu và Sources. Trên ngưỡng: gói Power Query có dữ liệu CSV, truy vấn .pq và hướng dẫn. Các dòng dữ liệu trùng nhau được giữ nguyên.</p>
     <div id="combine-warnings" role="status" hidden></div>
     <details><summary>Chi tiết từng nguồn</summary><div class="combine-scroll" id="combine-sources"></div></details>
+    <div class="combine-search-panel" aria-labelledby="combine-search-title">
+      <h3 id="combine-search-title">Tra cứu mã giày và size</h3>
+      <p class="combine-help">Tính tổng số đôi từ cột Number of Pairs, xem riêng từng Size và Size Range. Size Range giữ nguyên hậu tố vị trí. Chọn Khớp chính xác với A1A2 để loại A1A2-VQ. Chọn một hoặc nhiều cột để lọc toàn bộ dữ liệu. Khi tìm Mold Code, khoảng trắng trong mã được bỏ qua. Lần đầu chuẩn bị tra cứu có thể mất thời gian và dùng thêm dung lượng ổ đĩa.</p>
+      <button id="combine-search-create" type="button">Chuẩn bị tra cứu →</button>
+      <div id="combine-search-ready" hidden>
+        <p id="combine-search-scope" class="combine-help"></p>
+        <div id="combine-filters"></div>
+        <div class="combine-actions"><button id="combine-filter-add" type="button">+ Thêm điều kiện</button><button id="combine-search-run" class="combine-primary" type="button">Tìm và tính tổng →</button><button id="combine-search-clear" type="button">Xóa bộ lọc</button></div>
+        <p id="combine-search-stats" role="status"></p><p id="combine-search-warning" class="combine-help" hidden></p>
+        <div class="combine-scroll" id="combine-size-totals" tabindex="0" aria-label="Tổng số đôi theo size"></div>
+        <h4>Top 3 Issue từng size · chỉ Unit Type = DRR</h4>
+        <p class="combine-help" id="combine-top-issues-help">Xếp hạng theo tổng Number of Pairs giảm dần, trong phạm vi bộ lọc hiện tại. Khi bằng nhau, sắp theo tên Issue.</p>
+        <div class="combine-scroll" id="combine-top-issues" tabindex="0" aria-label="Top 3 Issue DRR từng size"></div>
+        <p class="combine-help">Dòng chi tiết được phân trang, tối đa 100 dòng mỗi trang.</p>
+        <div class="combine-scroll" id="combine-search-table" tabindex="0" aria-label="Dữ liệu tra cứu"></div>
+        <div class="combine-actions"><button id="combine-search-previous" type="button">← Trang trước</button><span id="combine-search-page"></span><button id="combine-search-next" type="button">Trang tiếp →</button></div>
+      </div>
+    </div>
     <label class="combine-name" for="combine-output-name">Tên file xuất<input id="combine-output-name" type="text" maxlength="165" autocomplete="off" spellcheck="false" aria-describedby="combine-name-help"></label>
     <p id="combine-name-help" class="combine-help">Bạn có thể sửa tên trước khi xuất; định dạng luôn là .xlsx.</p>
     <p id="combine-naming-basis" class="combine-help"></p>

@@ -10,18 +10,22 @@ vm.runInContext(fs.readFileSync(path.join(root, 'static/qms-navigation.js'), 'ut
 const nav = context.window.QmsNavigation;
 const original = JSON.stringify(memory.qms_modules);
 const modules = nav.prepare(memory.qms_modules);
-assert.equal(modules.length, 51);
+assert.equal(modules.length, memory.qms_modules.length);
+assert.ok(modules.length >= 32);
 assert.equal(JSON.stringify(memory.qms_modules), original, 'Display translation must not mutate crawled memory');
 assert.deepEqual(Array.from(modules, m => m.href), memory.qms_modules.map(m => m.href));
-assert.ok(modules.every(m => /^[\x20-\x7e]+$/.test(m.name)), 'All 51 displayed names must be English');
+assert.ok(modules.every(m => /^[\x20-\x7e]+$/.test(m.name)), 'Displayed names must be English');
 const counts = {};
 for (const module of modules) counts[module.category] = (counts[module.category] || 0) + 1;
-assert.deepEqual(counts, {'Control Plan': 3, 'Basic Information': 3, 'QA Document': 4,
-    'Collect Data': 9, 'Quality Database': 11, 'Performance Management': 4, 'Other Modules': 17});
-assert.equal(nav.filter(modules, '   ').length, 51);
-assert.equal(nav.filter(modules, 'q504')[0].name, 'HFPA');
+assert.deepEqual(counts, {'Control Plan': 3, 'Basic Information': 3, 'QA Document': 2,
+    'Collect Data': 9, 'Quality Database': 11, 'Performance Management': 4, 'Other Modules': 25});
+assert.equal(nav.filter(modules, '   ').length, modules.length);
+assert.equal(nav.filter(modules, 'mes410')[0].name, 'HFPA');
 assert.equal(nav.filter(modules, 'Q101')[0].category, 'Control Plan');
 assert.equal(nav.filter(modules, 'q05')[0].name, 'QA Manual');
+assert.equal(nav.filter(modules, 'qms750')[0].name, 'QA Document');
+assert.equal(nav.filter(modules, 'QA Document', 'QA Document').length, 2);
+assert.ok(!modules.some(m => /id=Q30[124]/.test(m.href)), 'Removed document placeholders must not remain');
 assert.equal(nav.filter(modules, 'cOpQ').length, 2, 'Search must include both data entry and reporting');
 assert.equal(nav.filter(modules, 'performance management').length, 4);
 assert.equal(nav.filter(modules, 'calibration report')[0].name, 'Product Process Calibration Report');
@@ -38,18 +42,21 @@ const elements = new Map(['qms-search', 'qms-category', 'qms-module-groups', 'qm
     'qms-search-clear', 'qms-empty'].map(id => [id, element()]));
 context.document = {getElementById: id => elements.get(id), createElement: element};
 context.window.cachedQmsModules = modules;
-elements.get('qms-search').value = 'q504';
+elements.get('qms-search').value = 'HFPA';
 nav.render();
-assert.equal(elements.get('qms-search-count').textContent, '1 of 51 modules');
+// Exact category search avoids the QC HFPA shortcut also present in the live menu.
+elements.get('qms-category').value = 'Quality Database';
+nav.render();
+assert.equal(elements.get('qms-search-count').textContent, `1 of ${modules.length} modules`);
 const link = elements.get('qms-module-groups').children[0].children[0].children[1].children[0].children[0];
 let opened;
 let prevented = false;
 context.window.jumpToQmsModule = (href, name) => {opened = {href, name};};
 link.click({preventDefault() {prevented = true;}});
 assert.ok(prevented, 'Ordinary clicks must navigate through the dashboard connection');
-assert.deepEqual(opened, {href: 'https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx?tree_id=Q504', name: 'HFPA'});
+assert.deepEqual(opened, {href: 'https://sfc.chingluh.com/vhmes/QA/QCHFPA.aspx', name: 'HFPA'});
 elements.get('qms-search').value = 'zz-no-such-module';
 nav.render();
 assert.equal(elements.get('qms-empty').hidden, false);
 assert.equal(elements.get('qms-module-groups').children.length, 0);
-console.log('QMS: 51 English labels, categories, URL preservation, combined search, empty state and filtered-result navigation passed');
+console.log('QMS: live labels, categories, URL preservation, document destinations, search and navigation passed');

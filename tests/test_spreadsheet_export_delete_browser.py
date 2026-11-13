@@ -63,8 +63,8 @@ class ExportDeleteBrowserTests(unittest.TestCase):
                         expect(page.locator('#offline-guide')).to_be_visible()
                         page.locator('#compare-upload').set_input_files(paths)
                         expect(page.locator('#workbook-count')).to_have_text('2 file')
-                        page.locator('.manual-setup-guide > summary').click()
-                        page.locator('#offline-add-comparison').click()
+                        page.locator('#advanced-checks > summary').click()
+                        page.locator('#add-comparison').click()
                         for field, value in [('left_range', 'A2:C4'), ('right_range', 'A2:C4'),
                                              ('left_keys', 'A,B'), ('right_keys', 'A,B'),
                                              ('left_columns', 'C'), ('right_columns', 'C')]:
@@ -80,12 +80,12 @@ class ExportDeleteBrowserTests(unittest.TestCase):
                         page.locator('#compare-status').select_option('all')
                         expect(page.locator('#compare-result-rows .result-row')).to_have_count(4)
                         expect(page.locator('#compare-result-rows').get_by_text('Khớp', exact=True)).to_have_count(1)
+                        page.locator('#workflow-options > summary').click()
                         page.locator('#workflow-rounding').select_option('1')
                         page.locator('#workflow-preview').click()
                         expect(page.locator('#workflow-plan')).to_be_visible()
                         expect(page.locator('#workflow-plan-content')).to_contain_text('factory')
-                        expect(page.locator('#workflow-run')).to_be_disabled()
-                        page.locator('#workflow-ack').check()
+                        expect(page.locator('#workflow-run')).to_be_enabled()
                         page.locator('#workflow-run').click()
                         expect(page.locator('#compare-notice')).to_contain_text('Hoàn tất quy trình')
                         expect(page.locator('#compare-result-rows .result-row')).to_have_count(3)
@@ -157,8 +157,9 @@ class ExportDeleteBrowserTests(unittest.TestCase):
                         errors = []
                         page.on('pageerror', lambda error: errors.append(str(error)))
                         page.goto(f'http://127.0.0.1:{http.server_port}/compare')
+                        page.locator('.saved-import > summary').click()
                         catalog = page.locator('#compare-catalog')
-                        delete = page.get_by_role('button', name='Xóa tất cả file', exact=True)
+                        delete = page.locator('#compare-delete-all')
                         expect(catalog.locator(f'option[value="{selection["id"]}"]')).to_have_count(1)
                         expect(catalog).to_have_value('')
                         expect(delete).to_be_enabled()

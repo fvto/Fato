@@ -1,9 +1,10 @@
-"""Conversational Excel analysis using Codex CLI + upstream Excel MCP Server.
+"""Conversational Excel analysis using local AI CLIs + upstream Excel MCP Server.
 
 Runs ephemeral inference sessions, never coding tasks. The only enabled tools
 are read-only Excel inspection and bounded numerical analysis of attached files.
 """
 from datetime import datetime, timezone
+from contextlib import nullcontext
 import json
 import os
 from pathlib import Path
@@ -12,6 +13,7 @@ import shutil
 import subprocess
 import threading
 import time
+import tempfile
 from uuid import uuid4
 
 import spreadsheet_compare as compare
@@ -25,7 +27,9 @@ PROCESSES = {}
 ACTIVE = set()
 CAPACITY = threading.BoundedSemaphore(2)
 STATUS_CACHE = (0, None)
+ANTIGRAVITY_STATUS_CACHE = (0, None)
 TIMEOUT = 240
+PROVIDERS = {'codex': 'Codex CLI', 'antigravity': 'Antigravity CLI'}
 COMPARISON_SIDE = {'type': 'object', 'properties': {
     'label': {'type': 'string'}, 'file': {'type': 'string'},
     'section': {'type': 'string'}, 'value': {'type': 'string'},
@@ -120,7 +124,50 @@ def hidden():
     return {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
 
 
-def status():
+def provider_id(value='codex'):
+    if not isinstance(value, str) or value not in PROVIDERS:
+        raise ValueError('Choose Codex or Antigravity for Dashboard analysis.')
+    return value
+
+
+def antigravity_path():
+    candidates = [os.environ.get('SPREADSHEET_ANTIGRAVITY_CLI'), shutil.which('agy.exe'),
+                  shutil.which('agy'), str(Path.home() / 'AppData/Local/agy/bin/agy.exe')]
+    return next((str(Path(path).resolve()) for path in candidates if path and Path(path).is_file()), None)
+
+
+def antigravity_status():
+    global ANTIGRAVITY_STATUS_CACHE
+    if time.monotonic() - ANTIGRAVITY_STATUS_CACHE[0] < 30 and ANTIGRAVITY_STATUS_CACHE[1] is not None:
+        return ANTIGRAVITY_STATUS_CACHE[1]
+    cli = antigravity_path()
+    ready = False
+    message = 'Thiếu Excel MCP. Chạy python scripts/setup_excel_ai.py.'
+    if not cli:
+        message = 'Chưa tìm thấy Antigravity CLI. Cài đặt rồi mở agy để đăng nhập.'
+    elif PYTHON.exists() and EXCEL.exists():
+        try:
+            # /usage is a read-only account command, with no model inference.
+            check = subprocess.run([cli, '-p', '/usage', '--output-format', 'json'],
+                                   capture_output=True, text=True, encoding='utf-8',
+                                   errors='replace', timeout=15, **hidden())
+            result = json.loads(check.stdout)
+            ready = (check.returncode == 0 and result.get('status') == 'SUCCESS'
+                     and result.get('command', {}).get('name') == 'usage')
+            message = ('Sẵn sàng · Excel MCP + tài khoản Antigravity đã đăng nhập' if ready
+                       else 'Mở agy để đăng nhập Antigravity, rồi chọn lại chế độ này.')
+        except (OSError, subprocess.TimeoutExpired, ValueError, AttributeError):
+            message = 'Không kiểm tra được Antigravity. Mở agy để kiểm tra đăng nhập và cập nhật CLI.'
+    data = {'ready': ready, 'message': message, 'provider': PROVIDERS['antigravity'],
+            'provider_id': 'antigravity', 'excel_tool': 'excel-mcp-server 2.2.2',
+            'timeout_seconds': TIMEOUT}
+    ANTIGRAVITY_STATUS_CACHE = (time.monotonic(), data)
+    return data
+
+
+def status(provider='codex'):
+    if provider_id(provider) == 'antigravity':
+        return antigravity_status()
     global STATUS_CACHE
     if time.monotonic() - STATUS_CACHE[0] < 30 and STATUS_CACHE[1] is not None:
         return STATUS_CACHE[1]
@@ -137,7 +184,7 @@ def status():
             message = 'Ready · Excel MCP + your signed-in Codex connection' if ready else 'Sign in to Codex CLI before starting Excel chat.'
         except (OSError, subprocess.TimeoutExpired):
             ready, message = False, 'Cannot check Codex sign-in. Check the local CLI installation.'
-    data = {'ready': ready, 'message': message, 'provider': 'Codex CLI',
+    data = {'ready': ready, 'message': message, 'provider': 'Codex CLI', 'provider_id': 'codex',
             'excel_tool': 'excel-mcp-server 2.2.2', 'timeout_seconds': TIMEOUT}
     STATUS_CACHE = (time.monotonic(), data)
     return data
@@ -250,6 +297,9 @@ def public_job(job_id):
 
 
 def submit(data):
+    if not isinstance(data, dict):
+        raise ValueError('Invalid analysis request.')
+    provider = provider_id(data.get('provider', 'codex'))
     message = str(data.get('message') or '').strip()
     if not 1 <= len(message) <= 12000:
         raise ValueError('Enter a request of at most 12,000 characters.')
@@ -273,19 +323,20 @@ def submit(data):
         if chat.get('active_job'):
             if read_job(chat['active_job'])['status'] in {'queued', 'running'}:
                 raise ValueError('This conversation already has an analysis running.')
-        if not status()['ready']:
-            raise ValueError(status()['message'])
+        connection = status(provider)
+        if not connection['ready']:
+            raise ValueError(connection['message'])
         if not CAPACITY.acquire(blocking=False):
             raise ValueError('Two analyses are already running. Try again after one finishes.')
         job_id = uuid4().hex
         job = {'id': job_id, 'chat_id': chat['id'], 'request_id': request_id,
                'status': 'queued', 'stage': 'Preparing attached workbooks…',
-               'created_at': now(), 'files': ids, 'message': message,
+               'created_at': now(), 'files': ids, 'message': message, 'provider': provider,
                'attachment_names': [compare.workbook(book_id)['name'] for book_id in ids]}
         try:
             compare.write_json(folder(job_id) / 'job.json', job)
             chat['messages'].append({'role': 'user', 'content': message, 'job_id': job_id,
-                                     'request_id': request_id, 'files': ids})
+                                     'request_id': request_id, 'files': ids, 'provider': provider})
             chat['active_job'] = job_id
             save_chat(chat)
             compare.write_json(receipt, {'job_id': job_id})
@@ -327,8 +378,46 @@ def stage_files(job):
     return manifest
 
 
-def command(job_id):
+def prepare_antigravity(job_id, workspace):
+    """Job-only configuration; never write to the user's CLI configuration."""
     job_dir = folder(job_id).resolve()
+    config = Path(workspace) / '.agents'
+    config.mkdir(parents=True, exist_ok=True)
+    servers = {
+        'spreadsheet-excel': {'command': str(EXCEL.resolve()),
+            'args': ['stdio', '--read-only', '--allow-dir', str(job_dir / 'files'),
+                     '--tools', 'data,formulas', '--max-loaded-cells', '500000'],
+            'tools': {name: {'eager': True} for name in
+                      ('describe_workbook', 'describe_sheet', 'read_range', 'find_cells', 'trace_formula')}},
+        'spreadsheet-analysis': {'command': str(PYTHON.resolve()),
+            'args': [str(APP / 'spreadsheet_chat_tools.py'), str(job_dir / 'manifest.json')],
+            'tools': {name: {'eager': True} for name in ('verify_checks', 'query_data', 'cell_details')}}}
+    compare.write_json(config / 'mcp_config.json', {'mcpServers': servers})
+    agent = config / 'agents' / 'dashboard-spreadsheet.md'
+    agent.parent.mkdir(exist_ok=True)
+    agent.write_text('---\nname: dashboard-spreadsheet\n'
+                     'description: Read-only analysis of attached spreadsheets\n'
+                     'mainAgent: true\nsubagent: false\ntools: [finish]\n---\n' + INSTRUCTIONS +
+                     '\nUse MCP servers spreadsheet-excel and spreadsheet-analysis only. '
+                     'After collecting sufficient evidence, call the built-in finish tool '
+                     'to return the final schema-constrained answer. Never call finish via MCP.\n',
+                     encoding='utf-8')
+    settings = {'agentMode': '', 'toolPermission': 'request-review',
+                'allowNonWorkspaceAccess': False, 'useG1Credits': False,
+                'statusLine': {'enabled': False}, 'title': {'enabled': False},
+                'permissions': {'allow': ['mcp(spreadsheet-excel/*)', 'mcp(spreadsheet-analysis/*)'],
+                                'ask': [], 'deny': ['command(*)', 'read_file(*)', 'write_file(*)',
+                                                   'read_url(*)', 'execute_url(*)']}}
+    compare.write_json(job_dir / 'antigravity-settings.json', settings)
+
+
+def command(job_id, provider='codex'):
+    job_dir = folder(job_id).resolve()
+    if provider_id(provider) == 'antigravity':
+        return [antigravity_path(), '--input-format', 'stream-json', '--output-format', 'stream-json',
+                '--disable-slash-commands', '--agent', 'dashboard-spreadsheet',
+                '--settings', str(job_dir / 'antigravity-settings.json'),
+                '--json-schema', str(job_dir / 'schema.json'), '--print-timeout', f'{TIMEOUT}s']
     args = [codex_path(), 'exec', '--ignore-user-config', '--ephemeral', '--skip-git-repo-check',
             '--sandbox', 'read-only', '--json']
     for feature in ('shell_tool', 'multi_agent', 'plugins', 'apps', 'hooks', 'browser_use', 'computer_use'):
@@ -347,6 +436,55 @@ def command(job_id):
     return args
 
 
+def parse_output(stdout, provider='codex'):
+    final, failure = None, None
+    for line in stdout.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        if provider == 'antigravity':
+            if event.get('event') != 'result':
+                continue
+            result = event.get('result') or {}
+            if result.get('status') != 'SUCCESS':
+                final = None
+                failure = result.get('error') or 'Antigravity could not finish the analysis.'
+                continue
+            final = result.get('structured_output')
+            if final is None:
+                try:
+                    final = json.loads(result.get('response', ''))
+                except (ValueError, TypeError):
+                    pass
+        else:
+            item = event.get('item') or {}
+            if event.get('type') == 'item.completed' and item.get('type') == 'agent_message':
+                try:
+                    final = json.loads(item['text'])
+                except (ValueError, KeyError):
+                    pass
+            if event.get('type') in {'error', 'turn.failed'}:
+                failure = event.get('message') or (event.get('error') or {}).get('message')
+    if failure or not isinstance(final, dict) or not isinstance(final.get('answer'), str):
+        raise RuntimeError(failure or f'{PROVIDERS[provider]} did not return a valid result. Check sign-in and usage limits, then retry.')
+    def valid(value, schema):
+        kind = schema['type']
+        if kind == 'object':
+            return (isinstance(value, dict) and set(value) == set(schema['required'])
+                    and all(valid(value[key], child) for key, child in schema['properties'].items()))
+        if kind == 'array':
+            return isinstance(value, list) and all(valid(item, schema['items']) for item in value)
+        if kind == 'boolean':
+            return isinstance(value, bool)
+        return isinstance(value, str) and ('enum' not in schema or value in schema['enum'])
+    if not valid(final, SCHEMA):
+        raise RuntimeError(f'{PROVIDERS[provider]} returned an incomplete comparison result. Please retry.')
+    return final
+
+
 def stop_process(process):
     if process.poll() is not None:
         return
@@ -360,6 +498,7 @@ def execute(job_id):
     process = None
     try:
         job = read_job(job_id)
+        provider = provider_id(job.get('provider', 'codex'))
         manifest = stage_files(job)
         job.update(status='running', stage='AI is reading your files and choosing how to check…')
         compare.write_json(folder(job_id) / 'job.json', job)
@@ -373,37 +512,40 @@ def execute(job_id):
         prompt = INSTRUCTIONS + '\nATTACHED FILES:\n' + json.dumps(manifest, ensure_ascii=False)
         prompt += '\nCONVERSATION:\n' + json.dumps(history, ensure_ascii=False)
         prompt += '\nPREVIOUS VERIFIED SCOPE (re-read/recompute as needed):\n' + json.dumps(prior, ensure_ascii=False)
-        process = subprocess.Popen(command(job_id), cwd=folder(job_id), stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                   text=True, encoding='utf-8', errors='replace', **hidden())
-        with LOCK:
-            PROCESSES[job_id] = process
-        stdout, stderr = process.communicate(prompt, timeout=TIMEOUT)
+        # Keep Antigravity outside the repository so report/project customizations
+        # aren't inherited by the spreadsheet analyst.
+        workspace = (tempfile.TemporaryDirectory(prefix='dashboard-spreadsheet-')
+                     if provider == 'antigravity' else nullcontext(folder(job_id)))
+        with workspace as cwd:
+            if provider == 'antigravity':
+                prepare_antigravity(job_id, cwd)
+            process = subprocess.Popen(command(job_id, provider), cwd=cwd, stdin=subprocess.PIPE,
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                       text=True, encoding='utf-8', errors='replace', **hidden())
+            with LOCK:
+                PROCESSES[job_id] = process
+            payload = (json.dumps({'event': 'user', 'message': {'content': prompt}}, ensure_ascii=False) + '\n'
+                       if provider == 'antigravity' else prompt)
+            try:
+                stdout, stderr = process.communicate(payload, timeout=TIMEOUT)
+            except subprocess.TimeoutExpired:
+                stop_process(process)
+                stdout, stderr = process.communicate()
+                (folder(job_id) / 'events.jsonl').write_text(stdout, encoding='utf-8')
+                (folder(job_id) / 'stderr.log').write_text(stderr, encoding='utf-8')
+                raise
         (folder(job_id) / 'events.jsonl').write_text(stdout, encoding='utf-8')
         (folder(job_id) / 'stderr.log').write_text(stderr, encoding='utf-8')
-        final, failure = None, None
-        for line in stdout.splitlines():
-            try:
-                event = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            item = event.get('item', {})
-            if event.get('type') == 'item.completed' and item.get('type') == 'agent_message':
-                try:
-                    final = json.loads(item['text'])
-                except (json.JSONDecodeError, KeyError):
-                    pass
-            if event.get('type') in {'error', 'turn.failed'}:
-                failure = event.get('message') or (event.get('error') or {}).get('message')
-        if process.returncode != 0 or not final or not isinstance(final.get('answer'), str):
-            raise RuntimeError(failure or 'The AI connection did not complete. Check Codex sign-in and usage limits, then retry.')
+        final = parse_output(stdout, provider)
+        if process.returncode != 0:
+            raise RuntimeError(f'{PROVIDERS[provider]} exited before completing the analysis. Check sign-in and usage limits, then retry.')
         job.update(status='completed', stage='Analysis complete.', **final)
         with LOCK:
             chat = read_chat(job['chat_id'])
             chat['messages'].append({'role': 'assistant', 'content': final['answer'],
                                      'comparisons': final.get('comparisons', []),
                                      'answer_language': final.get('answer_language', 'vi'),
-                                     'job_id': job_id, 'checked_scope': final.get('checked_scope', []),
+                                     'job_id': job_id, 'provider': provider, 'checked_scope': final.get('checked_scope', []),
                                      'needs_clarification': final.get('needs_clarification', False)})
             chat['active_job'] = None
             save_chat(chat)

@@ -29,6 +29,8 @@
 <label id="mode-field">Chế độ xử lý<select id="mode"></select></label>
 <label id="source-field">Nguồn dữ liệu<select id="source"><option value="auto">Tự động: dùng dữ liệu có sẵn, tải thiếu từ SFC</option><option value="local">File trong thư mục tool hiện có</option><option value="sfc">File đã tải từ SFC Dashboard</option><option value="upload">Chọn file từ máy</option></select></label>
 <label id="cutoff-field" hidden>Ngày chốt SFC<input id="cutoff" type="date"></label>
+<label id="qdr-from-field" hidden>Từ ngày<input id="qdr-date-from" type="date"></label>
+<label id="qdr-to-field" hidden>Đến ngày<input id="qdr-date-to" type="date"></label>
 </div>
 <div class="preset-actions"><button id="save-preset" type="button">Lưu preset +</button><button id="load-preset" type="button">Dùng preset đã lưu</button></div>
 <div class="groups" id="groups"></div>
@@ -39,5 +41,6 @@
 </main>
 <footer class="workspace-footer"><span>FATO © 2026 · Nội bộ</span><a href="/">Điều khiển SFC ↗</a></footer>
 <aside class="panel" style="margin:28px 40px;"><h2>Spreadsheet Compare</h2><p>Check calculations or compare two Excel datasets using your own ranges, keys and tolerance.</p><a class="pill-link" href="/compare">Open comparison workspace ↗</a></aside>
-<script src="/static/report_tools.js?v=quarterly-quality-single-flow"></script>
+<script src="/static/quarterly_defect_review.js?v=progress-v2"></script>
+<script src="/static/report_tools.js?v=quarterly-progress-v2"></script>
 </body></html>

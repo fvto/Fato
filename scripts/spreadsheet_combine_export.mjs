@@ -20,9 +20,9 @@ function table(name, headers, rows, formats) {
   const sheet = workbook.worksheets.add(name);
   sheet.showGridLines = false;
   const end = column(headers.length - 1);
-  // Artifact Tool accepts Excel's apostrophe escape for literal text. Escape
-  // both formula prefixes and existing apostrophes to preserve the source.
-  const literal = value => typeof value === 'string' && /^[=']/.test(value) ? "'" + value : value;
+  // Escape formula prefixes. Existing leading apostrophes are already literal
+  // in Artifact Tool; doubling them would change the source text.
+  const literal = value => typeof value === 'string' && /^=/.test(value) ? "'" + value : value;
   sheet.getRange(`A1:${end}${rows.length + 1}`).values = [headers, ...rows].map(row => row.map(literal));
   const range = sheet.getRange(`A1:${end}${rows.length + 1}`);
   range.format.font = {name: 'Arial', size: 10, color: '#202020'};

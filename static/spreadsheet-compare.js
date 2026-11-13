@@ -64,7 +64,7 @@
     const storedChat = read('compare-chat-id',null);
     let chat = {messages:[],jobs:{}}, chatId = /^[a-f0-9]{32}$/.test(linkedChat||'')?linkedChat:storedChat, chatReady = false, chatBusy = false, chatTimer = null;
     let chatMode=read('compare-analysis-mode','offline');
-    if(!['offline','chatgpt','codex'].includes(chatMode))chatMode='offline';
+    if(!['offline','chatgpt','codex','antigravity'].includes(chatMode))chatMode='offline';
     let pendingChat = read('compare-chat-pending',null);
     async function api(url, options) {
         const response = await fetch(url, options);
@@ -74,7 +74,7 @@
     }
     const post = data => ({method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
     function updateCatalogControls() {
-        const disabled=busy||deletingExport;
+        const disabled=busy||deletingExport||workflowBusy;
         $('compare-catalog').disabled=disabled;
         $('compare-import').disabled=disabled||!$('compare-catalog').value;
         $('compare-delete-all').disabled=disabled||!exportIds.length;
@@ -162,12 +162,13 @@
         });
     }
     function preferredSheet(book) {return book?.sheets.find(sheet=>sheet.suggestions.length)||book?.sheets[0];}
-    function addRule(kind) {
+    function addRule(kind, selectedBooks=null) {
+        if(busy||workflowBusy)return;
         if(kind==='comparison'&&books.length<2){notice('Hãy nhập hai file trước khi thiết lập so sánh.',true);return;}
         if(rules.length>=20){notice('Mỗi lượt hỗ trợ tối đa 20 quy tắc.',true);return;}
-        const leftBook=books[0], leftSheet=preferredSheet(leftBook);
+        const leftBook=selectedBooks?.[0]||books[0], leftSheet=preferredSheet(leftBook);
         if(!leftBook||!leftSheet)return;
-        const rightBook=books[1]||leftBook, rightSheet=rightBook.sheets.find(sheet=>sheet.name===leftSheet.name)||preferredSheet(rightBook);
+        const rightBook=selectedBooks?.[1]||books[1]||leftBook, rightSheet=rightBook.sheets.find(sheet=>sheet.name===leftSheet.name)||preferredSheet(rightBook);
         const base={kind,name:kind==='calculation'?'Kiểm tra phép tính':'Đối chiếu dữ liệu',left:{workbook:leftBook.id,sheet:leftSheet.name},number_mode:'number',tolerance:'0',rounding_digits:''};
         if(kind==='calculation')rules.push(leftSheet.suggestions[0]?structuredClone(leftSheet.suggestions[0]):{...base,operation:'average',direction:'rows',source_range:'',target_range:'',label_range:'',missing_policy:'skip',ignore_zero:false});
         else rules.push({...base,name:'So sánh 2 file',right:{workbook:rightBook.id,sheet:rightSheet.name},left_range:leftSheet.data_range,right_range:rightSheet.data_range,matching:'keys',left_keys:'',right_keys:'',left_columns:'',right_columns:'',value_type:'auto',ignore_case:true});
@@ -186,13 +187,14 @@
         previewSheets();renderRules();renderHandoffFiles();updateChatControls();renderWorkflowFiles();
     }
     function invalidateWorkflow() {
-        workflowPlan=null;$('workflow-plan').hidden=true;$('workflow-ack').checked=false;updateWorkflowControls();
+        workflowPlan=null;$('workflow-plan').hidden=true;$('workflow-error').hidden=true;updateWorkflowControls();
     }
     function renderWorkflowFiles() {
         const source=$('workflow-source').value, report=$('workflow-report').value;
         const entries=books.map(book=>[book.id,book.name]);
         $('workflow-source').innerHTML=options(entries,books.some(book=>book.id===source)?source:books[0]?.id);
-        $('workflow-report').innerHTML=options(entries,books.some(book=>book.id===report)?report:(books[1]||books[0])?.id);
+        const selectedSource=$('workflow-source').value;
+        $('workflow-report').innerHTML=options(entries,books.some(book=>book.id===report&&book.id!==selectedSource)?report:(books.find(book=>book.id!==selectedSource)||books[0])?.id);
         if(workflowPlan&&(workflowPlan.inputs[0].id!==$('workflow-source').value||workflowPlan.inputs[1].id!==$('workflow-report').value))invalidateWorkflow();
         updateWorkflowControls();
     }
@@ -200,15 +202,29 @@
         const disabled=busy||workflowBusy;
         for(const id of ['workflow-source','workflow-report','workflow-profile','workflow-factory','workflow-rounding'])$(id).disabled=disabled;
         $('workflow-preview').disabled=disabled||books.length<2||$('workflow-source').value===$('workflow-report').value;
-        $('workflow-run').disabled=disabled||!workflowPlan||!$('workflow-ack').checked;
+        $('quick-compare').disabled=$('workflow-preview').disabled;
+        $('workflow-preview').hidden=Boolean(workflowPlan);
+        $('workflow-run').disabled=disabled||!workflowPlan;
+        $('workflow-files').hidden=books.length<2;
+        $('compare-upload').disabled=disabled;
+        $('compare-files').querySelectorAll('button').forEach(button=>button.disabled=disabled);
+        $('workflow-method-note').textContent=$('workflow-rounding').value===''?'Đối chiếu số chính xác, không làm tròn. Đổi trong Tùy chọn so sánh.':`Làm tròn đến ${$('workflow-rounding').value} chữ số thập phân trước khi đối chiếu. Đổi trong Tùy chọn so sánh.`;
+        const completed=(result?.quick_summary?.source_id===$('workflow-source').value&&result?.quick_summary?.report_id===$('workflow-report').value)||(workflowPlan&&result?.workflow?.id===workflowPlan.id);
+        $('offline-next-step').textContent=workflowBusy?'Đang kiểm tra hai file…':books.length<2?`Thêm ${2-books.length} file Excel ở bước 01 để bắt đầu.`:$('workflow-source').value===$('workflow-report').value?'Chọn hai file khác nhau bên dưới.':completed?'Đã kiểm tra xong. Xem kết quả ở bước 03 bên dưới.':workflowPlan?'Xem gợi ý bên dưới, sau đó bấm So sánh.':'Hai file đã sẵn sàng. Bấm Xem gợi ý so sánh để tiếp tục.';
+        const step=completed?3:books.length>=2?2:1;
+        ['offline-step-files','offline-step-review','offline-step-result'].forEach((id,index)=>{
+            if(index+1===step)$(id).setAttribute('aria-current','step');else $(id).removeAttribute('aria-current');
+        });
     }
     function workflowScope(scope) {
-        return scope.factories?`Nhà máy ${scope.factories.join(', ')} · ${scope.period.join(' đến ')} · ${scope.scoped_rows}/${scope.source_rows} dòng nguồn trong phạm vi · ${scope.matrices.join(', ')}`:`${scope.paired_tables} cặp bảng · ${scope.skipped_sheets.length} trang tính chưa ghép.`;
+        return scope.factories?`Nhà máy ${scope.factories.join(', ')} · ${scope.period.join(' đến ')} · ${scope.scoped_rows}/${scope.source_rows} dòng nguồn trong phạm vi · ${scope.matrices.join(', ')}`:`${scope.paired_tables} cặp trang tính`+(scope.skipped_sheets.length?` · ${scope.skipped_sheets.length} trang tính chưa ghép.`:'.');
     }
     function renderWorkflowPlan() {
         const plan=workflowPlan;
-        $('workflow-plan-content').innerHTML=`<h3>${esc(plan.profile_label)}</h3><p><strong>Nguồn:</strong> ${esc(plan.inputs[0].name)}<br><strong>Báo cáo:</strong> ${esc(plan.inputs[1].name)}</p><p><strong>Phạm vi:</strong> ${esc(workflowScope(plan.scope))}</p><p><strong>${plan.rules.length} quy tắc được lập:</strong></p><ul>${plan.descriptions.map(item=>`<li>${esc(item)}</li>`).join('')}</ul><p><strong>Phương pháp &amp; điểm cần xác nhận:</strong></p><ul>${plan.warnings.map(item=>`<li>${esc(item)}</li>`).join('')}</ul><p><strong>Chưa bao gồm:</strong></p><ul>${plan.exclusions.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`;
-        $('workflow-plan').hidden=false;$('workflow-ack').checked=false;updateWorkflowControls();
+        const warnings=plan.warnings.filter(item=>!item.startsWith('Làm tròn kết quả')).map(item=>item.replace('Khóa được đề xuất từ dữ liệu duy nhất, vẫn cần xác nhận đúng ý nghĩa nghiệp vụ trước khi chạy.','Kiểm tra cột ghép dòng có đúng mã hoặc tên bạn muốn đối chiếu.'));
+        const descriptions=plan.descriptions.map(item=>item.replace('khóa đề xuất','ghép dòng theo').replace('Average từng dòng, Grand Total từng cột','trung bình từng dòng, tổng hợp từng cột').replace(' theo tên tiêu đề, không theo vị trí.',' theo tên cột.'));
+        $('workflow-plan-content').innerHTML=`<h3>Gợi ý đã sẵn sàng</h3><p><strong>Sẽ kiểm tra:</strong> ${esc(workflowScope(plan.scope))}</p><ul class="workflow-pairs">${descriptions.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>${warnings.length?`<div class="workflow-cautions"><strong>Cần lưu ý</strong><ul>${warnings.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div>`:''}<details class="workflow-detail"><summary>Xem chi tiết và phần chưa được kiểm tra</summary><p>${esc(plan.profile_label)} · ${plan.rules.length} quy tắc</p><p><strong>File A:</strong> ${esc(plan.inputs[0].name)}<br><strong>File B:</strong> ${esc(plan.inputs[1].name)}</p><ul>${plan.exclusions.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></details>`;
+        $('workflow-plan').hidden=false;updateWorkflowControls();
     }
     function previewSheets() {
         const book=books.find(book=>book.id===$('preview-book').value);
@@ -221,12 +237,13 @@
         $('compare-preview').innerHTML=sheet?`<table><tbody>${sheet.preview.map(row=>`<tr>${row.map(item=>`<td><small>${esc(item.cell)}</small>${esc(item.value??(item.formula?'[Công thức chưa lưu kết quả]':''))}</td>`).join('')}</tr>`).join('')}</tbody></table>`:'';
     }
     async function importBooks(options) {
-        if(busy||deletingExport)return;
+        if(busy||workflowBusy||deletingExport)return;
         busy=true;$('run-compare').disabled=true;updateCatalogControls();$('compare-upload').disabled=true;notice('Đang đọc cấu trúc file và giá trị đã lưu…');
         try {
             const data=await api('/api/compare/workbooks',options);
             books.push(...data.workbooks);persist();renderFiles();
-            notice(chatMode==='offline'?`Đã nhập ${data.workbooks.length} file. Chọn “Thiết lập so sánh 2 file” để chọn vùng dữ liệu và cột đối chiếu.`:`Đã nhập ${data.workbooks.length} file. Nhập yêu cầu kiểm tra vào khung trò chuyện bên dưới.`);
+            notice(chatMode==='offline'?(books.length<2?'Đã thêm file đầu tiên. Thêm file thứ hai để tiếp tục.':'Đã đủ hai file. Bấm “Xem gợi ý so sánh” ở bước 02.'):`Đã nhập ${data.workbooks.length} file. Nhập yêu cầu kiểm tra vào khung trò chuyện bên dưới.`);
+            if(chatMode==='offline'&&books.length>=2)$('chat-heading').scrollIntoView({behavior:'smooth',block:'start'});
         } catch(error){notice(error.message,true);}
         finally{busy=false;updateCatalogControls();$('compare-upload').disabled=false;renderRules();updateChatControls();}
     }
@@ -247,7 +264,22 @@
         $('compare-results-panel').hidden=false;
         $('compare-html').disabled=exportingHtml||!['exact','rounded'].includes(result.comparison_policy);
         const counts=result.counts, exact=counts.match||0;
-        $('compare-summary').innerHTML=[[result.total,'Tổng mục kiểm tra'],[result.issue_count,'Cần xem lại'],[exact,'Khớp hoàn toàn'],[0,'Sai số cho phép']].map(([number,label])=>`<div class="summary-number"><strong>${number.toLocaleString('vi-VN')}</strong><span>${label}</span></div>`).join('');
+        const quick=result.quick_summary;
+        $('quick-verdict').hidden=!quick;
+        if(quick){
+            const percentage=quick.percent_equal===true?`Giống nhau · ${quick.percent_checked} ô %`:quick.percent_issues?`${quick.percent_issues} ô % khác hoặc cần xem lại`:quick.unmatched_sheets?'Chưa kiểm tra đủ · có trang tính chưa ghép':'Không tìm thấy ô % để kiểm tra';
+            const rowDelta=quick.left_rows-quick.right_rows;
+            const rowVerdict=quick.rows_equal?'Giống nhau · chênh lệch 0 dòng':rowDelta?`Chênh lệch ${Math.abs(rowDelta).toLocaleString('vi-VN')} dòng`:'Tổng bằng nhau · khác theo trang tính';
+            const direction=rowDelta?`File ${rowDelta>0?'A':'B'} nhiều hơn ${Math.abs(rowDelta).toLocaleString('vi-VN')} dòng.`:quick.rows_equal?'Số dòng khớp ở từng trang tính.':'Xem chênh lệch ở từng trang tính bên dưới.';
+            const sheetRows=quick.sheets.map(sheet=>{
+                const delta=sheet.left_rows===null||sheet.right_rows===null?null:sheet.left_rows-sheet.right_rows;
+                const text=delta===null?`Chỉ có ở file ${sheet.left_rows===null?'B':'A'}`:delta===0?'Khớp · 0 dòng':`File ${delta>0?'A':'B'} nhiều hơn ${Math.abs(delta)} dòng`;
+                return `<tr><td>${esc(sheet.left_sheet||sheet.right_sheet)}${sheet.left_sheet&&sheet.right_sheet&&sheet.left_sheet!==sheet.right_sheet?` ↔ ${esc(sheet.right_sheet)}`:''}</td><td>${sheet.left_rows??'—'}</td><td>${sheet.right_rows??'—'}</td><td>${esc(text)}</td></tr>`;
+            }).join('');
+            $('quick-verdict').innerHTML=`<p class="note">Đã kiểm tra: ${esc(quick.left_name)} ↔ ${esc(quick.right_name)}</p><div class="quick-verdicts"><p><span>Số dòng</span><strong>${esc(rowVerdict)}</strong><small>${esc(direction)}</small></p><p><span>Giá trị %</span><strong>${esc(percentage)}</strong></p></div><section id="quick-row-counts"><h3>Đối chiếu số dòng</h3><div class="table-scroll"><table><thead><tr><th>Trang tính</th><th>File A · số dòng</th><th>File B · số dòng</th><th>Chênh lệch</th></tr></thead><tbody>${sheetRows}</tbody></table></div></section><details class="workflow-detail"><summary>Cách kiểm tra</summary><p>${esc(quick.method)}</p></details>`;
+        }
+        const totals=quick?[[quick.left_rows,'Số dòng file A'],[quick.right_rows,'Số dòng file B'],[quick.percent_checked,'Ô % đã kiểm tra'],[quick.percent_issues,'Ô % cần xem lại']]:[[result.total,'Tổng mục kiểm tra'],[result.issue_count,'Cần xem lại'],[exact,'Khớp hoàn toàn'],[0,'Sai số cho phép']];
+        $('compare-summary').innerHTML=totals.map(([number,label])=>`<div class="summary-number"><strong>${number.toLocaleString('vi-VN')}</strong><span>${label}</span></div>`).join('');
         $('compare-no-data').textContent=counts.no_data?`${counts.no_data} mục không có dữ liệu số. `:'';
         $('compare-csv').href=result.csv_url;$('compare-json').href=result.json_url;
         $('compare-html').dataset.url=result.html_url||`/api/compare/results/${encodeURIComponent(result.id)}/download.html`;
@@ -279,9 +311,10 @@
                 (row.formula?`<p>Công thức: <code>${esc(row.formula)}</code></p>`:'')+
                 (row.other_formula?`<p>Công thức đối chiếu: <code>${esc(row.other_formula)}</code></p>`:'')+
                 (row.left_rows?`<p>Dòng nguồn: ${esc(row.left_rows.join(', ')||'Không có')}<br>Dòng đối chiếu: ${esc((row.right_rows||[]).join(', ')||'Không có')}</p>`:'');
-            const delta=row.delta===null||row.delta===undefined?'—':showValue(row.number_mode!=='number'?row.delta*100:row.delta,'number')+(row.number_mode!=='number'?'%':'');
-            return groupHeading+`<tr class="result-row"><td><span class="status-tag ${type}">${esc(statuses[row.status]||row.status)}</span><p>${esc(row.rule_index+'. '+ruleLabel)}</p></td><td><strong>${esc(row.label||'')}</strong>${location}${other}</td><td>${esc(showValue(row.expected,row.number_mode))}</td><td>${esc(showValue(row.actual,row.number_mode))}</td><td>${esc(delta)}</td><td>${esc(resultReason(row.reason))}<details><summary>Bằng chứng và quy tắc</summary>${evidence}<p class="note">Sai số cho phép: ${esc(rule.tolerance??'0')}${row.number_mode!=='number'?' điểm phần trăm':' đơn vị tuyệt đối'}. Số chữ số hiển thị: ${esc(rule.rounding_digits||'theo định dạng ô')}.</p></details></td></tr>`;
+            const delta=row.delta_display??(row.delta===null||row.delta===undefined?'—':showValue(row.number_mode!=='number'?row.delta*100:row.delta,'number')+(row.number_mode!=='number'?'%':''));
+            return groupHeading+`<tr class="result-row"><td><span class="status-tag ${type}">${esc(statuses[row.status]||row.status)}</span><p>${esc(row.rule_index+'. '+ruleLabel)}</p></td><td><strong>${esc(row.label||'')}</strong>${location}${other}</td><td>${esc(row.expected_display??showValue(row.expected,row.number_mode))}</td><td>${esc(row.actual_display??showValue(row.actual,row.number_mode))}</td><td>${esc(delta)}</td><td>${esc(resultReason(row.reason))}<details><summary>Bằng chứng và quy tắc</summary>${evidence}<p class="note">Sai số cho phép: ${esc(rule.tolerance??'0')}${row.number_mode!=='number'?' điểm phần trăm':' đơn vị tuyệt đối'}. Số chữ số hiển thị: ${esc(rule.rounding_digits||'theo định dạng ô')}.</p></details></td></tr>`;
         }).join('')||'<tr><td colspan="6">Không có kết quả trong nhóm này. Chọn “Tất cả kết quả” để xem toàn bộ.</td></tr>';
+        updateWorkflowControls();
     }
     async function fetchResult(offset=0) {
         if(!result)return;
@@ -316,19 +349,21 @@
         $('chat-handoff-status').textContent='';$('chat-copy-fallback').hidden=true;$('chat-copy-text').value='';
     }
     async function ensureChatConnection() {
-        try{const state=await api('/api/compare/chat/status');chatReady=state.ready;$('chat-connection').textContent=state.message;}catch(error){$('chat-connection').textContent=error.message;}
+        const provider=chatMode;
+        chatReady=false;$('chat-connection').textContent='Đang kiểm tra kết nối…';updateChatControls();
+        try{const state=await api('/api/compare/chat/status?provider='+encodeURIComponent(provider));if(chatMode!==provider)return;chatReady=state.ready;$('chat-connection').textContent=state.message;}catch(error){if(chatMode!==provider)return;chatReady=false;$('chat-connection').textContent=error.message;}
         updateChatControls();
     }
     function applyChatMode() {
         const web=chatMode==='chatgpt', offline=chatMode==='offline';
         $('chat-mode').value=chatMode;
         $('offline-guide').hidden=!offline;$('chat-online-controls').hidden=offline;
-        $('advanced-checks').open=offline;
         if(offline&&chatTimer){clearTimeout(chatTimer);chatTimer=null;}
         $('chat-handoff').hidden=!web;$('chat-import-panel').hidden=!web;
         $('chat-open-web').hidden=!web;$('chat-connection').hidden=web;
         $('chat-local-history').open=!web;
         $('chat-shortcut').textContent=web?'Ctrl + Enter để sao chép yêu cầu':'Enter để xuống dòng · Ctrl + Enter để gửi';
+        $('chat-disclosure').textContent=chatMode==='antigravity'?'Nội dung Excel liên quan đến yêu cầu được gửi qua tài khoản Antigravity đang đăng nhập. File gốc được giữ nguyên.':chatMode==='codex'?'Nội dung Excel liên quan đến yêu cầu được gửi qua tài khoản Codex đang đăng nhập. File gốc được giữ nguyên.':'Bạn tự đính kèm file và gửi yêu cầu trong ChatGPT. Các chế độ AI cần kết nối mạng.';
         updateChatControls();
     }
     function evidenceLinks(job) {
@@ -341,7 +376,8 @@
             const fileNames=item.role==='user'?(job?.attachment_names||[]):[];
             const comparisons=item.role==='assistant'?window.SpreadsheetChatFormat.renderComparisons(item.comparisons,item.answer_language):'';
             const imported=item.source==='chatgpt_web';
-            return `<article class="chat-message ${esc(item.role)}"><p class="eyebrow">${item.role==='user'?'BẠN':item.role==='error'?'KẾT NỐI / LỖI':imported?'CHATGPT WEB · KẾT QUẢ ĐÃ NHẬP':'TRỢ LÝ ĐỐI CHIẾU'}</p>${imported?'<p class="note">Kết quả từ ChatGPT do bạn nhập. Dashboard hiển thị lại và chưa tự xác minh số liệu.</p>':''}<div class="chat-body">${window.SpreadsheetChatFormat.render(item.content)}${comparisons}</div>${fileNames.length?`<p class="note">Đính kèm: ${esc(fileNames.join(' · '))}</p>`:''}${item.role==='assistant'?evidenceLinks(job)+(item.checked_scope?.length?`<details class="chat-scope"><summary>${imported?'Phạm vi ChatGPT báo đã kiểm tra':'Phạm vi kiểm tra và giả định'}</summary><ul>${item.checked_scope.map(scope=>`<li>${esc(scope)}</li>`).join('')}</ul></details>`:''):''}${item.role==='error'?evidenceLinks(job):''}</article>`;
+            const provider=(item.provider||job?.provider)==='antigravity'?'ANTIGRAVITY':'CODEX';
+            return `<article class="chat-message ${esc(item.role)}"><p class="eyebrow">${item.role==='user'?'BẠN':item.role==='error'?'KẾT NỐI / LỖI':imported?'CHATGPT WEB · KẾT QUẢ ĐÃ NHẬP':'TRỢ LÝ ĐỐI CHIẾU · '+provider}</p>${imported?'<p class="note">Kết quả từ ChatGPT do bạn nhập. Dashboard hiển thị lại và chưa tự xác minh số liệu.</p>':''}<div class="chat-body">${window.SpreadsheetChatFormat.render(item.content)}${comparisons}</div>${fileNames.length?`<p class="note">Đính kèm: ${esc(fileNames.join(' · '))}</p>`:''}${item.role==='assistant'?evidenceLinks(job)+(item.checked_scope?.length?`<details class="chat-scope"><summary>${imported?'Phạm vi ChatGPT báo đã kiểm tra':'Phạm vi kiểm tra và giả định'}</summary><ul>${item.checked_scope.map(scope=>`<li>${esc(scope)}</li>`).join('')}</ul></details>`:''):''}${item.role==='error'?evidenceLinks(job):''}</article>`;
         }).join('') || '<p class="chat-empty">Nhập câu hỏi để bắt đầu. Bạn có thể hỏi tiếp về các file đã chọn.</p>';
         $('chat-messages').querySelectorAll('[data-chat-result]').forEach(button=>button.onclick=async()=>{
             try{result=await api('/api/compare/results/'+button.dataset.chatResult);save('compare-last-result',result.id);$('compare-status').value='issues';renderResult();$('comparison-results-heading').scrollIntoView({behavior:'smooth'});}catch(error){notice(error.message,true);}
@@ -364,7 +400,7 @@
     async function initializeChat() {
         applyChatMode();
         if(chatMode==='offline')return;
-        if(chatMode==='codex')await ensureChatConnection();
+        if(['codex','antigravity'].includes(chatMode))await ensureChatConnection();
         if(pendingChat){$('chat-request').value=pendingChat.message;notice('Lần gửi trước chưa được xác nhận. Gửi lại để khôi phục yêu cầu mà không tạo bản trùng.');}
         updateChatControls();await restoreChat();
         if(chatId)save('compare-chat-id',chatId);
@@ -396,8 +432,8 @@
         if(!chatReady)return;
         chatBusy=true;updateChatControls();
         const ids=books.map(book=>book.id);
-        const same=pendingChat&&pendingChat.message===message&&JSON.stringify(pendingChat.workbooks)===JSON.stringify(ids)&&pendingChat.chat_id===chatId;
-        if(!same)pendingChat={chat_id:chatId,message,workbooks:ids,request_id:crypto.randomUUID().replaceAll('-','')};
+        const same=pendingChat&&(pendingChat.provider||'codex')===chatMode&&pendingChat.message===message&&JSON.stringify(pendingChat.workbooks)===JSON.stringify(ids)&&pendingChat.chat_id===chatId;
+        if(!same)pendingChat={chat_id:chatId,message,workbooks:ids,provider:chatMode,request_id:crypto.randomUUID().replaceAll('-','')};
         save('compare-chat-pending',pendingChat);
         try{
             const job=await api('/api/compare/chat/messages',post(pendingChat));
@@ -409,7 +445,7 @@
     };
     $('chat-request').oninput=()=>{clearHandoff();updateChatControls();};
     $('chat-include-context').onchange=clearHandoff;
-    $('chat-mode').onchange=async()=>{chatMode=$('chat-mode').value;save('compare-analysis-mode',chatMode);applyChatMode();if(chatMode==='codex'&&!chatReady)await ensureChatConnection();if(chatMode!=='offline')await restoreChat();};
+    $('chat-mode').onchange=async()=>{chatMode=$('chat-mode').value;chatReady=false;save('compare-analysis-mode',chatMode);applyChatMode();if(['codex','antigravity'].includes(chatMode))await ensureChatConnection();if(chatMode!=='offline')await restoreChat();};
     $('chat-import-text').oninput=()=>updateChatControls();
     $('chat-import-file').onchange=async()=>{
         const file=$('chat-import-file').files[0];if(!file)return;
@@ -437,7 +473,7 @@
     $('compare-import').onclick=()=>{if(!$('compare-catalog').value){notice('Chọn file đã xuất.',true);return;}importBooks(post({catalog_id:$('compare-catalog').value}));};
     $('compare-catalog').onchange=updateCatalogControls;
     $('compare-delete-all').onclick=async()=>{
-        if(busy||deletingExport)return;
+        if(busy||workflowBusy||deletingExport)return;
         deletingExport=true;updateCatalogControls();
         try{
             await refreshCatalog();
@@ -452,22 +488,32 @@
         }catch(error){notice(error.message,true);}
         finally{deletingExport=false;$('compare-delete-all').textContent='Xóa tất cả file';updateCatalogControls();}
     };
-    $('offline-add-comparison').onclick=()=>{addRule('comparison');$('advanced-checks').open=true;$('advanced-checks').scrollIntoView({behavior:'smooth',block:'start'});};
+    $('offline-add-comparison').onclick=()=>{addRule('comparison',[$('workflow-source').value,$('workflow-report').value].map(id=>books.find(book=>book.id===id)));$('advanced-checks').open=true;$('advanced-checks').scrollIntoView({behavior:'smooth',block:'start'});};
+    $('quick-compare').onclick=async()=>{
+        if(busy||workflowBusy||$('quick-compare').disabled)return;
+        busy=true;workflowBusy=true;updateWorkflowControls();updateCatalogControls();renderRules();$('quick-compare').textContent='Đang kiểm tra…';
+        try{
+            result=await api('/api/compare/quick',post({source_id:$('workflow-source').value,report_id:$('workflow-report').value}));
+            save('compare-last-result',result.id);$('compare-status').value='issues';renderResult();
+            notice('Đã kiểm tra số dòng và giá trị %. Xem kết quả bên dưới.');
+            $('comparison-results-heading').scrollIntoView({behavior:'smooth',block:'start'});
+        }catch(error){notice(error.message,true);}
+        finally{busy=false;workflowBusy=false;$('quick-compare').textContent='Kiểm tra số dòng và %';renderRules();updateWorkflowControls();updateCatalogControls();}
+    };
     for(const id of ['workflow-source','workflow-report','workflow-profile','workflow-factory','workflow-rounding'])$(id).onchange=invalidateWorkflow;
     $('workflow-rounding').onchange=()=>{save('compare-workflow-rounding',$('workflow-rounding').value);invalidateWorkflow();};
     $('workflow-factory').oninput=invalidateWorkflow;
-    $('workflow-ack').onchange=updateWorkflowControls;
     $('workflow-preview').onclick=async()=>{
         if(workflowBusy||busy)return;
-        invalidateWorkflow();workflowBusy=true;updateWorkflowControls();$('workflow-preview').textContent='Đang nhận diện…';
+        invalidateWorkflow();workflowBusy=true;updateWorkflowControls();updateCatalogControls();$('workflow-preview').textContent='Đang nhận diện…';
         try{
             workflowPlan=await api('/api/compare/workflows/preview',post({source_id:$('workflow-source').value,report_id:$('workflow-report').value,profile:$('workflow-profile').value,factory_scope:$('workflow-factory').value.trim()||null,comparison_rounding_digits:$('workflow-rounding').value}));
-            renderWorkflowPlan();notice('Đã lập kế hoạch. Chưa chạy đối chiếu; hãy kiểm tra phạm vi và phương pháp bên dưới.');
-        }catch(error){notice(error.message,true);}
-        finally{workflowBusy=false;$('workflow-preview').textContent='Nhận diện & lập kế hoạch';updateWorkflowControls();}
+            renderWorkflowPlan();notice('Đã có gợi ý. Kiểm tra bên dưới rồi bấm “So sánh theo gợi ý”.');
+        }catch(error){$('workflow-error-message').textContent=error.message;$('workflow-error').hidden=false;notice('Chưa thể tự chọn cách so sánh. Xem hướng dẫn bên dưới.',true);}
+        finally{workflowBusy=false;$('workflow-preview').textContent='Xem gợi ý so sánh →';updateWorkflowControls();updateCatalogControls();}
     };
     $('workflow-run').onclick=async()=>{
-        if(workflowBusy||busy||!workflowPlan||!$('workflow-ack').checked)return;
+        if(workflowBusy||busy||!workflowPlan)return;
         workflowBusy=true;busy=true;updateWorkflowControls();updateCatalogControls();renderRules();$('workflow-run').textContent='Đang chạy quy trình…';
         try{
             result=await api(`/api/compare/workflows/${encodeURIComponent(workflowPlan.id)}/run`,post({acknowledged:true}));
@@ -475,11 +521,11 @@
             notice(`Hoàn tất quy trình ${workflowPlan.profile_label}: ${result.total} mục kiểm tra, ${result.issue_count} mục cần xem lại. Có thể xuất HTML kèm ảnh.`);
             $('comparison-results-heading').scrollIntoView({behavior:'smooth',block:'start'});
         }catch(error){notice(error.message,true);}
-        finally{busy=false;workflowBusy=false;$('workflow-run').textContent='Xác nhận & chạy quy trình';updateWorkflowControls();updateCatalogControls();renderRules();}
+        finally{busy=false;workflowBusy=false;$('workflow-run').textContent='So sánh theo gợi ý →';updateWorkflowControls();updateCatalogControls();renderRules();}
     };
     $('add-calculation').onclick=()=>addRule('calculation');$('add-comparison').onclick=()=>addRule('comparison');
     $('run-compare').onclick=async()=>{
-        if(busy||!rules.length)return;
+        if(busy||workflowBusy||!rules.length)return;
         // Commit a field that is still focused before reading the rule list.
         document.activeElement?.blur();busy=true;$('run-compare').disabled=true;updateCatalogControls();$('run-compare').textContent='Đang so sánh…';notice('Đang đối chiếu dữ liệu trên máy…');
         try{result=await api('/api/compare/run',post({rules}));save('compare-last-result',result.id);$('compare-status').value='issues';renderResult();notice(`Đã kiểm tra ${result.total} giá trị. ${result.issue_count} mục cần xem lại.`);$('comparison-results-heading').scrollIntoView({behavior:'smooth',block:'start'});}

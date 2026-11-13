@@ -4,7 +4,8 @@ Open `/compare`, or choose **Spreadsheet Compare** from the shared menu, SFC Das
 
 ## Workflow
 
-The default mode is **ChatGPT web · ưu tiên miễn phí**. The Dashboard prepares a
+The default mode is **So sánh ngoại tuyến · trên máy của bạn**. Choose
+**ChatGPT trên web** for a manual handoff. The Dashboard prepares a
 prompt locally and offers original-workbook downloads. Copy the prompt, open
 ChatGPT, attach the files and send there. No Codex inference or API call runs in
 this mode. ChatGPT plan/feature limits still apply. Files and prompts are not
@@ -17,7 +18,7 @@ explicitly labeled as supplied by ChatGPT and not independently verified by the
 Dashboard. No inference is used for import. Prior results can optionally be
 included in the copied prompt when the attached workbook IDs match.
 
-Choose **Codex · phân tích ngay trên Dashboard** to use the automated workflow:
+Choose **Codex · phân tích ngay trên Dashboard** or **Antigravity CLI · phân tích ngay trên Dashboard** to use the automated workflow:
 
 1. Upload Excel workbooks (`.xlsx`, `.xlsm`, `.xls`) or import a saved Dashboard export.
 2. Type a natural-language request and click **Send request**. English and Vietnamese are supported.
@@ -47,6 +48,32 @@ environment from pinned `requirements-excel-ai.txt`. Install/sign in to Codex CL
 separately. `SPREADSHEET_CODEX_CLI` can point to its executable. No API key is stored
 in the Dashboard and no global Codex configuration is changed. Chat uses the signed-in
 account's usage limits; AI availability depends on that connection.
+
+### Antigravity CLI
+
+Install [Antigravity CLI](https://antigravity.google/docs/cli/install/) and open
+`agy` once to sign in. Select **Antigravity CLI** under **Cách phân tích** on
+`/compare`. The Dashboard checks the signed-in account using `/usage`, without
+running inference. `SPREADSHEET_ANTIGRAVITY_CLI` can point to `agy.exe` when it is
+not on PATH. The existing Excel MCP runtime is shared with Codex.
+
+Antigravity runs through the documented [headless interface](https://antigravity.google/docs/cli/headless/)
+with streamed input and schema-constrained JSON results. Related workbook content
+is sent through the signed-in Antigravity account and uses its quota. Extra G1
+credits are disabled for Dashboard sessions. Each request records its provider;
+switching providers keeps the saved conversation and evidence available.
+
+Per-job MCP configuration and a dedicated analyst with only the built-in completion tool
+are prepared in a temporary workspace outside the report repository. Session
+permissions allow the two spreadsheet MCP servers and deny shell commands, file
+reads/writes, and web access through built-in tools. No global MCP or permission
+settings are edited. Antigravity can still load the user's personal CLI
+customizations; unlike Codex, its CLI has no `--ignore-user-config` flag.
+The eight spreadsheet tools are loaded eagerly so their parameter schemas are
+available without granting the analyst access to local configuration files.
+Original workbooks remain unchanged. Results and independently computed numerical
+evidence use the same Dashboard cards and downloads as Codex.
+The integration was tested with Antigravity CLI 1.5.3 using a synthetic workbook.
 
 Per turn, Codex receives only the two configured MCP servers: upstream Excel MCP in
 read-only mode confined to staged copies of the attached files, and local analysis
@@ -115,5 +142,8 @@ Each workbook is limited to 40 MB and 500,000 scanned cells. A run allows up to 
 `node tests/test_spreadsheet_chat_format.js`
 
 `node tests/test_spreadsheet_chatgpt.js`
+
+Optional Chrome check: set `CHINGLUH_UI_TESTS=1` and run
+`python -m unittest tests.test_spreadsheet_provider_browser -q`.
 
 Coverage includes zeros, missing values, percentages, rounding, uncached formulas, row/column aggregates, weights, composite keys, reordered rows, duplicate keys, upload validation, result pagination, local request boundaries and downloads. Browser verification uses the referenced MQAA workbook: 51 row-average checks and 13 column-total checks locate P15, P29 and J56 under the chosen mean/tolerance rules.

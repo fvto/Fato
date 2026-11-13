@@ -27,13 +27,13 @@ def _application(client, names, collection):
     failures = []
     for name in names:
         try:
-            app = _retry(lambda: client.Dispatch(name))
+            app = _retry(lambda: client.DispatchEx(name))
             _retry(lambda: getattr(app, collection).Count)
             return app
         except Exception as error:
             failures.append(error)
         try:
-            app = _retry(lambda: client.DispatchEx(name))
+            app = _retry(lambda: client.Dispatch(name))
             _retry(lambda: getattr(app, collection).Count)
             return app
         except Exception as error:
@@ -112,25 +112,6 @@ def _position(shape, box):
     shape.Width, shape.Height = width, height
 
 
-def _sanitize_chart_links(path, target_filename):
-    """Normalize external chart relationships to the peer Excel file name."""
-    temp_pkg = Path(path).with_suffix('.relclean.pptx')
-    with ZipFile(path) as zin, ZipFile(temp_pkg, 'w') as zout:
-        for item in zin.infolist():
-            data = zin.read(item.filename)
-            if item.filename.endswith('.rels') and 'charts' in item.filename.replace('\\', '/'):
-                root = ElementTree.fromstring(data)
-                changed = False
-                for rel in root:
-                    if rel.get('TargetMode') == 'External':
-                        rel.set('Target', target_filename)
-                        changed = True
-                if changed:
-                    data = ElementTree.tostring(root, xml_declaration=True, encoding='utf-8')
-            zout.writestr(item, data)
-    shutil.move(str(temp_pkg), str(path))
-
-
 def _check_links(path, source):
     """Read-only check: Office must not leave links to the private workbook."""
     needle = str(Path(source).parent).replace('\\', '/').lower()
@@ -144,7 +125,102 @@ def _check_links(path, source):
                     raise OfficeChartCopyError('Chart vẫn liên kết tới Excel tạm. Chưa xuất PPT để tránh lỗi khi gửi người khác.')
 
 
-def copy_charts(pptx, xlsx, output_pptx, output_xlsx=None):
+def _summary_sheet(workbook, quarter, columns):
+    """Build the screenshot in Excel; every month is selected from the run."""
+    from openpyxl.utils.cell import get_column_letter
+    from .quarterly_quality import REGIONS
+
+    name = 'QBR HFPA Summary'
+    try:
+        sheet = workbook.Worksheets.Item(name)
+        sheet.Cells.Clear()
+    except Exception:
+        sheet = workbook.Worksheets.Add()
+        sheet.Name = name
+    area = sheet.Range('A1:E4')
+    area.Font.Name = 'Times New Roman'
+    area.Font.Size = 20
+    area.HorizontalAlignment = -4108
+    area.VerticalAlignment = -4108
+    area.Interior.Color = 16777215
+    area.RowHeight = 27
+    area.ColumnWidth = 12
+    area.Borders.LineStyle = 1
+    area.Borders.Color = 14474460
+    area.Borders.Weight = 1
+    sheet.Cells(1, 1).Value = 'HFPA'
+    sheet.Cells(1, 5).Value = 'Avg'
+    for row, region in ((2, 'VN'), (3, 'Indo')):
+        sheet.Cells(row, 1).Value = region
+        for col, month in enumerate(quarter.months, 2):
+            sheet.Cells(1, col).Value = int(month[-2:])
+            records = [quarter.values.get(('HFPA', month, plant)) for plant in REGIONS[region]]
+            cell = sheet.Cells(row, col)
+            if month not in quarter.covered or any(record is None for record in records):
+                cell.Value = None
+                continue
+            source = get_column_letter(columns[month])
+            first = 5 if region == 'VN' else 7
+            cell.Formula = (f'=IFERROR((1-SUM(\'Month HFPA\'!{source}{first+9}:{source}{first+10})/'
+                            f'SUM(\'Month HFPA\'!{source}{first}:{source}{first+1}))*100,"")')
+        sheet.Cells(row, 5).Formula = f'=IF(COUNT(B{row}:D{row})=3,AVERAGE(B{row}:D{row}),"")'
+    sheet.Range('B2:E3').NumberFormat = '0.0'
+    sheet.Range('E1:E3').BorderAround(1, 3, Color=0)
+    sheet.Range('A4:D4').ClearContents()
+    sheet.Range('E4').Formula = '=IF(COUNT(E2:E3)=2,AVERAGE(E2:E3),"")'
+    sheet.Range('E4').NumberFormat = '0'
+    sheet.Calculate()
+    return sheet.Range('A1:E4')
+
+
+def _paste_summary(presentation, area, image_path):
+    """Only copy/paste and placement happen in PPT; no table is drawn there."""
+    slides = []
+    for i in range(1, presentation.Slides.Count + 1):
+        slide = presentation.Slides.Item(i)
+        for j in range(1, slide.Shapes.Count + 1):
+            shape = slide.Shapes.Item(j)
+            if not shape.HasTextFrame:
+                continue
+            try:
+                text = str(shape.TextFrame.TextRange.Text).upper()
+            except Exception:
+                continue  # WPS reports HasTextFrame for some non-text objects.
+            if 'CONSUMER PROMISE REVIEW' in text:
+                slides.append(slide)
+                break
+    for slide in slides:
+        slot = _shape_by_id(slide, 6)
+        if slot is None:
+            raise OfficeChartCopyError('Thiếu vị trí note HFPA trên slide Consumer Promise Review.')
+        left, top, width = float(slot.Left), float(slot.Top), float(slot.Width)
+        area.Parent.Activate()
+        area.CopyPicture(1, 2)  # xlScreen, xlBitmap: a real Excel screenshot.
+        # WPS does not implement bitmap PasteSpecial consistently. Preserve
+        # Excel's exact clipboard screenshot as PNG, then paste that picture.
+        import win32clipboard
+        import struct
+        from io import BytesIO
+        from PIL import Image
+
+        def read_bitmap():
+            win32clipboard.OpenClipboard()
+            try:
+                return win32clipboard.GetClipboardData(8)  # CF_DIB
+            finally:
+                win32clipboard.CloseClipboard()
+        dib = _retry(read_bitmap)
+        header = struct.pack('<2sIHHI', b'BM', len(dib) + 14, 0, 0, 0)
+        with Image.open(BytesIO(header + dib)) as picture:
+            picture.save(image_path, 'PNG')
+            image_width, image_height = picture.size
+        shape = slide.Shapes.AddPicture(str(image_path), False, True, left, top,
+                                        width, width * image_height / image_width)
+        shape.Name = 'HFPA quarterly summary from Excel'
+        slot.Delete()
+
+
+def copy_charts(pptx, xlsx, output_pptx, output_xlsx=None, *, quarter=None):
     from .editable_charts import CHART_SPECS, chart_rectangle, RANK_PLOT_X, RANK_PLOT_WIDTH
     try:
         import pythoncom
@@ -152,24 +228,38 @@ def copy_charts(pptx, xlsx, output_pptx, output_xlsx=None):
     except ImportError as error:
         raise OfficeChartCopyError('Thiếu pywin32 để Copy/Paste chart bằng Office. Cài lại dependencies của Dashboard.') from error
     pythoncom.CoInitialize()
-    excel = powerpoint = workbook = presentation = temporary_files = None
+    excel = powerpoint = workbook = presentation = temporary_files = candidate = None
     try:
         excel = _application(client, ('Excel.Application', 'ket.Application'), 'Workbooks')
         powerpoint = _application(client, ('PowerPoint.Application', 'kwpp.Application'), 'Presentations')
+        # WPS can deadlock opening presentations without an application window.
+        _retry(lambda: setattr(powerpoint, 'Visible', True))
         temporary_files = tempfile.TemporaryDirectory(prefix='office-qbr-', ignore_cleanup_errors=True)
         with temporary_files as temporary:
             temporary = Path(temporary)
             source = temporary/'source.pptx'
             source.write_bytes(pptx.read() if hasattr(pptx, 'read') else Path(pptx).read_bytes())
-            candidate = temporary/'finished.pptx'
-            # Work on a private Excel copy; publish the Office-saved source at
-            # the end only after both outputs have been saved and reopened.
+            # Save beside the delivered Excel so Office can write native peer
+            # workbook links. The final bytes are never modified afterwards.
+            candidate = Path(output_pptx).resolve().with_name('.' + Path(output_pptx).stem + '.native.pptx')
+            # Prepare a private copy, then save the finished Excel at its
+            # delivered path before Copy, so WPS cannot retain a private link.
             excel_copy = temporary/'source.xlsx'
             shutil.copyfile(xlsx, excel_copy)
-            workbook = _retry(lambda: excel.Workbooks.Open(str(excel_copy.resolve())))
-            presentation = _retry(lambda: powerpoint.Presentations.Open(str(source.resolve()), False, False, False))
+            workbook = _retry(lambda: excel.Workbooks.Open(str(excel_copy.resolve()), UpdateLinks=0))
+            presentation = _retry(lambda: powerpoint.Presentations.Open(str(source.resolve()), False, False, True))
             width, height = float(presentation.PageSetup.SlideWidth), float(presentation.PageSetup.SlideHeight)
             charts = _charts(workbook, CHART_SPECS)
+            summary = None
+            if quarter is not None:
+                from openpyxl import load_workbook
+                from .template_output import month_columns
+                book = load_workbook(excel_copy, read_only=True, data_only=True)
+                try:
+                    columns = month_columns(book['Month HFPA'], 3, 4, None)
+                finally:
+                    book.close()
+                summary = _retry(lambda: _summary_sheet(workbook, quarter, columns))
             boxes = {}
             origins = {}
             for key, obj in charts.items():
@@ -190,7 +280,13 @@ def copy_charts(pptx, xlsx, output_pptx, output_xlsx=None):
                 _retry(lambda: setattr(obj, 'Left', left + (650 if region == 'Indo' else 0)))
                 offset = {'trend': 0, 'model': 240, 'defect': 370}[kind]
                 _retry(lambda: setattr(obj, 'Top', top + offset))
-            _retry(workbook.Save)
+            published_excel = Path(output_xlsx or xlsx).resolve()
+            alerts = excel.DisplayAlerts
+            try:
+                excel.DisplayAlerts = False
+                _retry(lambda: workbook.SaveAs(str(published_excel), 51))
+            finally:
+                excel.DisplayAlerts = alerts
             for metric in ('FTT', 'HFPA'):
                 slide = _slide(presentation, metric)
                 for owner, region, kind, ident, *_ in CHART_SPECS:
@@ -206,14 +302,14 @@ def copy_charts(pptx, xlsx, output_pptx, output_xlsx=None):
                         obj.Parent.Activate()
                         obj.Copy()
                         time.sleep(0.08)
-                        p = slide.Shapes.Paste()
+                        p = slide.Shapes.PasteSpecial(DataType=0, Link=False)
                         if p.Count >= 1:
                             return p.Item(1)
                         raise OfficeChartCopyError('Clipboard chưa sẵn sàng để Paste.')
 
                     shape = _retry(_paste_chart, timeout=10)
-                    if shape.Type in (11, 13):
-                        raise OfficeChartCopyError('Office đã Paste thành ảnh thay vì đối tượng chart. Chưa xuất PPT.')
+                    if shape.Type != 3 or not shape.HasChart:
+                        raise OfficeChartCopyError('Office chưa Paste thành chart chỉnh sửa được. Chưa xuất PPT.')
                     shape.Name = f'{metric} {region} {kind}'
                     _position(shape, boxes[metric, region, kind])
                     slot.Delete()
@@ -227,16 +323,27 @@ def copy_charts(pptx, xlsx, output_pptx, output_xlsx=None):
                     aw, ah = width*.025, min(height*.035, gap*.7)
                     centre = x + w*(RANK_PLOT_X + RANK_PLOT_WIDTH/6)
                     _position(arrow, (centre-aw/2, y+h+(gap-ah)/2, aw, ah))
-            # Save the native presentation in place; Office authors the entire package.
-            _retry(presentation.Save)
+            if summary is not None:
+                _paste_summary(presentation, summary, temporary/'hfpa-summary.png')
+                _retry(workbook.Save)
+            # Office owns the final package. Never patch its XML, links or
+            # chart caches after this save: that can trigger PowerPoint Repair.
+            _retry(lambda: presentation.SaveAs(str(candidate.resolve()), 24))
             _retry(presentation.Close)
             presentation = None
             _retry(lambda: workbook.Close(False))
             workbook = None
-            _sanitize_chart_links(source, Path(output_xlsx or xlsx).name)
-            _check_links(source, excel_copy)
-            shutil.copyfile(source, output_pptx)
-            shutil.copyfile(excel_copy, output_xlsx or xlsx)
+            _check_links(candidate, excel_copy)
+            presentation = _retry(lambda: powerpoint.Presentations.Open(str(candidate.resolve()), True, False, True))
+            for metric in ('FTT', 'HFPA'):
+                saved = _slide(presentation, metric)
+                count = sum(bool(saved.Shapes.Item(i).HasChart) for i in range(1, saved.Shapes.Count + 1))
+                if count != 6:
+                    raise OfficeChartCopyError(f'PowerPoint mở lại không đủ 6 chart {metric}.')
+            _retry(presentation.Close)
+            presentation = None
+            shutil.copyfile(candidate, output_pptx)
+            candidate.unlink()
         return 12
     except OfficeChartCopyError:
         raise
@@ -246,9 +353,16 @@ def copy_charts(pptx, xlsx, output_pptx, output_xlsx=None):
         for document, close_args in ((presentation, ()), (workbook, (False,))):
             if document is not None:
                 try:
+                    if document is presentation:
+                        document.Saved = True
                     document.Close(*close_args)
                 except Exception:
                     pass
         if temporary_files is not None:
             temporary_files.cleanup()
+        if candidate is not None and candidate.is_file():
+            try:
+                candidate.unlink()
+            except OSError:
+                pass
         pythoncom.CoUninitialize()

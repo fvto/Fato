@@ -3,6 +3,7 @@
 from decimal import Decimal
 from pathlib import Path
 
+import json
 import openpyxl
 from report_brief import copq_issues, hfpa_issues, summarize_checks
 
@@ -44,6 +45,34 @@ def check_outputs(folder, run, files):
             "Có file kết quả đúng định dạng " + extension + ".",
         )
     inputs = run.get("validation", [])
+    if tool == "copq" and mode in ("all", "combine"):
+        from sfc_report_tools import plant_of
+
+        for source in inputs:
+            if source["group"] != "copq":
+                continue
+            site = plant_of(source.get("name", ""))
+            if site is None:
+                continue
+            check(
+                "copq.source_rows." + str(site),
+                source["rows"] > 0,
+                f"COPQ {site}: file nguồn có {source['rows']:,} bản ghi.",
+                actual=source["rows"],
+                **({"issues": [dict(
+                    title=f"Nhà máy {site} không có dữ liệu COPQ đầu vào",
+                    reason=f"{source['name']} chỉ có tiêu đề hoặc dòng tổng 0. Chưa đủ căn cứ kết luận chi phí bằng 0.",
+                    action="Kiểm tra tháng, Category/Type và dữ liệu trên SFC; xuất lại file nhà máy này trước khi dùng báo cáo.",
+                    severity="verify", file=source["name"], sites={site: 1}, count=1, unit="file",
+                )]} if source["rows"] == 0 else {}),
+            )
+        if mode == "all":
+            from sfc_copq_acquisition import COPQ_PLANTS
+
+            present = {plant_of(v.get("name", "")) for v in inputs if v["group"] == "copq"}
+            missing = sorted(set(COPQ_PLANTS) - present)
+            check("copq.site_coverage", not missing,
+                  "Kiểm tra đủ nguồn COPQ của 7 nhà máy.", missing_sites=missing)
     for item in files:
         if not item["name"].endswith(".xlsx"):
             continue
@@ -62,6 +91,28 @@ def check_outputs(folder, run, files):
                 indexed_records = [(index, row) for index, row in enumerate(rows, 2)
                                    if any(v is not None for v in row)]
                 records = [row for _, row in indexed_records]
+                if "Site" in header:
+                    site_column = header.index("Site")
+                    cost_column = header.index("Ttl cost ($)") if "Ttl cost ($)" in header else None
+                    for source in inputs:
+                        if source["group"] != "copq":
+                            continue
+                        site = plant_of(source.get("name", ""))
+                        if site is None:
+                            continue
+                        site_records = [r for r in records
+                                        if str(r[site_column]).strip().upper().replace("JV3", "JVB") == site]
+                        expected_rows = source["rows"] - source.get("business_exclusions", {}).get("rework_rows", 0)
+                        check("copq.site_rows." + str(site), len(site_records) == expected_rows,
+                              f"Đối chiếu số bản ghi COPQ riêng nhà máy {site}.",
+                              expected=expected_rows, actual=len(site_records))
+                        if cost_column is not None:
+                            actual_cost = sum((Decimal(str(r[cost_column] or 0)) for r in site_records), Decimal(0))
+                            expected_cost = Decimal(str(source.get("totals", {}).get("Ttl cost ($)", 0))) - Decimal(
+                                source.get("business_exclusions", {}).get("rework_cost", "0"))
+                            check("copq.site_cost." + str(site), abs(actual_cost - expected_cost) <= Decimal("0.01"),
+                                  f"Đối chiếu chi phí COPQ riêng nhà máy {site}.",
+                                  expected=str(expected_cost), actual=str(actual_cost))
                 expected = sum(
                     v["rows"] - v.get("business_exclusions", {}).get("rework_rows", 0)
                     for v in inputs
@@ -248,6 +299,55 @@ def check_outputs(folder, run, files):
                     required_rules.extend(["hfpa.pptx.charts", "hfpa.pptx.links"])
             except Exception as e:
                 check("hfpa.cross_deliverables", False, f"Lỗi đối chiếu deliverable HFPA: {e}")
+    if tool == "quarterly_defect_review" and mode != "check":
+        required_rules.extend(["quarterly_defect_review.summary", "quarterly_defect_review.excel"])
+        summary_file = output / "review_summary.json"
+        if summary_file.is_file():
+            try:
+                summary_data = json.loads(summary_file.read_text(encoding="utf-8"))
+                check(
+                    "quarterly_defect_review.summary",
+                    True,
+                    f"Đã tạo báo cáo tổng hợp {summary_data.get('period')} ({summary_data.get('status_label')}).",
+                )
+                excel_rel = (summary_data.get("files") or {}).get("excel")
+                excel_file = Path(excel_rel) if excel_rel else None
+                if excel_file and excel_file.is_file():
+                    wb = openpyxl.load_workbook(excel_file, read_only=True, data_only=False)
+                    try:
+                        expected_sheets = {
+                            "Overview_and_Charts",
+                            "Drilldown_Normalized",
+                            "Detail_Breakdown_HFPA",
+                            "Detail_Breakdown_FTT",
+                            "Catalog_Mapping_&_Review",
+                        }
+                        missing_sheets = sorted(expected_sheets - set(wb.sheetnames))
+                        check(
+                            "quarterly_defect_review.excel",
+                            not missing_sheets,
+                            "Workbook Excel đủ 5 sheet chuẩn NIKE."
+                            if not missing_sheets
+                            else f"Thiếu sheet Excel: {', '.join(missing_sheets)}",
+                        )
+                    finally:
+                        wb.close()
+                office_meta = summary_data.get("office_meta") or {}
+                if mode == "all" and not summary_data.get("export_ok") is False:
+                    if (summary_data.get("files") or {}).get("pptx"):
+                        required_rules.append("quarterly_defect_review.office_reopen")
+                        pptx_file = Path(summary_data["files"]["pptx"])
+                        reopen_ok = bool(office_meta.get("reopen_verified")) and pptx_file.is_file()
+                        check(
+                            "quarterly_defect_review.office_reopen",
+                            reopen_ok,
+                            f"Đã kiểm tra mở lại PPTX qua {office_meta.get('verification_app')} "
+                            f"({office_meta.get('slide_count')} slide, {office_meta.get('native_charts_pasted')} chart native)."
+                            if reopen_ok
+                            else "Chưa xác nhận mở lại thành công file PPTX.",
+                        )
+            except Exception as err:
+                check("quarterly_defect_review.summary", False, f"Lỗi đọc review_summary.json: {err}")
     for rule in required_rules:
         if not any(c["rule"] == rule for c in checks):
             check(rule, False, "Thiếu bảng kết quả để đối chiếu quy tắc " + rule + ".")

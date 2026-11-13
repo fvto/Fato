@@ -172,17 +172,17 @@ class CombineTests(unittest.TestCase):
                 combine.upload(files)
         self.assertEqual(list(combine.ROOT.iterdir()), [])
 
-    def test_maximum_fifty_files_and_reject_fifty_one_before_saving(self):
-        files = [FileStorage(io.BytesIO(str(i).encode()), filename=f'{i}.xlsx') for i in range(51)]
-        with self.assertRaisesRegex(ValueError, '1 đến 50'):
+    def test_maximum_150_files_and_reject_151_before_saving(self):
+        files = [FileStorage(io.BytesIO(str(i).encode()), filename=f'{i}.xlsx') for i in range(151)]
+        with self.assertRaisesRegex(ValueError, '1 đến 150'):
             combine.upload(files)
         self.assertEqual(list(combine.ROOT.iterdir()), [])
         with patch.object(combine, 'read_sheets', return_value=[sheet([['ID'], ['001']])]):
-            job = combine.upload(files[:50])
-        self.assertEqual(len(job['files']), 50)
+            job = combine.upload(files[:150])
+        self.assertEqual(len(job['files']), 150)
         response = server.app.test_client().get('/combine')
-        self.assertIn('data-max-files="50"', response.text)
-        self.assertIn('Tối đa 50 file', response.text)
+        self.assertIn('data-max-files="150"', response.text)
+        self.assertIn('Tối đa 150 file', response.text)
 
     def test_changed_source_and_duplicate_sheet_selection_block(self):
         tables = [sheet([['A'], [1]])]

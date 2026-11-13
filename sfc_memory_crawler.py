@@ -89,21 +89,8 @@ def crawl_entire_sfc():
             page.wait_for_load_state("networkidle", timeout=10000)
             time.sleep(2)
 
-            qms_data = page.evaluate("""() => {
-                const items = [];
-                // Lấy toàn bộ link trong navigation tree hoặc danh sách menu
-                document.querySelectorAll("a").forEach(a => {
-                    const text = a.innerText.trim();
-                    const href = a.href || '';
-                    if (text && href && !href.endsWith('#') && href.includes('chingluh.com')) {
-                        const cleanHref = href.split('#')[0];
-                        if (!items.some(it => it.href === cleanHref)) {
-                            items.push({ name: text.replace(/\\n+/g, ' '), href: cleanHref });
-                        }
-                    }
-                });
-                return items;
-            }""")
+            from sfc_qms import parse_navigation
+            qms_data = parse_navigation(page.content())
 
             memory_db["qms_modules"] = qms_data
             print(f"   ✅ Đã trích xuất {len(qms_data)} tính năng / màn hình thuộc phân hệ QMS!")
@@ -237,4 +224,13 @@ def crawl_entire_sfc():
         return memory_db
 
 if __name__ == "__main__":
-    crawl_entire_sfc()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--qms-only', action='store_true', help='Refresh live QMS navigation and every QA PDF page')
+    parser.add_argument('--plant', default='VH', choices=['VH', 'VH2', 'VH3', 'VH4', 'JV', 'JV2', 'JVB'])
+    args = parser.parse_args()
+    if args.qms_only:
+        from sfc_qms import refresh
+        print(json.dumps(refresh(args.plant, progress=print), ensure_ascii=False, indent=2))
+    else:
+        crawl_entire_sfc()

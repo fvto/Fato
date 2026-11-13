@@ -13,17 +13,23 @@ import shutil
 import subprocess
 import unicodedata
 import zipfile
+from itertools import zip_longest
 from xml.etree.ElementTree import ParseError
 
 import openpyxl
 import xlrd
 from spreadsheet_combine_names import naming_details
 from spreadsheet_combine_profiles import remove_known_footer
+import spreadsheet_combine_csv as csv_input
 
 ROOT = Path(__file__).resolve().parent / 'Report' / 'CombinedExcel'
-MAX_BYTES = 40 * 1024 * 1024
-MAX_FILES = 50
+MAX_BYTES = 200 * 1024 * 1024
+MAX_TOTAL_BYTES = 5 * 1024 * 1024 * 1024
+MAX_FILES = 150
+XLSX_ROW_THRESHOLD = 1_000_000
 MAX_CELLS = 500_000
+STREAMING_EXPORT_CELLS = 50_000
+SUPPORTED_EXTENSIONS = {'.xls', '.xlsx', '.xlsm', '.csv'}
 SOURCE_COLUMNS = ['Source File', 'Source Sheet', 'Source Row']
 
 
@@ -85,18 +91,22 @@ def json_write(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False), encoding='utf-8')
 
 
-def read_sheets(path):
+def read_sheets(path, csv_options=None):
     try:
+        if Path(path).suffix.lower() == '.csv':
+            sheet = csv_input.read_csv(Path(path), MAX_CELLS, csv_options)
+            return [sheet] if any(any(v not in (None, '') for v in row) for row in sheet['rows']) else []
         return _read_sheets(path)
     except (xlrd.XLRDError, xlrd.compdoc.CompDocError, zipfile.BadZipFile, KeyError, IndexError, ParseError,
             openpyxl.utils.exceptions.InvalidFileException) as error:
         raise ValueError('Không đọc được cấu trúc Excel. Hãy mở và lưu lại bằng Excel trước khi gộp.') from error
 
 
-def _read_sheets(path):
+def _read_sheets(path, cell_limit=MAX_CELLS):
     """Read values and formats only; never execute formulas or source instructions."""
     path = Path(path)
-    signature = path.read_bytes()[:8]
+    with path.open('rb') as stream:
+        signature = stream.read(8)
     sheets, total = [], 0
     if signature == b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1':
         import xlrd
@@ -104,7 +114,7 @@ def _read_sheets(path):
         try:
             for sheet in book.sheets():
                 total += sheet.nrows * sheet.ncols
-                if total > MAX_CELLS:
+                if cell_limit is not None and total > cell_limit:
                     raise ValueError('File vượt 500.000 ô. Hãy chia nhỏ dữ liệu.')
                 rows, formats = [], []
                 for row in sheet.get_rows():
@@ -134,12 +144,12 @@ def _read_sheets(path):
             cached = openpyxl.load_workbook(cached_stream, read_only=True, data_only=True, keep_links=False)
             try:
                 for sheet in book:
-                    if (sheet.max_row or 0) * (sheet.max_column or 0) > MAX_CELLS:
+                    if cell_limit is not None and (sheet.max_row or 0) * (sheet.max_column or 0) > cell_limit:
                         raise ValueError('File vượt 500.000 ô. Hãy chia nhỏ dữ liệu.')
                     rows, formats = [], []
                     for row, saved in zip(sheet.iter_rows(), cached[sheet.title].iter_rows()):
                         total += len(row)
-                        if total > MAX_CELLS:
+                        if cell_limit is not None and total > cell_limit:
                             raise ValueError('File vượt 500.000 ô. Hãy chia nhỏ dữ liệu.')
                         values = []
                         for cell, stored in zip(row, saved):
@@ -159,46 +169,103 @@ def _read_sheets(path):
     return [sheet for sheet in sheets if any(any(v not in (None, '') for v in row) for row in sheet['rows'])]
 
 
-def upload(files):
+class UploadValidationError(ValueError):
+    def __init__(self, errors):
+        self.errors = errors
+        self.message = 'Có file không hợp lệ. Sửa hoặc bỏ các file được liệt kê rồi tải lại; chưa tạo lượt gộp.'
+        super().__init__(self.message + '\n' + '\n'.join(f'{e["file"]}: {e["error"]}' for e in errors))
+
+
+def upload(files, csv_options=None, progress=None):
     if not 1 <= len(files) <= MAX_FILES:
-        raise ValueError(f'Chọn từ 1 đến {MAX_FILES} file Excel mỗi lần.')
+        raise ValueError(f'Chọn từ 1 đến {MAX_FILES} file Excel/CSV mỗi lần.')
+    csv_options = csv_input.options(csv_options)
     job_id = uuid4().hex
     folder = ROOT / job_id
     folder.mkdir(parents=True)
-    items, hashes, cells = [], set(), 0
+    items, hashes, cells, errors = [], set(), 0, []
+    total_bytes = 0
     try:
         for index, storage in enumerate(files):
             name = str(storage.filename or '').replace('\\', '/').rsplit('/', 1)[-1]
             extension = Path(name).suffix.lower()
-            if extension not in {'.xls', '.xlsx', '.xlsm'}:
-                raise ValueError(f'{name}: chỉ hỗ trợ .xls, .xlsx và .xlsm.')
-            content = storage.stream.read(MAX_BYTES + 1)
-            if len(content) > MAX_BYTES:
-                raise ValueError(f'{name}: vượt giới hạn 40 MB mỗi file.')
-            digest = hashlib.sha256(content).hexdigest()
-            if digest in hashes:
-                raise ValueError(f'{name}: file trùng nội dung đã chọn. Hãy bỏ file trùng rồi thử lại.')
-            hashes.add(digest)
-            target = folder / f'input_{index}{extension}'
-            target.write_bytes(content)
+            if progress:
+                progress(f'Đọc file {index+1}/{len(files)}: {name}')
             try:
-                sheets = read_sheets(target)
+                if extension not in SUPPORTED_EXTENSIONS:
+                    raise ValueError('Chỉ hỗ trợ .xls, .xlsx, .xlsm và .csv.')
+                target = folder / f'input_{index}{extension}'
+                digest, size = hashlib.sha256(), 0
+                with target.open('wb') as stream:
+                    while chunk := storage.stream.read(64 * 1024):
+                        size += len(chunk)
+                        total_bytes += len(chunk)
+                        if total_bytes > MAX_TOTAL_BYTES:
+                            raise ValueError('Tổng file vượt giới hạn 5 GB. Hãy chia nhỏ lượt gộp.')
+                        if size > MAX_BYTES:
+                            raise ValueError(f'Vượt giới hạn {MAX_BYTES // (1024 * 1024)} MB mỗi file.')
+                        digest.update(chunk)
+                        stream.write(chunk)
+                digest = digest.hexdigest()
+                if digest in hashes:
+                    raise ValueError('File trùng nội dung đã chọn. Hãy bỏ file trùng rồi thử lại.')
+                hashes.add(digest)
+                if extension == '.csv':
+                    from spreadsheet_combine_large import inspect_csv
+                    metadata = inspect_csv(target, csv_options, progress, cache_scan=True)
+                    cells += metadata['cells']
+                    items.append(dict(id=index, name=name, sha256=digest, **metadata))
+                    continue
+                source_path = target
+                if extension in {'.xls','.xlsx','.xlsm'} and size > 2 * 1024**2:
+                    from spreadsheet_combine_large import inspect_xlsx
+                    metadata = inspect_xlsx(target)
+                    if not metadata:
+                        raise ValueError('Không có dữ liệu.')
+                    items.append(dict(id=index,name=name,stored=target.name,sha256=digest,
+                                      sheets=metadata,large=True))
+                    continue
+                try:
+                    sheets = read_sheets(source_path)
+                except ValueError as error:
+                    if extension not in {'.xls','.xlsx','.xlsm'} or not any(text in str(error) for text in ('500.000','sau giải nén')):
+                        raise
+                    from spreadsheet_combine_large import inspect_xlsx
+                    metadata = inspect_xlsx(target)
+                    if not metadata:
+                        raise ValueError('Không có dữ liệu.')
+                    items.append(dict(id=index,name=name,stored=target.name,sha256=digest,sheets=metadata,large=True))
+                    continue
+                try:
+                    if not sheets:
+                        raise ValueError('Không có dữ liệu.')
+                    cells += sum(sum(max(1, len(row)) for row in s['rows']) for s in sheets)
+                    item = dict(id=index, name=name, stored=target.name, sha256=digest,
+                                sheets=[dict(name=s['name'], rows=len(s['rows']),
+                                             columns=max(map(len, s['rows']), default=0),
+                                             header_row=detect_header(s)) for s in sheets])
+                    items.append(item)
+                finally:
+                    del sheets
             except (ValueError, OSError, zipfile.BadZipFile) as error:
-                raise ValueError(f'{name}: {error}') from error
-            if not sheets:
-                raise ValueError(f'{name}: không có dữ liệu.')
-            cells += sum(sum(len(row) for row in s['rows']) for s in sheets)
-            if cells > MAX_CELLS:
-                raise ValueError('Tổng dữ liệu vượt 500.000 ô. Hãy chia thành nhiều lượt gộp.')
-            items.append(dict(id=index, name=name, stored=target.name, sha256=digest,
-                              sheets=[dict(name=s['name'], rows=len(s['rows']),
-                                           columns=max(map(len, s['rows']), default=0),
-                                           header_row=detect_header(s)) for s in sheets]))
+                errors.append(dict(file=name, error=str(error)))
+                if total_bytes > MAX_TOTAL_BYTES:
+                    break
+        if errors:
+            raise UploadValidationError(errors)
+        if cells > MAX_CELLS:
+            for item in items:
+                item['large'] = True
         json_write(folder / 'inputs.json', items)
-        return dict(id=job_id, files=[{k: v for k, v in item.items() if k != 'stored'} for item in items])
+        estimated=sum(max(0,s['rows']-s['header_row']) for item in items for s in item['sheets'] if s.get('default_selected',s is item['sheets'][0]))
+        return dict(id=job_id, estimated_rows=estimated, xlsx_row_threshold=XLSX_ROW_THRESHOLD,
+                    files=[{k: v for k, v in item.items() if k not in {'stored','original_stored'}} for item in items])
     except Exception:
         # This newly-created job folder contains only this failed upload.
-        shutil.rmtree(folder)
+        target=folder.resolve()
+        if target.parent != ROOT.resolve() or not re.fullmatch('[a-f0-9]{32}',target.name):
+            raise ValueError('Không dọn thư mục ngoài vùng gộp file.')
+        shutil.rmtree(target)
         raise
 
 
@@ -271,12 +338,15 @@ def clean_table(sheet, header_row, end_row=None, footer_mode='auto'):
                 header_row=header_row, end_row=end_row)
 
 
-def prepare(job_id, selections, options=None):
+def prepare(job_id, selections, options=None, progress=None):
     options = {} if options is None else options
     if not isinstance(options, dict) or options.get('schema_mode', 'union') not in {'union', 'strict'} or options.get('footer_mode', 'auto') not in {'auto', 'keep'}:
         raise ValueError('Tùy chọn gộp không hợp lệ.')
     folder = folder_for(job_id)
     items = json.loads((folder / 'inputs.json').read_text(encoding='utf-8'))
+    if any(item.get('large') for item in items):
+        from spreadsheet_combine_large import prepare as prepare_large
+        return prepare_large(job_id, selections, options, progress)
     if not isinstance(selections, list) or not selections:
         raise ValueError('Chọn ít nhất một bảng để gộp.')
     columns, column_keys, parts, seen = [], [], [], set()
@@ -288,21 +358,41 @@ def prepare(job_id, selections, options=None):
             raise ValueError('File được chọn không hợp lệ.')
         item = items[file_id]
         path = folder / item['stored']
-        if hashlib.sha256(path.read_bytes()).hexdigest() != item['sha256']:
-            raise ValueError(f'{item["name"]}: file nguồn đã thay đổi, hãy tải lại.')
-        sheets = read_sheets(path)
-        selected = next((s for s in sheets if s['name'] == selection.get('sheet')), None)
-        if selected is None or (file_id, selected['name']) in seen:
-            raise ValueError('Trang tính bị trùng hoặc không còn tồn tại.')
-        seen.add((file_id, selected['name']))
-        table = clean_table(selected, selection.get('header_row', detect_header(selected)), selection.get('end_row'), options.get('footer_mode', 'auto'))
+        try:
+            with path.open('rb') as stream:
+                digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+            if digest != item.get('stored_sha256', item['sha256']):
+                raise ValueError('File nguồn đã thay đổi, hãy tải lại.')
+            if item.get('converted'):
+                with (folder / item['original_stored']).open('rb') as stream:
+                    if hashlib.file_digest(stream,'sha256').hexdigest() != item['sha256']:
+                        raise ValueError('File nguồn đã thay đổi, hãy tải lại.')
+            sheets = read_sheets(path, item.get('csv_options')) if path.suffix == '.csv' else read_sheets(path)
+            try:
+                selected = next((s for s in sheets if s['name'] == selection.get('sheet')), None)
+                if selected is None or (file_id, selected['name']) in seen:
+                    raise ValueError('Trang tính bị trùng hoặc không còn tồn tại.')
+                seen.add((file_id, selected['name']))
+                table = clean_table(selected, selection.get('header_row', detect_header(selected)), selection.get('end_row'), options.get('footer_mode', 'auto'))
+                sheet_name = selected['name']
+            finally:
+                selected = None
+                del sheets
+        except (ValueError, OSError) as error:
+            raise ValueError(f'{item["name"]}: {error}') from error
         if options.get('schema_mode') == 'strict' and parts and set(table['keys']) != set(parts[0][2]['keys']):
-            raise ValueError(f'{item["name"]} / {selected["name"]}: bộ cột khác bảng đầu tiên. Chọn Giữ tất cả cột nếu muốn ghép các bảng khác cấu trúc.')
+            raise ValueError(f'{item["name"]} / {sheet_name}: bộ cột khác bảng đầu tiên. Chọn Giữ tất cả cột nếu muốn ghép các bảng khác cấu trúc.')
         for label, normalized in zip(table['header'], table['keys']):
             if normalized not in column_keys:
                 column_keys.append(normalized)
                 columns.append(label)
-        parts.append((item, selected['name'], table))
+        parts.append((item, sheet_name, table))
+    # Check the expanded union before allocating rows: 150 narrow sources can
+    # otherwise create a huge sparse table despite a small input cell count.
+    row_count = sum(len(part[2]['records']) for part in parts)
+    if row_count * (len(columns) + 3) > MAX_CELLS or len(columns) + 3 > 16384:
+        from spreadsheet_combine_large import prepare as prepare_large
+        return prepare_large(job_id, selections, options, progress)
     provenance = []
     for label in SOURCE_COLUMNS:
         candidate, number = label, 1
@@ -331,6 +421,8 @@ def prepare(job_id, selections, options=None):
         raise ValueError('Bảng gộp vượt giới hạn 500.000 ô. Hãy chia nhỏ dữ liệu.')
     shared = set.intersection(*(set(part[2]['keys']) for part in parts))
     warnings = ['Các bảng không có cột chung. Kiểm tra lại trang tính và dòng tiêu đề trước khi xuất.'] if not shared and len(parts) > 1 else []
+    for file_id in dict.fromkeys(selection['file_id'] for selection in selections):
+        warnings.extend(f'{items[file_id]["name"]}: {warning}' for warning in items[file_id].get('warnings', []))
     columns += provenance
     return dict(columns=columns, rows=rows, sources=sources, source_columns=provenance,
                 **naming_details(sources), warnings=warnings, options=options,
@@ -341,9 +433,17 @@ def prepare(job_id, selections, options=None):
 
 
 def summary(payload):
-    return {k: v for k, v in payload.items() if k != 'rows'} | dict(
+    result={k: v for k, v in payload.items() if k != 'rows'} | dict(
+        export_mode='power_query' if payload['row_count']>XLSX_ROW_THRESHOLD else 'xlsx',
+        xlsx_row_threshold=XLSX_ROW_THRESHOLD,
         preview=[[cell['value'] for cell in row] for row in payload['rows'][:12]],
         preview_formats=[[cell['format'] for cell in row] for row in payload['rows'][:12]])
+    if payload['row_count']>XLSX_ROW_THRESHOLD:
+        warnings=[message for message in payload.get('warnings',[]) if 'Kết quả vượt giới hạn dòng một sheet Excel' not in message]
+        message='Kết quả trên 1 triệu dòng: chỉ xuất gói Power Query, không xuất toàn bộ dữ liệu thành sheet XLSX.'
+        if message not in warnings:warnings.append(message)
+        result['warnings']=warnings
+    return result
 
 
 def runtime():
@@ -355,24 +455,35 @@ def runtime():
     return node, modules
 
 
-def export(job_id, selections, output_name=None, options=None):
-    payload = prepare(job_id, selections, options)
+def export(job_id, selections, output_name=None, options=None, progress=None):
+    payload = prepare(job_id, selections, options, progress)
     payload['output_name'] = output_filename(payload['output_name'] if output_name is None else output_name)
+    if payload['row_count']>XLSX_ROW_THRESHOLD:
+        from spreadsheet_combine_powerquery import export as export_powerquery
+        return export_powerquery(job_id,payload,progress)
     folder = folder_for(job_id)
-    node, modules = runtime()
     # Each immutable result has its own directory, so concurrent requests cannot
     # overwrite another user's preview, payload or finished download.
     result_id = uuid4().hex
     result_folder = folder / result_id
     result_folder.mkdir()
-    json_write(result_folder / 'payload.json', payload)
+    json_write(result_folder / 'payload.json', summary(payload) if payload.get('large') else payload)
     output = result_folder / payload['output_name']
     builder = Path(__file__).resolve().parent / 'scripts/spreadsheet_combine_export.mjs'
     try:
-        subprocess.run([str(node), str(builder), str(result_folder), str(modules)],
-                       check=True, capture_output=True, text=True, encoding='utf-8',
-                       timeout=180, creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
-        verify(output, payload)
+        if payload.get('large'):
+            from spreadsheet_combine_large import write_verify
+            payload['combined_sheets'] = write_verify(output, payload, progress)
+        elif len(payload['rows']) * len(payload['columns']) > STREAMING_EXPORT_CELLS:
+            from spreadsheet_combine_stream import write
+            write(output, payload)
+        else:
+            node, modules = runtime()
+            subprocess.run([str(node), str(builder), str(result_folder), str(modules)],
+                           check=True, capture_output=True, text=True, encoding='utf-8',
+                           timeout=180, creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+        if not payload.get('large'):
+            verify(output, payload)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
         output.unlink(missing_ok=True)
         logging.getLogger(__name__).exception('Excel export failed; stderr=%s', getattr(error, 'stderr', ''))
@@ -389,10 +500,12 @@ def verify(path, payload):
         if book.sheetnames != ['Combined', 'Sources']:
             raise ValueError('File gộp thiếu bảng dữ liệu hoặc thông tin nguồn.')
         sheet = book['Combined']
-        values = list(sheet.iter_rows(values_only=True))
-        if list(values[0]) != payload['columns'] or len(values) != len(payload['rows']) + 1:
+        header = next(sheet.iter_rows(values_only=True), ())
+        if list(header) != payload['columns']:
             raise ValueError('Số dòng hoặc cột sau gộp không khớp nguồn.')
-        for actual, expected in zip(sheet.iter_rows(min_row=2), payload['rows']):
+        for actual, expected in zip_longest(sheet.iter_rows(min_row=2), payload['rows']):
+            if actual is None or expected is None or len(actual) != len(expected):
+                raise ValueError('Số dòng hoặc cột sau gộp không khớp nguồn.')
             for cell, wanted in zip(actual, expected):
                 value = cell.value
                 if cell.data_type == 'f':

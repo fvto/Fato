@@ -21,3 +21,9 @@
 ## 4. Proactive Execution Standard
 - Do not rely solely on manual UI button clicks. All pipelines must be executable via the unified agent runner (`python agents/run_agent.py`).
 - Always run the Quality Sentinel (`python agents/run_agent.py audit`) when incoming data formats change or when new factory sites are onboarded.
+
+## 5. FTT charts in the COPQ presentation
+- Copy the existing four `Top 3 Defect` charts for VH, VH2, JV and JV2 from `FTT_Combined_Report.xlsx` using native Office/WPS Copy/Paste. Keep editable chart objects.
+- Copy each site's complete cell-based color key from Excel. Do not truncate it to three defects, regenerate it from raw data, or recolor the pasted chart.
+- Prepare sizing and typography in Excel before Copy; after Paste only position and size the objects within the existing template panels. COPQ cost bars retain their existing source and logic.
+- The user accepts an accompanying Excel workbook for Edit Data. WPS requires links to its actual report-output location; moving the pair to another location requires updating chart links. Never leave links to private staging files.

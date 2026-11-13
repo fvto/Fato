@@ -22,6 +22,9 @@ def diagnostics(error):
 def friendly_error(error):
     from report_validation import PreflightError
 
+    if getattr(error, 'code', None) == 'sfc.dom_export_pending':
+        return error.user_message
+
     if isinstance(error, PreflightError):
         detail = next((issue["message"] for report in error.reports for issue in report.get("issues", [])
                        if issue.get("message")), "")

@@ -461,5 +461,112 @@
       ]
     },
     "expected_extensions": {"all": [".xlsx", ".pptx"]}
+  },
+  "quarterly_defect_review": {
+    "title": "Rà soát lỗi NIKE theo quý",
+    "description": "Phân tích độc lập HFPA NIKE và FTT NIKE theo 3 tầng (CLG, VH, JV, VB Factory Sandals) cùng Top 3 Model song song và xuất Excel + PowerPoint.",
+    "source": "NIKE Review",
+    "plants": ["VH", "VH2", "JV", "JV2"],
+    "groups": {
+      "hfpa_nike": ["HFPA NIKE", "Inputs/hfpa_nike"],
+      "ftt_nike": ["FTT NIKE", "Inputs/ftt_nike"],
+      "sandals_catalog": ["Danh mục Factory Sandals (tùy chọn)", "Inputs/sandals_catalog"]
+    },
+    "modes": {
+      "all": "Excel và PowerPoint 7 slide",
+      "excel": "Chỉ xuất Excel chuẩn hóa & 3 tháng HFPA"
+    },
+    "required_groups": {
+      "all": [],
+      "excel": []
+    },
+    "schemas": {
+      "hfpa_nike": "hfpa_nike",
+      "ftt_nike": "ftt_nike",
+      "sandals_catalog": "sandals_catalog"
+    },
+    "formats": {
+      "hfpa_nike": [".xls", ".xlsx", ".xlsm"],
+      "ftt_nike": [".xls", ".xlsx", ".xlsm"],
+      "sandals_catalog": [".json", ".xls", ".xlsx", ".xlsm"]
+    },
+    "upload_only": false,
+    "automatic": true,
+    "period_kind": "fiscal_quarter",
+    "default_period": "FY27-Q1",
+    "default_date_from": "2026-06-01",
+    "default_date_to": "2026-08-31",
+    "dependencies": ["lxml", "xlrd"],
+    "runner": "report_tools.quarterly_defect_review.report:run_report",
+    "steps": {
+      "all": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra nguồn NIKE độc lập"
+        },
+        {
+          "id": "hfpa_parse",
+          "title": "Chuẩn hóa dữ liệu HFPA NIKE"
+        },
+        {
+          "id": "ftt_parse",
+          "title": "Chuẩn hóa dữ liệu FTT NIKE"
+        },
+        {
+          "id": "area_mapping",
+          "title": "Phân khu VH / JV / VB từ Factory Sandals"
+        },
+        {
+          "id": "analysis",
+          "title": "Phân tích 3 tầng lỗi và Top model"
+        },
+        {
+          "id": "excel",
+          "title": "Tạo Excel và biểu đồ nguồn"
+        },
+        {
+          "id": "presentation",
+          "title": "Xuất PowerPoint 7 slide và kiểm tra mở lại"
+        },
+        {
+          "id": "export",
+          "title": "Đối chiếu và đóng gói kết quả"
+        }
+      ],
+      "excel": [
+        {
+          "id": "validation",
+          "title": "Kiểm tra nguồn NIKE độc lập"
+        },
+        {
+          "id": "hfpa_parse",
+          "title": "Chuẩn hóa dữ liệu HFPA NIKE"
+        },
+        {
+          "id": "ftt_parse",
+          "title": "Chuẩn hóa dữ liệu FTT NIKE"
+        },
+        {
+          "id": "area_mapping",
+          "title": "Phân khu VH / JV / VB từ Factory Sandals"
+        },
+        {
+          "id": "analysis",
+          "title": "Phân tích 3 tầng lỗi và Top model"
+        },
+        {
+          "id": "excel",
+          "title": "Tạo Excel và biểu đồ nguồn"
+        },
+        {
+          "id": "export",
+          "title": "Đối chiếu và đóng gói kết quả"
+        }
+      ]
+    },
+    "expected_extensions": {
+      "all": [".xlsx", ".pptx", ".json"],
+      "excel": [".xlsx", ".json"]
+    }
   }
 }

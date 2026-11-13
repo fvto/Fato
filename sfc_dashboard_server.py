@@ -3,11 +3,13 @@ import sys
 import re
 import json
 import logging
-from flask import Flask, render_template, request, jsonify, Response, stream_with_context, send_from_directory
+from flask import Flask, render_template, request, jsonify, Response, stream_with_context, send_from_directory, send_file
 import openpyxl
 import sfc_controller
 import sfc_command_jobs
 import sfc_report_tools
+import sfc_qms
+import sfc_qms_bulk
 from sfc_commands import EXPORT_ROOT, COMMAND_LOCK
 from dashboard_paths import APP_ROOT, mqaa_master_file
 from sfc_downloads import EXCEL_EXTENSIONS
@@ -25,7 +27,7 @@ app.register_blueprint(combine_blueprint)
 
 @app.before_request
 def protect_local_report_mutations():
-    if request.method == 'POST' and request.path.startswith(('/api/report-tools/', '/api/compare/', '/api/combine/')):
+    if request.method == 'POST' and request.path.startswith(('/api/report-tools/', '/api/compare/', '/api/combine/', '/api/qms/')):
         origin = request.headers.get('Origin')
         if origin and origin.rstrip('/') != request.host_url.rstrip('/'):
             return jsonify(error='Chỉ chấp nhận thao tác từ trang Dashboard đang mở.'), 403
@@ -33,7 +35,7 @@ def protect_local_report_mutations():
 
 @app.after_request
 def private_report_responses(response):
-    if request.path.startswith(('/api/report-tools', '/api/compare', '/api/combine')) or request.path in ('/reports', '/compare', '/combine'):
+    if request.path.startswith(('/api/report-tools', '/api/compare', '/api/combine', '/api/qms')) or request.path in ('/reports', '/compare', '/combine', '/api/memory'):
         response.headers['Cache-Control'] = 'no-store'
         response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
@@ -149,6 +151,16 @@ def api_start_report_tool(tool):
                    for storage in request.files.getlist(group) if storage.filename]
         automatic = data.get('acquire_missing') in (True, 'true', '1', 1)
         validate_only = request.path.endswith('/validate')
+        extra_kw = {'cutoff': data.get('cutoff') or None}
+        if tool == 'quarterly_defect_review':
+            raw_overrides = data.get('mapping_overrides')
+            if isinstance(raw_overrides, str) and raw_overrides.strip():
+                raw_overrides = json.loads(raw_overrides)
+            extra_kw.update({
+                'date_from': data.get('date_from') or None,
+                'date_to': data.get('date_to') or None,
+                'mapping_overrides': raw_overrides if isinstance(raw_overrides, (dict, list)) else None,
+            })
         if automatic:
             if not COMMAND_LOCK.acquire(blocking=False):
                 return jsonify(error='SFC đang chạy lệnh khác. Chờ hoàn tất rồi chạy báo cáo.'), 409
@@ -156,14 +168,14 @@ def api_start_report_tool(tool):
             try:
                 if not locked or sfc_command_jobs.running():
                     return jsonify(error='SFC đang bận. Chờ thao tác hiện tại hoàn tất.'), 409
-                run = sfc_report_tools.start_run(tool, data.get('period'), data.get('mode','all'),
+                run = sfc_report_tools.start_run(tool, data.get('period'), data.get('mode', 'all'),
                                                 selections, uploads, acquire_missing=True, validate_only=validate_only,
-                                                cutoff=data.get('cutoff'))
+                                                **extra_kw)
             finally:
                 if locked: sfc_controller.SFC_LOCK.release()
                 COMMAND_LOCK.release()
         else:
-            run = sfc_report_tools.start_run(tool, data.get('period'), data.get('mode', 'all'), selections, uploads, validate_only=validate_only)
+            run = sfc_report_tools.start_run(tool, data.get('period'), data.get('mode', 'all'), selections, uploads, validate_only=validate_only, **extra_kw)
         return jsonify(run), 200 if validate_only else 202
     except sfc_report_tools.PreflightError as error:
         return jsonify(error=str(error), valid=False, validation=error.reports), 422
@@ -238,6 +250,99 @@ def api_report_tool_file(run_id, filename):
     except (ValueError, OSError) as error:
         return jsonify(error=str(error)), 404
 
+
+@app.route('/api/report-tools/runs/<run_id>/defect-review')
+def api_report_defect_review(run_id):
+    try:
+        run = sfc_report_tools.snapshot(run_id)
+        if run.get('tool') != 'quarterly_defect_review':
+            return jsonify(error='Lượt chạy không phải báo cáo rà soát lỗi NIKE.'), 400
+        output = (sfc_report_tools.run_folder(run_id) / 'workspace' / 'Output').resolve()
+        summary_path = output / 'review_summary.json'
+        if not summary_path.is_file():
+            return jsonify(status=run.get('status'), ready=False), 202 if run.get('status') in ('queued', 'running') else 404
+        payload = json.loads(summary_path.read_text(encoding='utf-8'))
+        previews = []
+        preview_dir = output / 'previews'
+        if preview_dir.is_dir():
+            for png in sorted(preview_dir.glob('slide_*.png'), key=lambda p: p.name):
+                previews.append({'name': png.name, 'url': f'/api/report-tools/runs/{run_id}/defect-review/slides/{png.name}'})
+        payload['preview_urls'] = previews
+        return jsonify(ready=True, run=run, review_summary=payload)
+    except (ValueError, OSError) as error:
+        return jsonify(error=str(error)), 404
+
+
+@app.route('/api/report-tools/runs/<run_id>/defect-review/slides/<slide_name>')
+def api_report_defect_review_slide(run_id, slide_name):
+    if not re.fullmatch(r'slide_[1-9]\d?\.png', slide_name or ''):
+        return jsonify(error='Tên ảnh slide không hợp lệ.'), 400
+    try:
+        output = (sfc_report_tools.run_folder(run_id) / 'workspace' / 'Output' / 'previews').resolve()
+        path = (output / slide_name).resolve()
+        if not path.is_relative_to(output) or not path.is_file():
+            raise FileNotFoundError('Không tìm thấy ảnh preview slide.')
+        resp = send_from_directory(output, path.name, mimetype='image/png', as_attachment=False)
+        resp.headers['Cache-Control'] = 'no-store'
+        return resp
+    except (ValueError, OSError) as error:
+        return jsonify(error=str(error)), 404
+
+
+@app.route('/api/report-tools/quarterly_defect_review/overrides', methods=['GET', 'POST'])
+def api_defect_review_overrides():
+    from report_tools.quarterly_defect_review.defect_mapping import clean_label_key, load_defect_mapping
+    from report_tools.quarterly_defect_review.report import DEFAULT_MAPPING_OVERRIDES_PATH
+
+    if request.method == 'GET':
+        mapping = load_defect_mapping(
+            overrides_path=DEFAULT_MAPPING_OVERRIDES_PATH if DEFAULT_MAPPING_OVERRIDES_PATH.is_file() else None
+        )
+        rules = []
+        if DEFAULT_MAPPING_OVERRIDES_PATH.is_file():
+            try:
+                saved = json.loads(DEFAULT_MAPPING_OVERRIDES_PATH.read_text(encoding='utf-8'))
+                rules = saved.get('rules', []) if isinstance(saved, dict) else saved
+            except Exception:
+                rules = []
+        return jsonify(
+            mapping_version=mapping['mapping_version'],
+            groups=[{'id': g['id'], 'label': g['label']} for g in mapping['groups_by_id'].values()],
+            subtypes=[{'id': s['id'], 'label': s['label'], 'standard_group_id': s['standard_group_id']} for s in mapping['subtypes_by_id'].values()],
+            rules=rules,
+        )
+
+    request.max_content_length = 256 * 1024
+    data = request.get_json(silent=True) or {}
+    new_rules = data.get('rules') if isinstance(data, dict) else None
+    if not isinstance(new_rules, list):
+        return jsonify(error='Danh sách quy tắc mapping phải là mảng.'), 400
+    existing = []
+    if DEFAULT_MAPPING_OVERRIDES_PATH.is_file():
+        try:
+            old = json.loads(DEFAULT_MAPPING_OVERRIDES_PATH.read_text(encoding='utf-8'))
+            existing = old.get('rules', []) if isinstance(old, dict) else []
+        except Exception:
+            existing = []
+    by_key = {(str(r.get('source_metric') or '*').upper(), clean_label_key(r.get('raw_key') or r.get('raw_label'))): r for r in existing if isinstance(r, dict)}
+    for r in new_rules:
+        if not isinstance(r, dict) or not (r.get('raw_key') or r.get('raw_label')) or not r.get('standard_group_id'):
+            continue
+        k = (str(r.get('source_metric') or '*').upper(), clean_label_key(r.get('raw_key') or r.get('raw_label')))
+        by_key[k] = {
+            'source_metric': k[0],
+            'raw_key': k[1],
+            'raw_label': r.get('raw_label') or k[1],
+            'standard_group_id': str(r['standard_group_id']),
+            'nike_subtype_id': str(r.get('nike_subtype_id') or ''),
+            'detail_label': str(r.get('detail_label') or r.get('raw_label') or k[1]),
+            'confirmed_by': str(r.get('confirmed_by') or 'ui_review'),
+        }
+    DEFAULT_MAPPING_OVERRIDES_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DEFAULT_MAPPING_OVERRIDES_PATH.write_text(json.dumps({'rules': list(by_key.values())}, indent=2, ensure_ascii=False), encoding='utf-8')
+    updated = load_defect_mapping(overrides_path=DEFAULT_MAPPING_OVERRIDES_PATH)
+    return jsonify(saved=len(by_key), mapping_version=updated['mapping_version'], rules=list(by_key.values()))
+
 @app.route("/")
 def index():
     return render_template("index.html", last_command_prompt=sfc_command_jobs.latest_prompt(),
@@ -279,6 +384,84 @@ def api_memory():
         except Exception as e:
             return jsonify({"error": str(e)})
     return jsonify({"modules": [], "qms_modules": []})
+
+
+@app.route('/api/qms/documents')
+def api_qms_documents():
+    plant = request.args.get('plant', 'VH').upper()
+    if plant not in sfc_controller.SEVEN_FACTORIES:
+        return jsonify(error='Nhà máy không hợp lệ.'), 400
+    return jsonify(sfc_qms.document_catalog(plant))
+
+
+@app.route('/api/qms/refresh', methods=['POST'])
+def api_qms_refresh():
+    data = request.get_json(silent=True) or {}
+    plant = data.get('plant', 'VH') if isinstance(data, dict) else None
+    if plant not in sfc_controller.SEVEN_FACTORIES:
+        return jsonify(error='Nhà máy không hợp lệ.'), 400
+    try:
+        return jsonify(sfc_qms.refresh(plant))
+    except (RuntimeError, OSError, ValueError):
+        app.logger.exception('QMS refresh failed')
+        return jsonify(error='Chưa cập nhật được QMS. Kiểm tra đăng nhập và kết nối SFC rồi thử lại; danh mục cũ vẫn được giữ.'), 409
+
+
+@app.route('/api/qms/documents/<plant>/<document_id>/pdf')
+def api_qms_pdf(plant, document_id):
+    if plant not in sfc_controller.SEVEN_FACTORIES or not re.fullmatch(r'[a-f0-9]{32}', document_id):
+        return jsonify(error='Tài liệu không hợp lệ.'), 404
+    try:
+        content, filename = sfc_qms.download_pdf(plant, document_id)
+        return send_file(content, mimetype='application/pdf', as_attachment=True, download_name=filename)
+    except FileNotFoundError as error:
+        return jsonify(error=str(error)), 404
+    except (RuntimeError, OSError, ValueError) as error:
+        detail = sfc_qms.download_error(error)
+        return jsonify(error=detail['message'], failure=detail), detail.get('http_status', 409)
+
+
+@app.route('/api/qms/bulk', methods=['POST'])
+def api_qms_bulk_start():
+    request.max_content_length = 256 * 1024
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or data.get('plant') not in sfc_controller.SEVEN_FACTORIES:
+        return jsonify(error='Nhà máy hoặc danh sách PDF không hợp lệ.'), 400
+    try:
+        return jsonify(sfc_qms_bulk.start(data['plant'], data.get('ids'), data.get('source'))), 202
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
+    except (RuntimeError, OSError) as error:
+        return jsonify(error=str(error) if isinstance(error, RuntimeError) else 'Chưa lưu được lượt tải PDF.'), 409
+
+
+@app.route('/api/qms/bulk/<job_id>')
+def api_qms_bulk_status(job_id):
+    try:
+        return jsonify(sfc_qms_bulk.snapshot(job_id))
+    except (ValueError, OSError):
+        return jsonify(error='Không tìm thấy lượt tải PDF.'), 404
+
+
+@app.route('/api/qms/bulk/<job_id>/zip')
+def api_qms_bulk_zip(job_id):
+    try:
+        path = sfc_qms_bulk.archive_file(job_id)
+        return send_file(path, mimetype='application/zip', as_attachment=True, download_name=path.name)
+    except (ValueError, OSError):
+        return jsonify(error='Không tìm thấy file ZIP.'), 404
+    except RuntimeError as error:
+        return jsonify(error=str(error)), 409
+
+
+@app.route('/api/qms/bulk/<job_id>/resume', methods=['POST'])
+def api_qms_bulk_resume(job_id):
+    try:
+        return jsonify(sfc_qms_bulk.resume(job_id)), 202
+    except (ValueError, FileNotFoundError) as error:
+        return jsonify(error=str(error)), 400
+    except (RuntimeError, OSError) as error:
+        return jsonify(error=str(error) if isinstance(error, RuntimeError) else 'Không ghi được tiến độ để tiếp tục tải.'), 409
 
 DEFAULT_NAV_TILES = [
     {
